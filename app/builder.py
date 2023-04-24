@@ -93,7 +93,7 @@ def get_local_virtual_boxes():
 
 def replace_configs_in_file(configs: dict, file_path):
     with open(file_path, "r") as file:
-        lines = [line for line in file]
+        lines = file.readlines()
 
     for default_key in configs:
         if isinstance(configs[default_key], str):
@@ -258,6 +258,7 @@ class Vagrant(Creator):
         programs_path = f'{vmbuilder_path}/templates/programs'
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
+            vagrantfile.write('apt-get update --yes && apt-get upgrade --yes\n')
             for program in self.configs['programs']['install']:
                 with open(f'{programs_path}/{program}/install.sh') as install_file:
                     vagrantfile.write(f'\n#######   INSTALL {program}     #######\n')
@@ -265,9 +266,15 @@ class Vagrant(Creator):
                 with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
                     vagrantfile.write(f'\n#######   CONFIG {program}     #######\n')
                     vagrantfile.write(f'{config_file.read()}\n')
-            for program in self.configs['programs']['uninstall']:
-                vagrantfile.write(f'\n#######   UNINSTALL {program}     #######\n')
-                vagrantfile.write(f'apt-get purge --yes {program}\n')
+            if self.configs['programs']['uninstall']:
+                for program in self.configs['programs']['uninstall']:
+                    vagrantfile.write(f'\n#######   UNINSTALL {program}     #######\n')
+                    vagrantfile.write(f'apt-get purge --yes {program}\n')
+            with open(f'{programs_path}/clean.sh') as clean_file:
+                vagrantfile.write('\n#######   CLEAR   #######')
+                for line in clean_file.readlines():
+                    if not line.startswith('#'):
+                        vagrantfile.write(f'{line}')
             vagrantfile.write('\nSHELL\nend')
 
         replace_configs_in_file(self.configs, vagrantfile_path)
