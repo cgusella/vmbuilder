@@ -1,5 +1,5 @@
 __pycache__
 templates/programs/*/configs/*
 !templates/programs/*/configs/config.sh
-machines/vagrant/*
-machines/packer/*
+vagrant/*
+packer/*

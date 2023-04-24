@@ -10,7 +10,7 @@ from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
 
 
-sys.tracebacklimit = 0
+# sys.tracebacklimit = 0
 vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 logger = logging.getLogger('')
 
@@ -193,6 +193,7 @@ class Vagrant(Creator):
         self.arguments: dict = convert_argv_list_to_dict()
         self.machine_path: str = vmbuilder_path + '/machines/vagrant'
         self.vbox_confs_provs = os.listdir(f'{vmbuilder_path}/templates/vagrant/vbox_confs_provs')
+        self.configs: dict = dict()
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
@@ -222,7 +223,21 @@ class Vagrant(Creator):
         if self.arguments['-vb'] in get_local_virtual_boxes():
             raise ExistenceVirtualBoxError(f'The virtualbox {self.arguments["-vb"]} already exists!')
 
+    def set_configs(self):
+        config_provision_file_path = f'{vmbuilder_path}/templates/vagrant/vbox_confs_provs/{self.arguments["-j"]}'
+        with open(config_provision_file_path, 'r') as provisions:
+            configs = json.loads(provisions.read())
+        configs['extra_user'] = self.arguments['-u']
+        configs['default_image'] = self.arguments['-i']
+        configs['default_hostname'] = self.arguments['-ho']
+        configs['default_vbname'] = self.arguments['-vb']
+        configs['ssh_insert_key'] = False if self.arguments['-s'] == 'password' else True
+        if configs['extra_user'] == configs['default_user']:
+            raise FlagError('Default user in provision file is the same as inserted user!')
+        self.configs = configs.copy()
+
     def create_project_folder(self):
+        self.set_configs()
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
@@ -231,46 +246,31 @@ class Vagrant(Creator):
             src=f'{vagrant_folder}/Vagrantfile',
             dst=f'{project_folder}/Vagrantfile'
         )
-        # with open(f'{vmbuilder_path}/templates/vagrant/vbox_confs_provs/{self.arguments["-j"]}') as config_file:
-        #     programs = json.loads(config_file.read())['programs']['install']
-        # for program in programs:
-        #     shutil.copytree(
-        #         src=f'{vmbuilder_path}/templates/programs/{program}',
-        #         dst=f'{project_folder}/programs/{program}/'
-        #     )
+        for program in self.configs['programs']['install']:
+            program_folder = f'{vmbuilder_path}/templates/programs/{program}'
+            shutil.copytree(
+                src=program_folder,
+                dst=f'{project_folder}/{program}'
+            )
 
     def provision(self):
-        # provisions_folder_path = f'{self.machine_path}/{self.arguments["-n"]}/provision'
-        config_provision_file_path = f'{vmbuilder_path}/templates/vagrant/vbox_confs_provs/{self.arguments["-j"]}'
-        with open(config_provision_file_path, 'r') as provisions:
-            configs = json.loads(provisions.read())
-
-        configs['extra_user'] = self.arguments['-u']
-        configs['default_image'] = self.arguments['-i']
-        configs['default_hostname'] = self.arguments['-ho']
-        configs['default_vbname'] = self.arguments['-vb']
-        configs['ssh_insert_key'] = False if self.arguments['-s'] == 'password' else True
-        if configs['extra_user'] == configs['default_user']:
-            raise FlagError('Default user in provision file is the same as inserted user!')
-
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         programs_path = f'{vmbuilder_path}/templates/programs'
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
-            for program in configs['programs']['install']:
+            for program in self.configs['programs']['install']:
                 with open(f'{programs_path}/{program}/install.sh') as install_file:
                     vagrantfile.write(f'\n#######   INSTALL {program}     #######\n')
                     vagrantfile.write(f'{install_file.read()}\n')
                 with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
                     vagrantfile.write(f'\n#######   CONFIG {program}     #######\n')
                     vagrantfile.write(f'{config_file.read()}\n')
-            for program in configs['programs']['uninstall']:
-                with open(f'{programs_path}/{program}/uninstall.sh') as uninstall_file:
-                    vagrantfile.write(f'\n#######   UNINSTALL {program}     #######\n')
-                    vagrantfile.write(f'{uninstall_file.read()}\n')
+            for program in self.configs['programs']['uninstall']:
+                vagrantfile.write(f'\n#######   UNINSTALL {program}     #######\n')
+                vagrantfile.write(f'apt-get purge --yes {program}\n')
             vagrantfile.write('\nSHELL\nend')
 
-        replace_configs_in_file(configs, vagrantfile_path)
+        replace_configs_in_file(self.configs, vagrantfile_path)
 
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
