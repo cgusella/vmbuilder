@@ -259,6 +259,9 @@ class Vagrant(Builder):
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
             if self.configs['programs']['init']:
+                vagrantfile.write(f'\n\n{40*"#"}\n')
+                vagrantfile.write(f'#######   UPDATE and UPGRADE apt   #####')
+                vagrantfile.write(f'\n{40*"#"}\n')
                 vagrantfile.write('apt-get update && apt-get upgrade --yes\n')
             for program in self.configs['programs']['install']:
                 with open(f'{programs_path}/{program}/install.sh') as install_file:
@@ -266,7 +269,6 @@ class Vagrant(Builder):
                     pound_number = 40 - 18 - len(program) - 3 
                     vagrantfile.write(f'#######   INSTALL {program}   {pound_number*"#"}')
                     vagrantfile.write(f'\n{40*"#"}\n')
-                    # vagrantfile.write(f'{install_file.read()}\n')
                     for line in install_file.readlines():
                         if not line.startswith('#!'):
                             vagrantfile.write(f'{line}')
@@ -275,7 +277,6 @@ class Vagrant(Builder):
                     pound_number = 40 - 17 - len(program) - 3 
                     vagrantfile.write(f'#######   CONFIG {program}   {pound_number*"#"}')
                     vagrantfile.write(f'\n{40*"#"}\n')
-                    # vagrantfile.write(f'{config_file.read()}\n')
                     for line in config_file.readlines():
                         if not line.startswith('#!'):
                             vagrantfile.write(f'{line}')
