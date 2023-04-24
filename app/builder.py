@@ -144,7 +144,7 @@ def convert_argv_list_to_dict():
                 good_arguments[arg] = ''
 
     undefined_args = ()
-    for good_argument in good_arguments:
+    for good_argument in ('-n', '-vb', '-t'):
         if not good_arguments[good_argument]:
             undefined_args += (good_argument,)
     for flag in COMMON_VALID_FLAGS:
