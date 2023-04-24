@@ -2,4 +2,6 @@ __pycache__
 templates/programs/*/configs/*
 !templates/programs/*/configs/config.sh
 machines/vagrant/*
+!machines/vagrant/README.md
 machines/packer/*
+!machines/packer/README.md
