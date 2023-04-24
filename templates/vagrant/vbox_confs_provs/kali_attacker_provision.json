@@ -1,0 +1,15 @@
+{
+  "default_user": "vagrant",
+  "default_pass": "vagrant",
+  "api_version": "2",
+  "disk_size": "30000",
+  "provisions": [
+    "update-upgrade-apt",
+    "install-openvpn",
+    "install-impacket",
+    "config-root-bash",
+    "config-vagrant-user",
+    "config-extra-user",
+    "connect-to-htb-vpn"
+  ]
+}

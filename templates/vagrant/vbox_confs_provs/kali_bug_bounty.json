@@ -1,0 +1,18 @@
+{
+    "default_user": "vagrant",
+    "default_pass": "vagrant",
+    "api_version": "2",
+    "disk_size": "30000",
+    "provisions": [
+      "update-upgrade-apt",
+      "install-openvpn",
+      "install-feroxbuster",
+      "install-impacket",
+      "config-root-bash",
+      "config-vagrant-user",
+      "config-extra-user",
+      "config-motd-message",
+      "pin-them-to-taskbar"
+    ]
+  }
+  
