@@ -10,7 +10,7 @@ from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
 
 
-# sys.tracebacklimit = 0
+sys.tracebacklimit = 0
 vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 logger = logging.getLogger('')
 
@@ -169,7 +169,7 @@ def get_project_class():
         raise FlagError("Select from [packer|vagrant]")
 
 
-class Creator(abc.ABC):
+class Builder(abc.ABC):
 
     @abc.abstractmethod
     def check_flags(self):
@@ -188,7 +188,7 @@ class Creator(abc.ABC):
         pass
 
 
-class Vagrant(Creator):
+class Vagrant(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
         self.machine_path: str = vmbuilder_path + '/machines/vagrant'
@@ -258,24 +258,43 @@ class Vagrant(Creator):
         programs_path = f'{vmbuilder_path}/templates/programs'
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
-            vagrantfile.write('apt-get update --yes && apt-get upgrade --yes\n')
+            if self.configs['programs']['init']:
+                vagrantfile.write('apt-get update && apt-get upgrade --yes\n')
             for program in self.configs['programs']['install']:
                 with open(f'{programs_path}/{program}/install.sh') as install_file:
-                    vagrantfile.write(f'\n#######   INSTALL {program}     #######\n')
-                    vagrantfile.write(f'{install_file.read()}\n')
+                    vagrantfile.write(f'\n\n{40*"#"}\n')
+                    pound_number = 40 - 18 - len(program) - 3 
+                    vagrantfile.write(f'#######   INSTALL {program}   {pound_number*"#"}')
+                    vagrantfile.write(f'\n{40*"#"}\n')
+                    # vagrantfile.write(f'{install_file.read()}\n')
+                    for line in install_file.readlines():
+                        if not line.startswith('#!'):
+                            vagrantfile.write(f'{line}')
                 with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
-                    vagrantfile.write(f'\n#######   CONFIG {program}     #######\n')
-                    vagrantfile.write(f'{config_file.read()}\n')
+                    vagrantfile.write(f'\n\n{40*"#"}\n')
+                    pound_number = 40 - 17 - len(program) - 3 
+                    vagrantfile.write(f'#######   CONFIG {program}   {pound_number*"#"}')
+                    vagrantfile.write(f'\n{40*"#"}\n')
+                    # vagrantfile.write(f'{config_file.read()}\n')
+                    for line in config_file.readlines():
+                        if not line.startswith('#!'):
+                            vagrantfile.write(f'{line}')
             if self.configs['programs']['uninstall']:
                 for program in self.configs['programs']['uninstall']:
-                    vagrantfile.write(f'\n#######   UNINSTALL {program}     #######\n')
+                    vagrantfile.write(f'\n\n{40*"#"}\n')
+                    pound_number = 40 - 20 - len(program) - 3 
+                    vagrantfile.write(f'#######   UNINSTALL {program}   {pound_number*"#"}')
+                    vagrantfile.write(f'\n{40*"#"}\n')
                     vagrantfile.write(f'apt-get purge --yes {program}\n')
-            with open(f'{programs_path}/clean.sh') as clean_file:
-                vagrantfile.write('\n#######   CLEAR   #######')
-                for line in clean_file.readlines():
-                    if not line.startswith('#'):
-                        vagrantfile.write(f'{line}')
-            vagrantfile.write('\nSHELL\nend')
+            if self.configs['programs']['end']:
+                with open(f'{programs_path}/clean.sh') as clean_file:
+                    vagrantfile.write(f'\n{40*"#"}\n')
+                    vagrantfile.write('#######   CLEAN apt packages   #########')
+                    vagrantfile.write(f'\n{40*"#"}\n')
+                    for line in clean_file.readlines():
+                        if not line.startswith('#!'):
+                            vagrantfile.write(f'{line}')
+            vagrantfile.write('\n\nSHELL\nend')
 
         replace_configs_in_file(self.configs, vagrantfile_path)
 
@@ -283,7 +302,7 @@ class Vagrant(Creator):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
 
 
-class Packer(Creator):
+class Packer(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
         self.machine_path: str = vmbuilder_path + '/machines/packer'
