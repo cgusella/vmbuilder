@@ -4,7 +4,9 @@
   "api_version": "2",
   "disk_size": "30000",
   "programs": {
+    "start": "init",
     "install": ["terminator", "dhcp-server"],
-    "uninstall": ["firefox"]
+    "uninstall": ["firefox"],
+    "end": "clean"
   }
 }
