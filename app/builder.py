@@ -278,21 +278,22 @@ class Vagrant(Builder):
                             title="UPDATE and UPGRADE",
                             program='apt'
                         )
-            for program in self.configs['programs']['install']:
-                with open(f'{programs_path}/{program}/install.sh') as install_file:
-                    self.generate_provision_text(
-                        src=install_file,
-                        dst=vagrantfile,
-                        title="INSTALL",
-                        program=program
-                    )
-                with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
-                    self.generate_provision_text(
-                        src=config_file,
-                        dst=vagrantfile,
-                        title="CONFIG",
-                        program=program
-                    )
+            if self.configs['programs']['install']:
+                for program in self.configs['programs']['install']:
+                    with open(f'{programs_path}/{program}/install.sh') as install_file:
+                        self.generate_provision_text(
+                            src=install_file,
+                            dst=vagrantfile,
+                            title="INSTALL",
+                            program=program
+                        )
+                    with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
+                        self.generate_provision_text(
+                            src=config_file,
+                            dst=vagrantfile,
+                            title="CONFIG",
+                            program=program
+                        )
             if self.configs['programs']['uninstall']:
                 for program in self.configs['programs']['uninstall']:
                     with open(f'{programs_path}/{program}/uninstall.sh') as uninstall_file:
