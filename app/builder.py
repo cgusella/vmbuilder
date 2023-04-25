@@ -106,6 +106,9 @@ class Vagrant(Builder):
                 src=program_folder,
                 dst=f'{project_folder}/{program}'
             )
+        if self.configs['upload']:
+            upload_folder = f'{project_folder}/upload'
+            os.mkdir(upload_folder)
 
     def generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55

@@ -1,0 +1,25 @@
+{
+    "default_user": "vagrant",
+    "default_pass": "vagrant",
+    "api_version": "2",
+    "disk_size": "30000",
+    "programs": {
+      "init": true,
+      "install": [
+        "openvpn",
+        "impacket"
+      ],
+      "uninstall": [],
+      "end": false
+    },
+    "custom-scripts":[
+      "create-extra-user.sh",
+      "config-root-bash.sh",
+      "config-vagrant-user.sh",
+      "connect-to-htb-vpn.sh",
+      "pin-terminator-to-taskbar.sh",
+      "config-ssh-banner.sh"
+    ],
+    "upload": true
+  }
+  
