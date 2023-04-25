@@ -107,8 +107,10 @@ class Vagrant(Builder):
                 dst=f'{project_folder}/{program}'
             )
         if self.configs['upload']:
-            upload_folder = f'{project_folder}/upload'
-            os.mkdir(upload_folder)
+            shutil.copytree(
+                src=f'{vmbuilder_path}/templates/upload/',
+                dst=f'{project_folder}/upload'
+            )
 
     def generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
@@ -196,7 +198,7 @@ class Vagrant(Builder):
                         self.generate_provision_text(
                             src=script_file,
                             dst=vagrantfile,
-                            title="CUSTOM script",
+                            title="CUSTOM SCRIPT",
                             program=f'{script.split(".")[0]}'
                         )
             vagrantfile.write('\n\nSHELL\nend')
