@@ -254,7 +254,7 @@ class Vagrant(Builder):
             )
 
     def generate_provision_text(self, src, dst, title: str, program: str):
-        hash_number = 40
+        hash_number = 50
 
         lines = src.readlines()
         # if file has only hash bang line, exit
@@ -283,6 +283,7 @@ class Vagrant(Builder):
 
     def provision(self):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
+        custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
         programs_path = f'{vmbuilder_path}/templates/programs'
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
@@ -327,6 +328,15 @@ class Vagrant(Builder):
                         title="CLEAN apt packages",
                         program=''
                     )
+            if self.configs['custom-scripts']:
+                for script in self.configs['custom-scripts']:
+                    with open(f'{custom_scripts_path}/{script}') as script_file:
+                        self.generate_provision_text(
+                            src=script_file,
+                            dst=vagrantfile,
+                            title="CUSTOM script",
+                            program=f'{script.split(".")[0]}'
+                        )
             vagrantfile.write('\n\nSHELL\nend')
 
         replace_configs_in_file(self.configs, vagrantfile_path)

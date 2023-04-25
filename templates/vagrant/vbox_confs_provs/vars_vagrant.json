@@ -8,5 +8,6 @@
     "install": ["terminator", "dhcp-server","impacket"],
     "uninstall": ["firefox"],
     "end": true
-  }
+  },
+  "custom-scripts":["create-extra-user.sh"]
 }
