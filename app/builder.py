@@ -282,14 +282,17 @@ class Vagrant(Builder):
                             vagrantfile.write(f'{line}')
             if self.configs['programs']['uninstall']:
                 for program in self.configs['programs']['uninstall']:
-                    vagrantfile.write(f'\n\n{40*"#"}\n')
-                    pound_number = 40 - 20 - len(program) - 3 
-                    vagrantfile.write(f'#######   UNINSTALL {program}   {pound_number*"#"}')
-                    vagrantfile.write(f'\n{40*"#"}\n')
-                    vagrantfile.write(f'apt-get purge --yes {program}\n')
+                    with open(f'{programs_path}/{program}/uninstall.sh') as uninstall_file:
+                        vagrantfile.write(f'\n\n{40*"#"}\n')
+                        pound_number = 40 - 20 - len(program) - 3 
+                        vagrantfile.write(f'#######   UNINSTALL {program}   {pound_number*"#"}')
+                        vagrantfile.write(f'\n{40*"#"}\n')
+                        for line in uninstall_file.readlines():
+                            if not line.startswith('#!'):
+                                vagrantfile.write(f'{line}')
             if self.configs['programs']['end']:
                 with open(f'{programs_path}/clean.sh') as clean_file:
-                    vagrantfile.write(f'\n{40*"#"}\n')
+                    vagrantfile.write(f'\n\n{40*"#"}\n')
                     vagrantfile.write('#######   CLEAN apt packages   #########')
                     vagrantfile.write(f'\n{40*"#"}\n')
                     for line in clean_file.readlines():
