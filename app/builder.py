@@ -254,6 +254,8 @@ class Vagrant(Builder):
             )
 
     def generate_provision_text(self, src, dst, title: str, program: str):
+        hash_number = 40
+
         lines = src.readlines()
         # if file has only hash bang line, exit
         if len(lines) == 1 and lines[0].startswith('#!'):
@@ -268,10 +270,10 @@ class Vagrant(Builder):
         if len(lines) == empty_lines + 1:
             return
 
-        dst.write(f'\n\n{40*"#"}\n')
-        pound_number = 40 - 10 - len(title) - 1 - len(program) - 3 
+        dst.write(f'\n\n{hash_number*"#"}\n')
+        pound_number = hash_number - 10 - len(title) - 1 - len(program) - 3 
         dst.write(f'#######   {title} {program}   {pound_number*"#"}')
-        dst.write(f'\n{40*"#"}\n')
+        dst.write(f'\n{hash_number*"#"}\n')
 
         for line in lines:
             if line.startswith('#!'):
