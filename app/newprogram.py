@@ -22,6 +22,8 @@ def main():
     open(f'{new_program_path}/configs/config.sh', 'w')
     # create install file
     open(f'{new_program_path}/install.sh', 'w')
+    # create uninstall file
+    open(f'{new_program_path}/uninstall.sh', 'w')
 
 
 if __name__ == '__main__':
