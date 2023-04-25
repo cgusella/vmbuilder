@@ -253,6 +253,18 @@ class Vagrant(Builder):
                 dst=f'{project_folder}/{program}'
             )
 
+    def generate_provision_text(self, src, dst, title: str, program: str):
+        dst.write(f'\n\n{40*"#"}\n')
+        pound_number = 40 - 10 - len(title) - 1 - len(program) - 3 
+        dst.write(f'#######   {title} {program}   {pound_number*"#"}')
+        dst.write(f'\n{40*"#"}\n')
+        for line in src.readlines():
+            if len(src.readlines()) == 1 and line.startswith('#!'):
+                pass
+            else:
+                if not line.startswith('#!'):
+                    dst.write(f'{line}')
+
     def provision(self):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         programs_path = f'{vmbuilder_path}/templates/programs'
@@ -265,31 +277,28 @@ class Vagrant(Builder):
                 vagrantfile.write('apt-get update && apt-get upgrade --yes\n')
             for program in self.configs['programs']['install']:
                 with open(f'{programs_path}/{program}/install.sh') as install_file:
-                    vagrantfile.write(f'\n\n{40*"#"}\n')
-                    pound_number = 40 - 18 - len(program) - 3 
-                    vagrantfile.write(f'#######   INSTALL {program}   {pound_number*"#"}')
-                    vagrantfile.write(f'\n{40*"#"}\n')
-                    for line in install_file.readlines():
-                        if not line.startswith('#!'):
-                            vagrantfile.write(f'{line}')
+                    self.generate_provision_text(
+                        src=install_file,
+                        dst=vagrantfile,
+                        title="INSTALL",
+                        program=program
+                    )
                 with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
-                    vagrantfile.write(f'\n\n{40*"#"}\n')
-                    pound_number = 40 - 17 - len(program) - 3 
-                    vagrantfile.write(f'#######   CONFIG {program}   {pound_number*"#"}')
-                    vagrantfile.write(f'\n{40*"#"}\n')
-                    for line in config_file.readlines():
-                        if not line.startswith('#!'):
-                            vagrantfile.write(f'{line}')
+                    self.generate_provision_text(
+                        src=config_file,
+                        dst=vagrantfile,
+                        title="CONFIG",
+                        program=program
+                    )
             if self.configs['programs']['uninstall']:
                 for program in self.configs['programs']['uninstall']:
                     with open(f'{programs_path}/{program}/uninstall.sh') as uninstall_file:
-                        vagrantfile.write(f'\n\n{40*"#"}\n')
-                        pound_number = 40 - 20 - len(program) - 3 
-                        vagrantfile.write(f'#######   UNINSTALL {program}   {pound_number*"#"}')
-                        vagrantfile.write(f'\n{40*"#"}\n')
-                        for line in uninstall_file.readlines():
-                            if not line.startswith('#!'):
-                                vagrantfile.write(f'{line}')
+                        self.generate_provision_text(
+                            src=uninstall_file,
+                            dst=vagrantfile,
+                            title="UNINSTALL",
+                            program=program
+                        )
             if self.configs['programs']['end']:
                 with open(f'{programs_path}/clean.sh') as clean_file:
                     vagrantfile.write(f'\n\n{40*"#"}\n')
