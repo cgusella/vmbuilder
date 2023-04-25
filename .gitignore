@@ -5,3 +5,5 @@ machines/vagrant/*
 !machines/vagrant/README.md
 machines/packer/*
 !machines/packer/README.md
+templates/custom-scripts/*
+!templates/custom-scripts/README.md
