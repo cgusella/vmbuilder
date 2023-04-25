@@ -4,6 +4,21 @@
   "api_version": "2",
   "disk_size": "30000",
   "programs": {
+    "init": true,
+    "install": ["openvpn", "impacket"],
+    "uninstall": ["firefox"],
+    "end": true
+  },
+  "custom-scripts":["create-extra-user.sh"]
+}
+
+
+{
+  "default_user": "vagrant",
+  "default_pass": "vagrant",
+  "api_version": "2",
+  "disk_size": "30000",
+  "programs": {
     "start": "init",
     "install": ["openvpn", "impacket", "bash"],
     ""

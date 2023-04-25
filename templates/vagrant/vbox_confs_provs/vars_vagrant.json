@@ -5,7 +5,7 @@
   "disk_size": "30000",
   "programs": {
     "init": true,
-    "install": ["terminator", "dhcp-server","impacket"],
+    "install": ["terminator", "isc-dhcp-server","impacket"],
     "uninstall": ["firefox"],
     "end": true
   },
