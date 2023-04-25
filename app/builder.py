@@ -10,7 +10,7 @@ from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
 
 
-sys.tracebacklimit = 0
+# sys.tracebacklimit = 0
 vmbuilder_path = f'{os.getcwd()}/..'
 logger = logging.getLogger('')
 
@@ -285,9 +285,13 @@ class Vagrant(Builder):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
         programs_path = f'{vmbuilder_path}/templates/programs'
+        init = self.configs['programs']['init']
+        end = self.configs['programs']['end']
+        programs_to_install = self.configs['programs']['install']
+        programs_to_uninstall = self.configs['programs']['uninstall']
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
-            if self.configs['programs']['init']:
+            if init:
                 with open(f'{programs_path}/init.sh') as init_file:
                     self.generate_provision_text(
                             src=init_file,
@@ -295,8 +299,8 @@ class Vagrant(Builder):
                             title="UPDATE and UPGRADE",
                             program='apt'
                         )
-            if self.configs['programs']['install']:
-                for program in self.configs['programs']['install']:
+            if programs_to_install:
+                for program in programs_to_install:
                     with open(f'{programs_path}/{program}/install.sh') as install_file:
                         self.generate_provision_text(
                             src=install_file,
@@ -311,8 +315,8 @@ class Vagrant(Builder):
                             title="CONFIG",
                             program=program
                         )
-            if self.configs['programs']['uninstall']:
-                for program in self.configs['programs']['uninstall']:
+            if programs_to_uninstall:
+                for program in programs_to_uninstall:
                     with open(f'{programs_path}/{program}/uninstall.sh') as uninstall_file:
                         self.generate_provision_text(
                             src=uninstall_file,
