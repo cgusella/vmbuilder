@@ -7,3 +7,5 @@ machines/packer/*
 !machines/packer/README.md
 templates/custom-scripts/*
 !templates/custom-scripts/README.md
+templates/upload/*
+!templates/upload/README.md
