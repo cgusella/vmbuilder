@@ -271,10 +271,13 @@ class Vagrant(Builder):
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
             if self.configs['programs']['init']:
-                vagrantfile.write(f'\n\n{40*"#"}\n')
-                vagrantfile.write(f'#######   UPDATE and UPGRADE apt   #####')
-                vagrantfile.write(f'\n{40*"#"}\n')
-                vagrantfile.write('apt-get update && apt-get upgrade --yes\n')
+                with open(f'{programs_path}/init.sh') as init_file:
+                    self.generate_provision_text(
+                            src=init_file,
+                            dst=vagrantfile,
+                            title="UPDATE and UPGRADE",
+                            program='apt'
+                        )
             for program in self.configs['programs']['install']:
                 with open(f'{programs_path}/{program}/install.sh') as install_file:
                     self.generate_provision_text(
@@ -301,12 +304,12 @@ class Vagrant(Builder):
                         )
             if self.configs['programs']['end']:
                 with open(f'{programs_path}/clean.sh') as clean_file:
-                    vagrantfile.write(f'\n\n{40*"#"}\n')
-                    vagrantfile.write('#######   CLEAN apt packages   #########')
-                    vagrantfile.write(f'\n{40*"#"}\n')
-                    for line in clean_file.readlines():
-                        if not line.startswith('#!'):
-                            vagrantfile.write(f'{line}')
+                    self.generate_provision_text(
+                        src=clean_file,
+                        dst=vagrantfile,
+                        title="CLEAN apt packages",
+                        program=''
+                    )
             vagrantfile.write('\n\nSHELL\nend')
 
         replace_configs_in_file(self.configs, vagrantfile_path)
