@@ -115,7 +115,7 @@ def convert_argv_list_to_dict():
     arguments = sys.argv[1:]
     if not arguments:
         error_msg = '''
-        build_lab
+        vmbuilder
           -n\t[PROJECT NAME]
           -vb\t[VBOXNAME]
           -t\tvagrant\n{}
