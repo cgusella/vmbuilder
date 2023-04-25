@@ -9,5 +9,6 @@
     "uninstall": ["firefox"],
     "end": true
   },
-  "custom-scripts":["create-extra-user.sh"]
+  "custom-scripts":["create-extra-user.sh"],
+  "upload": true
 }
