@@ -1,161 +1,16 @@
 import abc
-import subprocess
 import os
-import sys
 import shutil
 import json
-import logging
 from error import FlagError
 from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
-
-
-# sys.tracebacklimit = 0
-vmbuilder_path = f'{os.getcwd()}/..'
-logger = logging.getLogger('')
-
-
-def get_vagrant_provision_for_error():
-    return '\n'.join(
-        [
-            '\t\t\t\t--> ' + file for file in os.listdir(
-                f"{vmbuilder_path}/templates/vagrant/vbox_confs_provs"
-            )
-        ]
-    )
-
-
-def get_packer_provision_for_error():
-    return '\n'.join(
-        [
-            '\t\t\t\t--> ' + file for file in os.listdir(
-                f'{vmbuilder_path}/templates/packer/vbox_confs_provs'
-            )
-        ]
-    )
-
-
-def replace_text_in_file(search_phrase, replace_with, file_path):
-    replaced_content = ""
-    with open(file_path, "r") as file:
-        for line in file:
-            line = line.strip()
-            new_line = line.replace(search_phrase, replace_with)
-            replaced_content = replaced_content + new_line + '\n'
-    with open(file_path, "w") as new_file:
-        new_file.write(replaced_content)
-
-
-def get_local_vagrant_boxes():
-    bash_command = "vagrant box list"
-    process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
-    output, _ = process.communicate()
-    items = output.decode("utf-8").split('\n')
-    return [item.split()[0] for item in items if item]
-
-
-def get_vagrant_images_for_error():
-    return '\n'.join(
-        [
-            '\t\t\t\t--> ' + file for file in get_local_vagrant_boxes()
-        ]
-    )
-
-
-COMMON_FLAGS_TO_ERROR = {
-    '-n': '[PROJECT NAME]',
-    '-vb': '[VBOXNAME]',
-    '-t': '[vagrant|packer]'
-}
-VAGRANT_FLAGS_TO_ERROR = {
-    '-u': '[EXTRA USER]',
-    '-ho': '[HOSTNAME]',
-    '-i': f'[VAGRANT IMAGE]\n{get_vagrant_images_for_error()}',
-    '-j': f'[VAGRANT PROVISION FILE]\n{get_vagrant_provision_for_error()}',
-    '-s': '[VAGRANT SSH CONNECTION TYPE]\n\t\t\t\t[password|key]'
-}
-PACKER_FLAGS_TO_ERROR = {
-    '-il': '[ISO LINK]',
-    '-if': '[ISO FILE]',
-    '-cs': '[CHECKSUM]',
-    '-j': f'[PACKER CONFIG FILE]\n{get_packer_provision_for_error()}'
-}
-COMMON_VALID_FLAGS = ('-n', '-vb', '-t')
-
-
-def get_local_virtual_boxes():
-    bash_command = "VBoxManage list vms"
-    process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
-    output, _ = process.communicate()
-    items = output.decode("utf-8").split('\n')
-    return [item.split()[0].replace('"', '') for item in items if item]
-
-
-def replace_configs_in_file(configs: dict, file_path):
-    with open(file_path, "r") as file:
-        lines = file.readlines()
-
-    for default_key in configs:
-        if isinstance(configs[default_key], str):
-            for count, line in enumerate(lines):
-                lines[count] = line.replace(default_key, configs[default_key])
-        elif isinstance(configs[default_key], bool):
-            bool_value = "true" if configs[default_key] else "false"
-            for count, line in enumerate(lines):
-                if "SSH_INSERT_KEY" in line:
-                    lines[count] = line.replace(default_key, bool_value)
-                    lines[count] = ''.join(lines[count].split('"'))
-
-    with open(file_path, 'w') as file:
-        for line in lines:
-            file.write(line)
-
-
-def convert_argv_list_to_dict():
-    arguments = sys.argv[1:]
-    if not arguments:
-        error_msg = '''
-        vmbuilder
-          -n\t[PROJECT NAME]
-          -vb\t[VBOXNAME]
-          -t\tvagrant\n{}
-          ---------------------------
-          -t\tpacker\n{}
-        '''
-        vagrant_error_str = ''
-        packer_error_str = ''
-        for vagrant_flag in VAGRANT_FLAGS_TO_ERROR:
-            vagrant_error_str += f'\t\t{vagrant_flag}:\t\t{VAGRANT_FLAGS_TO_ERROR[vagrant_flag]}\n'
-        for packer_flag in PACKER_FLAGS_TO_ERROR:
-            packer_error_str += f'\t\t{packer_flag}:\t\t{PACKER_FLAGS_TO_ERROR[packer_flag]}\n'
-        raise FlagError(
-            error_msg.format(vagrant_error_str, packer_error_str)
-        )
-
-    good_arguments = dict()
-    for count, arg in enumerate(arguments):
-        if arg.startswith('-'):
-            try:
-                if arguments[count + 1].startswith('-'):
-                    good_arguments[arg] = ''
-                else:
-                    good_arguments[arg] = arguments[count + 1]
-            except IndexError:
-                good_arguments[arg] = ''
-
-    undefined_args = ()
-    for good_argument in ('-n', '-vb', '-t'):
-        if not good_arguments[good_argument]:
-            undefined_args += (good_argument,)
-    for flag in COMMON_VALID_FLAGS:
-        if flag not in good_arguments.keys():
-            undefined_args += (flag,)
-    error_msg = '\n'
-    if undefined_args:
-        for undefined_flag in undefined_args:
-            error_msg += f'\t{undefined_flag}\t{COMMON_FLAGS_TO_ERROR[undefined_flag]}\n'
-        raise FlagError(error_msg)
-    return good_arguments
+from  helper import vmbuilder_path
+from  helper import VAGRANT_FLAGS_TO_ERROR
+from  helper import PACKER_FLAGS_TO_ERROR
+from  helper import convert_argv_list_to_dict
+from  helper import get_local_virtual_boxes
+from  helper import replace_configs_in_file
 
 
 def get_project_class():
@@ -167,7 +22,6 @@ def get_project_class():
         return Packer()
     else:
         raise FlagError("Select from [packer|vagrant]")
-
 
 class Builder(abc.ABC):
 
@@ -254,7 +108,7 @@ class Vagrant(Builder):
             )
 
     def generate_provision_text(self, src, dst, title: str, program: str):
-        hash_number = 50
+        hash_number = 55
 
         lines = src.readlines()
         # if file has only hash bang line, exit
@@ -289,6 +143,7 @@ class Vagrant(Builder):
         end = self.configs['programs']['end']
         programs_to_install = self.configs['programs']['install']
         programs_to_uninstall = self.configs['programs']['uninstall']
+        custom_scripts = self.configs['custom-scripts']
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
             if init:
@@ -324,7 +179,7 @@ class Vagrant(Builder):
                             title="UNINSTALL",
                             program=program
                         )
-            if self.configs['programs']['end']:
+            if end:
                 with open(f'{programs_path}/clean.sh') as clean_file:
                     self.generate_provision_text(
                         src=clean_file,
@@ -332,8 +187,8 @@ class Vagrant(Builder):
                         title="CLEAN apt packages",
                         program=''
                     )
-            if self.configs['custom-scripts']:
-                for script in self.configs['custom-scripts']:
+            if custom_scripts:
+                for script in custom_scripts:
                     with open(f'{custom_scripts_path}/{script}') as script_file:
                         self.generate_provision_text(
                             src=script_file,
