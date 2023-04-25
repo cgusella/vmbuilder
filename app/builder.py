@@ -254,16 +254,30 @@ class Vagrant(Builder):
             )
 
     def generate_provision_text(self, src, dst, title: str, program: str):
+        lines = src.readlines()
+        # if file has only hash bang line, exit
+        if len(lines) == 1 and lines[0].startswith('#!'):
+            return
+        # if file contains only empty lines after hash bang line, exit
+        empty_lines = 0
+        for line in lines:
+            if line in ['\n']:
+                # count empty lines
+                empty_lines += 1
+        # take hash bang line into consideration
+        if len(lines) == empty_lines + 1:
+            return
+
         dst.write(f'\n\n{40*"#"}\n')
         pound_number = 40 - 10 - len(title) - 1 - len(program) - 3 
         dst.write(f'#######   {title} {program}   {pound_number*"#"}')
         dst.write(f'\n{40*"#"}\n')
-        for line in src.readlines():
-            if len(src.readlines()) == 1 and line.startswith('#!'):
-                pass
+
+        for line in lines:
+            if line.startswith('#!'):
+                continue
             else:
-                if not line.startswith('#!'):
-                    dst.write(f'{line}')
+                dst.write(f'{line}')
 
     def provision(self):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
