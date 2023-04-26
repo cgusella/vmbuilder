@@ -8,11 +8,11 @@
   "vbox-provisions": {
     "programs": {
       "init": true,
-      "install": ["openvpn", "impacket", "terminator"],
+      "install": [],
       "uninstall": [],
       "clean": true
     },
-    "custom-scripts": ["my-script.sh"],
-    "upload": false
+    "custom-scripts": [],
+    "upload": true
   }
 }
