@@ -5,12 +5,13 @@ import json
 from error import FlagError
 from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
-from helper import vmbuilder_path
 from helper import VAGRANT_FLAGS_TO_ERROR
 from helper import PACKER_FLAGS_TO_ERROR
 from helper import convert_argv_list_to_dict
 from helper import get_local_virtual_boxes
-from helper import replace_configs_in_file
+from helper import replace_configs_in_vagrantfile
+
+vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 
 
 def get_project_class():
@@ -47,8 +48,9 @@ class Vagrant(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
         self.machine_path: str = vmbuilder_path + '/machines/vagrant'
-        self.vbox_confs_provs = os.listdir(f'{vmbuilder_path}/templates/vagrant/vbox_confs_provs')
+        self.provisions_configs = f'{vmbuilder_path}/templates/vagrant/provisions_configs'
         self.configs: dict = dict()
+        self.provisions: dict = dict()
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
@@ -79,9 +81,9 @@ class Vagrant(Builder):
             raise ExistenceVirtualBoxError(f'The virtualbox {self.arguments["-vb"]} already exists!')
 
     def set_configs(self):
-        config_provision_file_path = f'{vmbuilder_path}/templates/vagrant/vbox_confs_provs/{self.arguments["-j"]}'
+        config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
         with open(config_provision_file_path, 'r') as provisions:
-            configs = json.loads(provisions.read())
+            configs = json.loads(provisions.read())["vbox-configs"]
         configs['extra_user'] = self.arguments['-u']
         configs['default_image'] = self.arguments['-i']
         configs['default_hostname'] = self.arguments['-ho']
@@ -91,8 +93,14 @@ class Vagrant(Builder):
             raise FlagError('Default user in provision file is the same as inserted user!')
         self.configs = configs.copy()
 
+    def set_provisions(self):
+        config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
+        with open(config_provision_file_path, 'r') as provisions:
+            self.provisions = json.loads(provisions.read())["vbox-provisions"]
+
     def create_project_folder(self):
         self.set_configs()
+        self.set_provisions()
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
@@ -101,13 +109,13 @@ class Vagrant(Builder):
             src=f'{vagrant_folder}/Vagrantfile',
             dst=f'{project_folder}/Vagrantfile'
         )
-        for program in self.configs['programs']['install']:
+        for program in self.provisions['programs']['install']:
             program_folder = f'{vmbuilder_path}/templates/programs/{program}'
             shutil.copytree(
                 src=program_folder,
-                dst=f'{project_folder}/{program}'
+                dst=f'{project_folder}/programs/{program}'
             )
-        if self.configs['upload']:
+        if self.provisions['upload']:
             shutil.copytree(
                 src=f'{vmbuilder_path}/templates/upload/',
                 dst=f'{project_folder}/upload'
@@ -145,15 +153,23 @@ class Vagrant(Builder):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
         programs_path = f'{vmbuilder_path}/templates/programs'
-        init = self.configs['programs']['init']
-        end = self.configs['programs']['end']
-        programs_to_install = self.configs['programs']['install']
-        programs_to_uninstall = self.configs['programs']['uninstall']
-        custom_scripts = self.configs['custom-scripts']
+        init = self.provisions['programs']['init']
+        clean = self.provisions['programs']['clean']
+        programs_to_install = self.provisions['programs']['install']
+        programs_to_uninstall = self.provisions['programs']['uninstall']
+        custom_scripts = self.provisions['custom-scripts']
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
+            if self.configs['extra_user']:
+                with open(f'{programs_path}/bash/create-extra-user.sh') as create_user_script:
+                    self.generate_provision_text(
+                            src=create_user_script,
+                            dst=vagrantfile,
+                            title=f"CREATE USER {self.configs['extra_user']}",
+                            program=''
+                        )
             if init:
-                with open(f'{programs_path}/init.sh') as init_file:
+                with open(f'{programs_path}/bash/init.sh') as init_file:
                     self.generate_provision_text(
                             src=init_file,
                             dst=vagrantfile,
@@ -185,8 +201,8 @@ class Vagrant(Builder):
                             title="UNINSTALL",
                             program=program
                         )
-            if end:
-                with open(f'{programs_path}/clean.sh') as clean_file:
+            if clean:
+                with open(f'{programs_path}/bash/clean.sh') as clean_file:
                     self.generate_provision_text(
                         src=clean_file,
                         dst=vagrantfile,
@@ -203,8 +219,7 @@ class Vagrant(Builder):
                             program=f'{script.split(".")[0]}'
                         )
             vagrantfile.write('\n\nSHELL\nend')
-
-        replace_configs_in_file(self.configs, vagrantfile_path)
+        replace_configs_in_vagrantfile(self.configs, vagrantfile_path)
 
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
@@ -214,7 +229,7 @@ class Packer(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
         self.machine_path: str = vmbuilder_path + '/machines/packer'
-        self.vbox_confs_provs = os.listdir(f'{vmbuilder_path}/templates/packer/provision_configs/')
+        self.provisions_configs = os.listdir(f'{vmbuilder_path}/templates/packer/provision_configs/')
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
