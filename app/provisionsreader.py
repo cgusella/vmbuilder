@@ -4,8 +4,7 @@ import os
 from error import ProgramNotFoundError
 from error import ScriptNotFoundError
 
-
-vmbuilder_path = f'{os.getcwd()}/..'
+vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 
 
 class ProvisionConfigReader:
