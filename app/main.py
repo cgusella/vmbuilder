@@ -21,8 +21,8 @@ def main():
     try:
         project.create_project_folder()
         project.provision()
-    except (FileNotFoundError, KeyError) as err:
-        logging.error(err)
+    except (FileNotFoundError, KeyError) as error:
+        logging.error(error)
         project.delete_project()
 
 
