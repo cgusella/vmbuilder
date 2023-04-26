@@ -1,6 +1,7 @@
 __pycache__
-templates/programs/*/configs/*
-!templates/programs/*/configs/config.sh
+templates/programs/*
+!templates/programs/program-example/
+!templates/programs/bash
 machines/vagrant/*
 !machines/vagrant/README.md
 machines/packer/*
