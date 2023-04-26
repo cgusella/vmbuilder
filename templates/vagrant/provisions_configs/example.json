@@ -1,0 +1,18 @@
+{
+  "vbox-configs": {
+    "default_user": "vagrant",
+    "default_pass": "vagrant",
+    "api_version": "2",
+    "disk_size": "30000"
+  },
+  "vbox-provisions": {
+    "programs": {
+      "init": true,
+      "install": ["openvpn", "impacket", "terminator"],
+      "uninstall": [],
+      "clean": true
+    },
+    "custom-scripts": ["my-script.sh"],
+    "upload": false
+  }
+}
