@@ -22,3 +22,11 @@ class ExistenceProjectError(Error):
 
 class ExistenceVirtualBoxError(Error):
     pass
+
+
+class ProgramNotFoundError(Error):
+    pass
+
+
+class ScriptNotFoundError(Error):
+    pass
