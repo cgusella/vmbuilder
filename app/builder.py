@@ -5,12 +5,12 @@ import json
 from error import FlagError
 from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
-from  helper import vmbuilder_path
-from  helper import VAGRANT_FLAGS_TO_ERROR
-from  helper import PACKER_FLAGS_TO_ERROR
-from  helper import convert_argv_list_to_dict
-from  helper import get_local_virtual_boxes
-from  helper import replace_configs_in_file
+from helper import vmbuilder_path
+from helper import VAGRANT_FLAGS_TO_ERROR
+from helper import PACKER_FLAGS_TO_ERROR
+from helper import convert_argv_list_to_dict
+from helper import get_local_virtual_boxes
+from helper import replace_configs_in_file
 
 
 def get_project_class():
@@ -22,6 +22,7 @@ def get_project_class():
         return Packer()
     else:
         raise FlagError("Select from [packer|vagrant]")
+
 
 class Builder(abc.ABC):
 
