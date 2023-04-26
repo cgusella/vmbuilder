@@ -4,8 +4,7 @@ import logging
 import os
 from error import FlagError
 
-sys.tracebacklimit = 0
-vmbuilder_path = f'{os.getcwd()}/..'
+vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 logger = logging.getLogger('')
 
 
@@ -13,7 +12,7 @@ def get_vagrant_provision_for_error():
     return '\n'.join(
         [
             '\t\t\t\t--> ' + file for file in os.listdir(
-                f"{vmbuilder_path}/templates/vagrant/vbox_confs_provs"
+                f"{vmbuilder_path}/templates/vagrant/provisions_configs"
             )
         ]
     )
@@ -23,7 +22,7 @@ def get_packer_provision_for_error():
     return '\n'.join(
         [
             '\t\t\t\t--> ' + file for file in os.listdir(
-                f'{vmbuilder_path}/templates/packer/vbox_confs_provs'
+                f'{vmbuilder_path}/templates/packer/provisions_configs'
             )
         ]
     )
@@ -62,7 +61,7 @@ COMMON_FLAGS_TO_ERROR = {
     '-t': '[vagrant|packer]'
 }
 VAGRANT_FLAGS_TO_ERROR = {
-    '-u': '[EXTRA USER]',
+    '-u': '[EXTRA SUDOER USER]',
     '-ho': '[HOSTNAME]',
     '-i': f'[VAGRANT IMAGE]\n{get_vagrant_images_for_error()}',
     '-j': f'[VAGRANT PROVISION FILE]\n{get_vagrant_provision_for_error()}',
@@ -85,7 +84,7 @@ def get_local_virtual_boxes():
     return [item.split()[0].replace('"', '') for item in items if item]
 
 
-def replace_configs_in_file(configs: dict, file_path):
+def replace_configs_in_vagrantfile(configs: dict, file_path):
     with open(file_path, "r") as file:
         lines = file.readlines()
 
@@ -139,18 +138,11 @@ def convert_argv_list_to_dict():
 
     undefined_args = ()
     for good_argument in ('-n', '-vb', '-t'):
-        if not good_arguments[good_argument]:
+        if not good_arguments.get(good_argument, ''):
             undefined_args += (good_argument,)
-    for flag in COMMON_VALID_FLAGS:
-        if flag not in good_arguments.keys():
-            undefined_args += (flag,)
     error_msg = '\n'
     if undefined_args:
         for undefined_flag in undefined_args:
             error_msg += f'\t{undefined_flag}\t{COMMON_FLAGS_TO_ERROR[undefined_flag]}\n'
         raise FlagError(error_msg)
     return good_arguments
-
-
-
-
