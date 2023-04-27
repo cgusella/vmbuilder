@@ -1,9 +1,7 @@
 #!/bin/python3
 import argparse
 import os
-
-
-vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
+import constants
 
 
 def make_program_folder(programs: list = []):
@@ -18,7 +16,7 @@ def make_program_folder(programs: list = []):
         programs = arguments.programs
 
     for program in programs:
-        new_program_path = f'{vmbuilder_path}/templates/programs/{program}'
+        new_program_path = f'{constants.programs_path}/{program}'
         # create program folder
         os.mkdir(new_program_path)
         # create configs folder

@@ -1,18 +1,15 @@
 import subprocess
 import sys
-import logging
 import os
 from error import FlagError
-
-vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
-logger = logging.getLogger('')
+import constants
 
 
 def get_vagrant_provision_for_error():
     return '\n'.join(
         [
             '\t\t\t\t--> ' + file for file in os.listdir(
-                f"{vmbuilder_path}/templates/vagrant/provisions_configs"
+                constants.vagrant_provs_confs_path
             )
         ]
     )
@@ -22,7 +19,7 @@ def get_packer_provision_for_error():
     return '\n'.join(
         [
             '\t\t\t\t--> ' + file for file in os.listdir(
-                f'{vmbuilder_path}/templates/packer/provisions_configs'
+                constants.packer_provs_confs_path
             )
         ]
     )

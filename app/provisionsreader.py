@@ -5,8 +5,7 @@ from error import ProgramNotFoundError
 from error import ScriptNotFoundError
 from error import EmptyScriptError
 from newprogram import make_program_folder
-
-vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
+import constants
 
 
 class ProvisionConfigReader:
@@ -29,7 +28,7 @@ class ProvisionConfigReader:
         if programs["install"]:
             not_found_install_programs = list()
             for program in programs["install"]:
-                if program not in os.listdir(f'{vmbuilder_path}/templates/programs'):
+                if program not in os.listdir(constants.programs_path):
                     not_found_install_programs.append(program)
 
             if not_found_install_programs:
@@ -39,7 +38,7 @@ class ProvisionConfigReader:
         if programs["uninstall"]:
             not_found_uninstall_programs = list()
             for program in programs["uninstall"]:
-                if program not in os.listdir(f'{vmbuilder_path}/templates/programs'):
+                if program not in os.listdir(constants.programs_path):
                     not_found_uninstall_programs.append(program)
 
             if not_found_uninstall_programs:
@@ -59,7 +58,7 @@ class ProvisionConfigReader:
         if scripts:
             not_found_scripts = list()
             for script in scripts:
-                if script not in os.listdir(f'{vmbuilder_path}/templates/custom-scripts'):
+                if script not in os.listdir(constants.custom_scripts_path):
                     not_found_scripts.append(script)
 
             if not_found_scripts:
@@ -68,7 +67,7 @@ class ProvisionConfigReader:
     def check_install_scripts_emptyness(self):
         empty_scripts = list()
         for program in self.provisions['programs']['install']:
-            with open(f'{vmbuilder_path}/templates/programs/{program}/install.sh') as install_script:
+            with open(f'{constants.programs_path}/{program}/install.sh') as install_script:
                 lines = set(install_script.readlines())
 
             lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
@@ -83,7 +82,7 @@ class ProvisionConfigReader:
     def check_uninstall_scripts_emptyness(self):
         empty_scripts = list()
         for program in self.provisions['programs']['uninstall']:
-            with open(f'{vmbuilder_path}/templates/programs/{program}/uninstall.sh') as uninstall_script:
+            with open(f'{constants.programs_path}/{program}/uninstall.sh') as uninstall_script:
                 lines = set(uninstall_script.readlines())
 
             lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))

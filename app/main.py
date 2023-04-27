@@ -2,10 +2,8 @@
 from builder import get_project_class
 from provisionsreader import ProvisionConfigReader
 import sys
-import os
 
 sys.tracebacklimit = 0
-vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 
 
 def main():
@@ -21,7 +19,7 @@ def main():
     try:
         project.create_project_folder()
         project.provision()
-    except (FileNotFoundError, KeyError):
+    except (KeyError):
         project.delete_project()
 
 

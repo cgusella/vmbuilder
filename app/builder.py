@@ -7,14 +7,12 @@ from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
 from error import JsonConfigNotFoundError
 from error import FileExtesionError
-from error import EmptyScriptError
 from helper import VAGRANT_FLAGS_TO_ERROR
 from helper import PACKER_FLAGS_TO_ERROR
 from helper import convert_argv_list_to_dict
 from helper import get_local_virtual_boxes
 from helper import replace_configs_in_vagrantfile
-
-vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
+import constants
 
 
 def get_project_class():
@@ -50,8 +48,8 @@ class Builder(abc.ABC):
 class Vagrant(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
-        self.machine_path: str = vmbuilder_path + '/machines/vagrant'
-        self.provisions_configs = f'{vmbuilder_path}/templates/vagrant/provisions_configs'
+        self.machine_path: str = constants.vagrant_machines_path
+        self.provisions_configs = constants.vagrant_provs_confs_path
         self.configs: dict = dict()
         self.provisions: dict = dict()
 
@@ -120,20 +118,20 @@ class Vagrant(Builder):
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
-        vagrant_folder = f'{vmbuilder_path}/templates/vagrant'
+        vagrant_folder = constants.vagrant_templates_path
         shutil.copyfile(
             src=f'{vagrant_folder}/Vagrantfile',
             dst=f'{project_folder}/Vagrantfile'
         )
         for program in self.provisions['programs']['install']:
-            program_folder = f'{vmbuilder_path}/templates/programs/{program}'
+            program_folder = f'{constants.programs_path}/{program}'
             shutil.copytree(
                 src=program_folder,
                 dst=f'{project_folder}/programs/{program}'
             )
         if self.provisions['upload']:
             shutil.copytree(
-                src=f'{vmbuilder_path}/templates/upload/',
+                src=f'{constants.upload_path}/',
                 dst=f'{project_folder}/upload'
             )
 
@@ -159,8 +157,6 @@ class Vagrant(Builder):
 
     def provision(self):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
-        custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
-        programs_path = f'{vmbuilder_path}/templates/programs'
         update_upgrade = self.provisions['programs']['update-upgrade']
         clean = self.provisions['programs']['clean']
         programs_to_install = self.provisions['programs']['install']
@@ -170,14 +166,14 @@ class Vagrant(Builder):
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
         if self.configs['extra_user']:
             self.generate_provision_text(
-                    src=f'{programs_path}/bash/create-extra-user.sh',
+                    src=f'{constants.programs_path}/bash/create-extra-user.sh',
                     dst=vagrantfile_path,
                     title=f"CREATE USER {self.configs['extra_user']}",
                     program=''
                 )
         if update_upgrade:
             self.generate_provision_text(
-                    src=f'{programs_path}/bash/update-upgrade.sh',
+                    src=f'{constants.programs_path}/bash/update-upgrade.sh',
                     dst=vagrantfile_path,
                     title="UPDATE and UPGRADE",
                     program='apt'
@@ -185,13 +181,13 @@ class Vagrant(Builder):
         if programs_to_install:
             for program in programs_to_install:
                 self.generate_provision_text(
-                    src=f'{programs_path}/{program}/install.sh',
+                    src=f'{constants.programs_path}/{program}/install.sh',
                     dst=vagrantfile_path,
                     title="INSTALL",
                     program=program
                 )
                 self.generate_provision_text(
-                    src=f'{programs_path}/{program}/configs/config.sh',
+                    src=f'{constants.programs_path}/{program}/configs/config.sh',
                     dst=vagrantfile_path,
                     title="CONFIG",
                     program=program
@@ -199,14 +195,14 @@ class Vagrant(Builder):
         if programs_to_uninstall:
             for program in programs_to_uninstall:
                 self.generate_provision_text(
-                    src=f'{programs_path}/{program}/uninstall.sh',
+                    src=f'{constants.programs_path}/{program}/uninstall.sh',
                     dst=vagrantfile_path,
                     title="UNINSTALL",
                     program=program
                 )
         if clean:
             self.generate_provision_text(
-                src=f'{programs_path}/bash/clean.sh',
+                src=f'{constants.programs_path}/bash/clean.sh',
                 dst=vagrantfile_path,
                 title="CLEAN apt packages",
                 program=''
@@ -214,7 +210,7 @@ class Vagrant(Builder):
         if custom_scripts:
             for script in custom_scripts:
                 self.generate_provision_text(
-                    src=f'{custom_scripts_path}/{script}',
+                    src=f'{constants.custom_scripts_path}/{script}',
                     dst=vagrantfile_path,
                     title="CUSTOM SCRIPT",
                     program=f'{script.split(".")[0]}'
@@ -232,8 +228,8 @@ class Vagrant(Builder):
 class Packer(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
-        self.machine_path: str = vmbuilder_path + '/machines/packer'
-        self.provisions_configs = os.listdir(f'{vmbuilder_path}/templates/packer/provision_configs/')
+        self.machine_path: str = constants.vmbuilder_path + '/machines/packer'
+        self.provisions_configs = os.listdir(constants.packer_provs_confs_path)
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
@@ -262,12 +258,12 @@ class Packer(Builder):
             raise ExistenceProjectError("[ERROR] Project already exists!")
 
     def create_project_folder(self):
-        configurations_folder = f'{vmbuilder_path}/configurations/'
+        configurations_folder = f'{constants.vmbuilder_path}/configurations/'
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
         shutil.copytree(src=configurations_folder, dst=f'{project_folder}/configurations')
 
-        packer_folder = f'{vmbuilder_path}/packer'
+        packer_folder = f'{constants.vmbuilder_path}/packer'
         for element in os.listdir(packer_folder):
             element_path = f'{packer_folder}/{element}'
             if os.path.isdir(element_path):
