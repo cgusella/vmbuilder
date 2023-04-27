@@ -12,4 +12,6 @@ templates/custom-scripts/*
 templates/upload/*
 !templates/upload/README.md
 templates/vagrant/provisions_configs/*
-!templates/vagrant/provisions_configs/example.json
+!templates/vagrant/provisions_configs/template.json
+templates/packer/provisions_configs/*
+!templates/packer/provisions_configs/template.json
