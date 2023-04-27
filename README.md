@@ -5,8 +5,8 @@
 This project manage and create customized virtual machine.
 You can create two kinds of machines: Packer or Vagrant.
 The customization is first setted using a JSON object saved in
-    * /templates/packer/provisions_configs;
-    * /templates/vagrant/provisions_configs.
+ * /templates/packer/provisions_configs;
+ * /templates/vagrant/provisions_configs.
 
 ## Vagrant Machine
 
