@@ -5,6 +5,9 @@ import json
 from error import FlagError
 from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
+from error import JsonConfigNotFoundError
+from error import FileExtesionError
+from error import EmptyScriptError
 from helper import VAGRANT_FLAGS_TO_ERROR
 from helper import PACKER_FLAGS_TO_ERROR
 from helper import convert_argv_list_to_dict
@@ -32,7 +35,7 @@ class Builder(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def check_folder_vb_existence(self):
+    def check_folder_vb_json_existence(self):
         pass
 
     @abc.abstractmethod
@@ -74,11 +77,24 @@ class Vagrant(Builder):
                 error_msg += f'\t\t{forgotten_flag}:\t{VAGRANT_FLAGS_TO_ERROR[forgotten_flag]}\n'
             raise FlagError(error_msg)
 
-    def check_folder_vb_existence(self):
+        if not self.arguments['-j'].endswith('.json'):
+            raise FileExtesionError(f'The config file {self.arguments["-j"]} is not a JSON file!')
+
+    def check_folder_vb_json_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
         if self.arguments['-vb'] in get_local_virtual_boxes():
             raise ExistenceVirtualBoxError(f'The virtualbox {self.arguments["-vb"]} already exists!')
+        if self.arguments['-j'] not in os.listdir(self.provisions_configs):
+            shutil.copyfile(
+                src=f'{self.provisions_configs}/template.json',
+                dst=f'{self.provisions_configs}/{self.arguments["-j"]}'
+            )
+            raise JsonConfigNotFoundError(
+                f'The json file {self.arguments["-j"]} '
+                'is created at /templates/vagrant/provisions_configs folder.\n'
+                'Fill it up and come back then!'
+            )
 
     def set_configs(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
@@ -123,102 +139,90 @@ class Vagrant(Builder):
 
     def generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
+        with open(src) as src_file:
+            lines = set(src_file.readlines())
 
-        lines = src.readlines()
-        # if file has only hash bang line, exit
-        if len(lines) == 1 and lines[0].startswith('#!'):
-            return
-        # if file contains only empty lines after hash bang line, exit
-        empty_lines = 0
-        for line in lines:
-            if line in ['\n']:
-                # count empty lines
-                empty_lines += 1
-        # take hash bang line into consideration
-        if len(lines) == empty_lines + 1:
-            return
+        lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
+        empty_file = not any(lines)
 
-        dst.write(f'\n\n{hash_number*"#"}\n')
-        pound_number = hash_number - 10 - len(title) - 1 - len(program) - 3 
-        dst.write(f'#######   {title} {program}   {pound_number*"#"}')
-        dst.write(f'\n{hash_number*"#"}\n')
+        if title.lower() in ['config'] and empty_file:
+            pass
+        else:
+            with open(dst, 'a') as vagrantfile:
+                vagrantfile.write(f'\n\n{hash_number*"#"}\n')
+                pound_number = hash_number - 10 - len(title) - 1 - len(program) - 3
+                vagrantfile.write(f'#######   {title} {program}   {pound_number*"#"}')
+                vagrantfile.write(f'\n{hash_number*"#"}\n')
 
-        for line in lines:
-            if line.startswith('#!'):
-                continue
-            else:
-                dst.write(f'{line}')
+                for line in lines:
+                    vagrantfile.write(f'{line.strip()}\n')
 
     def provision(self):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
         programs_path = f'{vmbuilder_path}/templates/programs'
-        init = self.provisions['programs']['init']
+        update_upgrade = self.provisions['programs']['update-upgrade']
         clean = self.provisions['programs']['clean']
         programs_to_install = self.provisions['programs']['install']
         programs_to_uninstall = self.provisions['programs']['uninstall']
         custom_scripts = self.provisions['custom-scripts']
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
-            if self.configs['extra_user']:
-                with open(f'{programs_path}/bash/create-extra-user.sh') as create_user_script:
-                    self.generate_provision_text(
-                            src=create_user_script,
-                            dst=vagrantfile,
-                            title=f"CREATE USER {self.configs['extra_user']}",
-                            program=''
-                        )
-            if init:
-                with open(f'{programs_path}/bash/init.sh') as init_file:
-                    self.generate_provision_text(
-                            src=init_file,
-                            dst=vagrantfile,
-                            title="UPDATE and UPGRADE",
-                            program='apt'
-                        )
-            if programs_to_install:
-                for program in programs_to_install:
-                    with open(f'{programs_path}/{program}/install.sh') as install_file:
-                        self.generate_provision_text(
-                            src=install_file,
-                            dst=vagrantfile,
-                            title="INSTALL",
-                            program=program
-                        )
-                    with open(f'{programs_path}/{program}/configs/config.sh') as config_file:
-                        self.generate_provision_text(
-                            src=config_file,
-                            dst=vagrantfile,
-                            title="CONFIG",
-                            program=program
-                        )
-            if programs_to_uninstall:
-                for program in programs_to_uninstall:
-                    with open(f'{programs_path}/{program}/uninstall.sh') as uninstall_file:
-                        self.generate_provision_text(
-                            src=uninstall_file,
-                            dst=vagrantfile,
-                            title="UNINSTALL",
-                            program=program
-                        )
-            if clean:
-                with open(f'{programs_path}/bash/clean.sh') as clean_file:
-                    self.generate_provision_text(
-                        src=clean_file,
-                        dst=vagrantfile,
-                        title="CLEAN apt packages",
-                        program=''
-                    )
-            if custom_scripts:
-                for script in custom_scripts:
-                    with open(f'{custom_scripts_path}/{script}') as script_file:
-                        self.generate_provision_text(
-                            src=script_file,
-                            dst=vagrantfile,
-                            title="CUSTOM SCRIPT",
-                            program=f'{script.split(".")[0]}'
-                        )
+        if self.configs['extra_user']:
+            self.generate_provision_text(
+                    src=f'{programs_path}/bash/create-extra-user.sh',
+                    dst=vagrantfile_path,
+                    title=f"CREATE USER {self.configs['extra_user']}",
+                    program=''
+                )
+        if update_upgrade:
+            self.generate_provision_text(
+                    src=f'{programs_path}/bash/update-upgrade.sh',
+                    dst=vagrantfile_path,
+                    title="UPDATE and UPGRADE",
+                    program='apt'
+                )
+        if programs_to_install:
+            for program in programs_to_install:
+                self.generate_provision_text(
+                    src=f'{programs_path}/{program}/install.sh',
+                    dst=vagrantfile_path,
+                    title="INSTALL",
+                    program=program
+                )
+                self.generate_provision_text(
+                    src=f'{programs_path}/{program}/configs/config.sh',
+                    dst=vagrantfile_path,
+                    title="CONFIG",
+                    program=program
+                )
+        if programs_to_uninstall:
+            for program in programs_to_uninstall:
+                self.generate_provision_text(
+                    src=f'{programs_path}/{program}/uninstall.sh',
+                    dst=vagrantfile_path,
+                    title="UNINSTALL",
+                    program=program
+                )
+        if clean:
+            self.generate_provision_text(
+                src=f'{programs_path}/bash/clean.sh',
+                dst=vagrantfile_path,
+                title="CLEAN apt packages",
+                program=''
+            )
+        if custom_scripts:
+            for script in custom_scripts:
+                self.generate_provision_text(
+                    src=f'{custom_scripts_path}/{script}',
+                    dst=vagrantfile_path,
+                    title="CUSTOM SCRIPT",
+                    program=f'{script.split(".")[0]}'
+                )
+
+        with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\nSHELL\nend')
+
         replace_configs_in_vagrantfile(self.configs, vagrantfile_path)
 
     def delete_project(self):
@@ -253,7 +257,7 @@ class Packer(Builder):
                 error_msg += f'\t\t{forgotten_flag}:\t{PACKER_FLAGS_TO_ERROR[forgotten_flag]}\n'
             raise FlagError(error_msg)
 
-    def check_folder_vb_existence(self):
+    def check_folder_vb_json_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
 
