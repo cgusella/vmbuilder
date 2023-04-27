@@ -1,8 +1,3 @@
-import logging
-
-log = logging.getLogger(__name__)
-
-
 class Error(Exception):
 
     def __init__(self, msg):
@@ -29,4 +24,16 @@ class ProgramNotFoundError(Error):
 
 
 class ScriptNotFoundError(Error):
+    pass
+
+
+class JsonConfigNotFoundError(Error):
+    pass
+
+
+class FileExtesionError(Error):
+    pass
+
+
+class EmptyScriptError(Error):
     pass
