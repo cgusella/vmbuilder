@@ -138,9 +138,12 @@ class Vagrant(Builder):
     def generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
         with open(src) as src_file:
-            lines = set(src_file.readlines())
+            lines = src_file.readlines()
 
-        lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
+        for line in lines:
+            if line in ['#!/bin/bash', '#!/bin/bash\n']:
+                lines.remove(line)
+
         empty_file = not any(lines)
 
         if title.lower() in ['config'] and empty_file:
