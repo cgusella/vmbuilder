@@ -5,7 +5,6 @@
 # Do not change these values from here. Consult config json file.
 DEFAULT_USER = "default_user"
 DEFAULT_PASS = "default_pass"
-VAGRANTFILE_API_VERSION = "2"
 DISK_SIZE = "disk_size"
 
 # Constants from command line parameters
@@ -14,7 +13,7 @@ HOSTNAME = "default_hostname"
 VB_NAME = "default_vbname"
 SSH_INSERT_KEY = "ssh_insert_key"
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure("2") do |config|
     config.vm.box = VAGRANT_IMAGE
     config.ssh.username = DEFAULT_USER
     config.ssh.password = DEFAULT_PASS
