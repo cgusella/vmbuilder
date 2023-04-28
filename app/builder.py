@@ -127,7 +127,6 @@ class Vagrant(Builder):
             src=f'{vagrant_folder}/Vagrantfile',
             dst=f'{project_folder}/Vagrantfile'
         )
-        print(self.provisions)
         for program in self.provisions['programs']['install']:
             program_folder = f'{constants.programs_path}/{program}'
             shutil.copytree(
@@ -286,14 +285,6 @@ class Packer(Builder):
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
-        # packer_folder = f'{constants.vmbuilder_path}/templates/packer'
-        # for element in os.listdir(packer_folder):
-        #     element_path = f'{packer_folder}/{element}'
-        #     if os.path.isdir(element_path):
-        #         shutil.copytree(src=element_path, dst=f'{project_folder}/{element}')
-        #     else:
-        #         shutil.copy(src=element_path, dst=project_folder)
-        print(self.provisions)
         if self.provisions['upload']:
             shutil.copytree(
                 src=f'{constants.upload_path}/',
@@ -307,15 +298,23 @@ class Packer(Builder):
                     json_file['vbox-configs'][var]["default"] = self.configs[var]
                 if isinstance(json_file['vbox-configs'][var]["default"], str):
                     default_type = 'string'
+                    vars_file.write(
+                        f'variable "{var}" ' + '{\n'
+                        f'  description\t= "{json_file["vbox-configs"][var]["description"]}"\n'
+                        f'  type\t= {default_type}\n'
+                        f'  default\t= "{json_file["vbox-configs"][var]["default"]}"\n'
+                        '}\n\n'
+                    )
                 elif isinstance(json_file['vbox-configs'][var]["default"], bool):
                     default_type = 'bool'
-                vars_file.write(
-                    f'variable "{var}" ' + '{\n'
-                    f'  description\t= "{json_file["vbox-configs"][var]["description"]}"\n'
-                    f'  type\t= {default_type}\n'
-                    f'  default\t= "{json_file["vbox-configs"][var]["default"]}"\n'
-                    '}\n\n'
-                )
+                    default_value = str(json_file["vbox-configs"][var]["default"]).lower()
+                    vars_file.write(
+                        f'variable "{var}" ' + '{\n'
+                        f'  description\t= "{json_file["vbox-configs"][var]["description"]}"\n'
+                        f'  type\t= {default_type}\n'
+                        f'  default\t= {default_value}\n'
+                        '}\n\n'
+                    )
 
     def provision(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
