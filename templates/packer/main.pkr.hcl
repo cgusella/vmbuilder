@@ -1,6 +1,5 @@
 locals {
   timestamp        = formatdate("YYYY-MM", timestamp())
-  // output_directory = "${var.output_directory}/${formatdate("YYYY-MM-DD-hh-mm", timestamp())}"
   output_directory = "${var.output_directory}/"
 }
 
@@ -26,17 +25,11 @@ source "virtualbox-iso" "vbox" {
   iso_checksum         = "${var.iso_checksum}"
   iso_interface        = "${var.iso_interface}"
   iso_target_extension = "${var.iso_target_extension}"
-  // iso_target_path      = "${regex_replace("${var.packer_cache_dir}", "^$", "/tmp")}/${var.iso_file}"
   iso_target_path      = "${var.iso_directory}/${var.iso_file}"
   iso_urls = [
     "${var.iso_link}",
     "${var.output_directory}/${var.iso_file}"
   ]
-  //iso_urls = [
-  //  "http://archive.ubuntu.com/ubuntu/dists/focal/main/installer-amd64/current/legacy-images/netboot/mini.iso",
-  //  "${var.output_directory}/${var.iso_file}",
-  //  // "${var.archive_ubuntu_path}/${var.distro}/${var.installer_image_path}/${var.iso_file}",
-  //]
   keep_registered              = "${var.keep_registered}"
   output_directory             = "${local.output_directory}"
   post_shutdown_delay          = "${var.post_shutdown_delay}"
@@ -101,12 +94,9 @@ build {
 
   provisioner "file" {
     sources = [
-      "configurations/bash-terminator/bashrc",
-      "configurations/bash-terminator/bashrc_root",
-      "configurations/bash-terminator/config",
-      "configurations/keyboard.config.sh",
-      "configurations/nanorc",
-      "configurations/sudoers",
+      "upload/bashrc",
+      "upload/bashrc_root",
+      "upload/config",
     ]
     destination = "/home/vagrant/upload/"
   }
