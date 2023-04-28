@@ -54,7 +54,7 @@
     },
     "bundle_iso":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "format":{
       "description":"Format of the output file (ova > hard disk + config file package)",
@@ -74,7 +74,7 @@
     },
     "headless":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "user_data_location":{
       "description":"",
@@ -110,7 +110,7 @@
     },
     "keep_registered":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "shutdown_timeout":{
       "description":"",
@@ -118,7 +118,7 @@
     },
     "skip_export":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "ssh_timeout":{
       "description":"Wait time for installation",
@@ -130,15 +130,15 @@
     },
     "ssh_agent_auth":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "ssh_clear_authorized_keys":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "ssh_disable_agent_forwarding":{
       "description":"",
-      "default":"false"
+      "default":false
     },
     "ssh_file_transfer_method":{
       "description":"",
@@ -170,7 +170,7 @@
     },
     "ssh_pty":{
       "description":"",
-      "default":"true"
+      "default":true
     },
     "vnc_vrdp_bind_address":{
       "description":"",
