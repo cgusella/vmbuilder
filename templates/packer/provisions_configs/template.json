@@ -1,65 +1,262 @@
 {
-  "cpus": "2",
-  "memory": "8192",
-  "gfx_vram_size": "128",
-  "disk_size": "15000",
-  "guest_os_type": "Ubuntu_64",
-  "hard_drive_discard": "false",
-  "skip_nat_mapping": "false",
-  "hard_drive_interface": "sata",
-  "iso_interface": "sata",
-  "sata_port_count": "1",
-  "vm_name": "cmd_param",
-  "boot_command": "<<-EOF\n  <esc><wait2>\n  install<wait1> auto=true<wait1> priority=critical<wait1> url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait1>\n  <enter>\n  EOF",
-  "boot_wait": "5s",
-  "bundle_iso": "false",
-  "format": "ova",
-  "guest_additions_mode": "disable",
-  "post_shutdown_delay": "0s",
-  "iso_target_extension": "iso",
-  "headless": "false",
-  "user_data_location": "user-data",
-  "host_port_max": "4444",
-  "host_port_min": "2222",
-  "http_directory": "http",
-  "http_port_max": "9000",
-  "http_port_min": "8000",
-  "iso_checksum": "sha256:0e79e00bf844929d40825b1f0e8634415cda195ba23bae0b041911fde4dfe018",
-  "packer_cache_dir": "${env(\"PACKER_CACHE_DIR\")}",
-  "keep_registered": "false",
-  "shutdown_timeout": "5m",
-  "skip_export": "false",
-  "ssh_timeout": "15m",
-  "communicator": "ssh",
-  "ssh_agent_auth": "false",
-  "ssh_clear_authorized_keys": "false",
-  "ssh_disable_agent_forwarding": "false",
-  "ssh_file_transfer_method": "scp",
-  "ssh_handshake_attempts": "100",
-  "ssh_keep_alive_interval": "5s",
-  "ssh_username": "vagrant",
-  "ssh_password": "vagrant",
-  "ssh_certificate_file": "",
-  "ssh_port": "22",
-  "ssh_pty": "true",
-  "vnc_vrdp_bind_address": "127.0.0.1",
-  "vnc_vrdp_port_max": "6000",
-  "vnc_vrdp_port_min": "5900",
-  "start_retry_timeout": "5m",
-  "version": "0.0.0",
-  "vagrantfile_template": "vagrant.rb.j2",
-  "min_vagrant_version": "2.3.0",
-  "archive_ubuntu_path": "http://archive.ubuntu.com/ubuntu/dists",
-  "distro": "focal",
-  "installer_image_path": "main/installer-amd64/current/legacy-images/netboot",
-  "iso_file": "cmd_param",
-  "iso_link": "cmd_param",
-  "iso_old_release_path_external": "https://old-releases.ubuntu.com/releases/12.04",
-  "iso_new_release_path_external": "https://releases.ubuntu.com/focal",
-  "output_directory": "",
-  "iso_directory": "",
-  "proxy_host": "",
-  "proxy_port": "",
-  "ssh_password_crypted": "",
-  "provisions": ["terminator", "dhcp-server"]
+  "vbox-configs": {
+    "cpus":{
+      "description":"Number of CPU cores for the machine",
+      "default":"2"
+    },
+    "memory":{
+      "description":"Memory value for the machine in MegaByte",
+      "default":"8192"
+    },
+    "gfx_vram_size":{
+      "description":"Memory value for the VGA in MegaByte",
+      "default":"128"
+    },
+    "disk_size":{
+      "description":"Disk size of the machine in MegaByte",
+      "default":"15000"
+    },
+    "guest_os_type":{
+      "description":"The desired image for the packer",
+      "default":"Ubuntu_64"
+    },
+    "hard_drive_discard":{
+      "description":"Whether or not discard the hard drive",
+      "default":false
+    },
+    "skip_nat_mapping":{
+      "description":"",
+      "default":false
+    },
+    "hard_drive_interface":{
+      "description":"Interface in which the hard drive is connected to",
+      "default":"sata"
+    },
+    "iso_interface":{
+      "description":"",
+      "default":"sata"
+    },
+    "sata_port_count":{
+      "description":"",
+      "default":"1"
+    },
+    "vb_name":{
+      "description":"",
+      "default":""
+    },
+    "boot_command":{
+      "description":"string",
+      "default":"<<-EOF"
+    },
+    "boot_wait":{
+      "description":"Wait time for boot",
+      "default":"5s"
+    },
+    "bundle_iso":{
+      "description":"",
+      "default":"false"
+    },
+    "format":{
+      "description":"Format of the output file (ova > hard disk + config file package)",
+      "default":"ova"
+    },
+    "guest_additions_mode":{
+      "description":"Whether or not use the guest additions",
+      "default":"disable"
+    },
+    "post_shutdown_delay":{
+      "description":"",
+      "default":"0s"
+    },
+    "iso_target_extension":{
+      "description":"",
+      "default":"iso"
+    },
+    "headless":{
+      "description":"",
+      "default":"false"
+    },
+    "user_data_location":{
+      "description":"",
+      "default":"user-data"
+    },
+    "host_port_max":{
+      "description":"",
+      "default":"4444"
+    },
+    "host_port_min":{
+      "description":"",
+      "default":"2222"
+    },
+    "http_directory":{
+      "description":"",
+      "default":"http"
+    },
+    "http_port_max":{
+      "description":"",
+      "default":"9000"
+    },
+    "http_port_min":{
+      "description":"",
+      "default":"8000"
+    },
+    "iso_checksum":{
+      "description":"Checksum of the downloaded image",
+      "default":"sha256:0e79e00bf844929d40825b1f0e8634415cda195ba23bae0b041911fde4dfe018"
+    },
+    "packer_cache_dir":{
+      "description":"",
+      "default":"${env(''PACKER_CACHE_DIR'')}"
+    },
+    "keep_registered":{
+      "description":"",
+      "default":"false"
+    },
+    "shutdown_timeout":{
+      "description":"",
+      "default":"5m"
+    },
+    "skip_export":{
+      "description":"",
+      "default":"false"
+    },
+    "ssh_timeout":{
+      "description":"Wait time for installation",
+      "default":"15m"
+    },
+    "communicator":{
+      "description":"Communicator program for the machine",
+      "default":"ssh"
+    },
+    "ssh_agent_auth":{
+      "description":"",
+      "default":"false"
+    },
+    "ssh_clear_authorized_keys":{
+      "description":"",
+      "default":"false"
+    },
+    "ssh_disable_agent_forwarding":{
+      "description":"",
+      "default":"false"
+    },
+    "ssh_file_transfer_method":{
+      "description":"",
+      "default":"scp"
+    },
+    "ssh_handshake_attempts":{
+      "description":"",
+      "default":"100"
+    },
+    "ssh_keep_alive_interval":{
+      "description":"",
+      "default":"5s"
+    },
+    "ssh_username":{
+      "description":"",
+      "default":"vagrant"
+    },
+    "ssh_password":{
+      "description":"",
+      "default":"vagrant"
+    },
+    "ssh_certificate_file":{
+      "description":"",
+      "default":""
+    },
+    "ssh_port":{
+      "description":"",
+      "default":"22"
+    },
+    "ssh_pty":{
+      "description":"",
+      "default":"true"
+    },
+    "vnc_vrdp_bind_address":{
+      "description":"",
+      "default":"127.0.0.1"
+    },
+    "vnc_vrdp_port_max":{
+      "description":"",
+      "default":"6000"
+    },
+    "vnc_vrdp_port_min":{
+      "description":"",
+      "default":"5900"
+    },
+    "start_retry_timeout":{
+      "description":"",
+      "default":"5m"
+    },
+    "version":{
+      "description":"",
+      "default":"0.0.0"
+    },
+    "vagrantfile_template":{
+      "description":"",
+      "default":"vagrant.rb.j2"
+    },
+    "min_vagrant_version":{
+      "description":"",
+      "default":"2.3.0"
+    },
+    "archive_ubuntu_path":{
+      "description":"",
+      "default":"http://archive.ubuntu.com/ubuntu/dists"
+    },
+    "distro":{
+      "description":"",
+      "default":"focal"
+    },
+    "installer_image_path":{
+      "description":"",
+      "default":"main/installer-amd64/current/legacy-images/netboot"
+    },
+    "iso_file":{
+      "description":"",
+      "default":""
+    },
+    "iso_link":{
+      "description":"",
+      "default":""
+    },
+    "iso_old_release_path_external":{
+      "description":"",
+      "default":"https://old-releases.ubuntu.com/releases/12.04"
+    },
+    "iso_new_release_path_external":{
+      "description":"",
+      "default":"https://releases.ubuntu.com/focal"
+    },
+    "output_directory":{
+      "description":"",
+      "default":""
+    },
+    "iso_directory":{
+      "description":"",
+      "default":""
+    },
+    "proxy_host":{
+      "description":"",
+      "default":""
+    },
+    "proxy_port":{
+      "description":"",
+      "default":""
+    },
+    "ssh_password_crypted":{
+      "description":"",
+      "default":""
+    }
+  },
+  "vbox-provisions": {
+    "programs": {
+      "update-upgrade": true,
+      "install": [],
+      "uninstall": [],
+      "clean": true
+    },
+    "custom-scripts": [],
+    "upload": true
+  }
 }
