@@ -12,6 +12,7 @@ from helper import PACKER_FLAGS_TO_ERROR
 from helper import convert_argv_list_to_dict
 from helper import get_local_virtual_boxes
 from helper import replace_configs_in_vagrantfile
+from helper import generate_packer_variable
 import constants
 
 
@@ -307,16 +308,31 @@ class Packer(Builder):
                 if var == 'iso_directory':
                     if not json_file[var]["default"]:
                         json_file[var]["default"] = constants.iso_path
+                if var == 'boot_command':
+                    with open(f'{constants.packer_http_path}/boot_command.txt') as boot_command:
+                        lines = boot_command.read()
+                    json_file[var]["default"] = lines
+
 
                 if isinstance(json_file[var]["default"], str):
-                    default_type = 'string'
-                    vars_file.write(
-                        f'variable "{var}" ' + '{\n'
-                        f'  description\t= "{json_file[var]["description"]}"\n'
-                        f'  type\t= {default_type}\n'
-                        f'  default\t= "{json_file[var]["default"]}"\n'
-                        '}\n\n'
-                    )
+                    if var == 'boot_command':
+                        default_type = 'string'
+                        vars_file.write(
+                            f'variable "{var}" ' + '{\n'
+                            f'  description\t= "{json_file[var]["description"]}"\n'
+                            f'  type\t= {default_type}\n'
+                            f'  default\t= {json_file[var]["default"]}\n'
+                            '}\n\n'
+                        )
+                    else:                        
+                        default_type = 'string'
+                        vars_file.write(
+                            f'variable "{var}" ' + '{\n'
+                            f'  description\t= "{json_file[var]["description"]}"\n'
+                            f'  type\t= {default_type}\n'
+                            f'  default\t= "{json_file[var]["default"]}"\n'
+                            '}\n\n'
+                        )
                 elif isinstance(json_file[var]["default"], bool):
                     default_type = 'bool'
                     default_value = str(json_file[var]["default"]).lower()
@@ -327,12 +343,88 @@ class Packer(Builder):
                         f'  default\t= {default_value}\n'
                         '}\n\n'
                     )
+    def _generate_main_file(self, json_file: dict):
+        with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/main.pkr.hcl', 'w') as main_file:
+            main_file.write(
+                'locals {\n' 
+                f'{generate_packer_variable("output_directory")}'
+                '}\n\n'
+            )
+            main_file.write('source "virtualbox-iso" "vbox" {\n')
+            for var in json_file['vbox-configs']:
+                if var in ['start_retry_timeout', 'iso_file']:
+                    continue
+                if var == 'boot_command':
+                    main_file.write(f'  {var} = [ var.{var} ]\n')
+                elif var == 'iso_directory':
+                    main_file.write('  iso_target_path \t\t\t\t\t= "${var.iso_directory' + '}/${var.iso_file' + '}"\n')
+                elif var == 'iso_link':
+                    main_file.write(
+                        '  iso_urls = [\n'
+                        '    "${var.output_directory' + '}/${var.iso_file' + '}",\n'
+                        '    "${var.iso_link' + '}",\n'
+                        '  ]\n'
+                    )
+                elif var == 'ssh_password':
+                    main_file.write(
+                        '  shutdown_command \t\t\t\t\t= "echo ' + "'" 
+                        '  ${var.ssh_password' + '}' + "'" + ' | sudo -E -S poweroff"\n'
+                    )
+                    main_file.write(generate_packer_variable(var))
+                else:
+                    main_file.write(generate_packer_variable(var))
+            main_file.write(
+                '  vboxmanage = [\n'
+                '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--rtcuseutc", "off"],\n'
+                '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--vram", "128"]\n'
+                '  ]\n'
+                '  virtualbox_version_file \t\t\t\t\t= "/tmp/.vbox_version"\n'
+            )
+            main_file.write('}\n\n')
+
+            main_file.write(
+                'build {\n\n'
+                '  sources \t\t\t\t\t= ["source.virtualbox-iso.vbox"]\n\n'
+                '  provisioner "shell" {\n'
+                '    binary            = false\n'
+                '    execute_command   = "echo ' + "'${" + "var.ssh_password}" + "' | " + '{' + '{' + ' .Vars ' + '}' + '} sudo -S -E bash ' + "'" +  '{' + '{' + ' .Path ' + '}' + '}' + "'" + '"\n'
+                '    expect_disconnect = true\n'
+                '    valid_exit_codes  = [0, 2]\n'
+                '    scripts = [\n'
+            )
+
+            script = '../../../templates/programs/bash/update-upgrade.sh'
+            main_file.write(f'      "{script}",\n')
+
+            main_file.write('    ]\n')
+            main_file.write(f'  {generate_packer_variable("start_retry_timeout")}')
+            main_file.write('  }\n\n')
+
+            upload = json_file['vbox-provisions']['upload']
+            if upload:
+                file_to_upload = "upload/configurations/bash-terminator/bashrc"
+                main_file.write(
+                    '  provisioner "file" {\n'
+                    '    sources = [\n'
+                )
+                main_file.write(f'      "{file_to_upload}",\n')
+                main_file.write(
+                    '    ]\n'
+                    '    destination = "/home/vagrant/upload"\n'
+                    '  }\n'
+                )
+
+                    
+
+            main_file.write('}\n')
+
 
     def provision(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
             json_provision = json.loads(provisions.read())
         vbox_configs = json_provision['vbox-configs']
         self._generate_vars_file(vbox_configs)
+        self._generate_main_file(json_provision)
 
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
