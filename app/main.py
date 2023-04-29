@@ -3,7 +3,7 @@ from builder import get_project_class
 from provisionsreader import ProvisionConfigReader
 import sys
 
-# sys.tracebacklimit = 0
+sys.tracebacklimit = 0
 
 
 def main():
