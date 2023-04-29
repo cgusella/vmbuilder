@@ -54,7 +54,7 @@ def get_vagrant_images_for_error():
 
 COMMON_FLAGS_TO_ERROR = {
     '-n': '[PROJECT NAME]',
-    '-vb': '[VBOXNAME]',
+    '-vm': '[VBOXNAME]',
     '-t': '[vagrant|packer]'
 }
 VAGRANT_FLAGS_TO_ERROR = {
@@ -70,7 +70,7 @@ PACKER_FLAGS_TO_ERROR = {
     '-cs': '[CHECKSUM]',
     '-j': f'[PACKER CONFIG FILE]\n{get_packer_provision_for_error()}'
 }
-COMMON_VALID_FLAGS = ('-n', '-vb', '-t')
+COMMON_VALID_FLAGS = ('-n', '-vm', '-t')
 
 
 def get_local_virtual_boxes():
@@ -107,7 +107,7 @@ def convert_argv_list_to_dict():
         error_msg = '''
         vmbuilder
           -n\t[PROJECT NAME]
-          -vb\t[VBOXNAME]
+          -vm\t[VBOXNAME]
           -t\tvagrant\n{}
           ---------------------------
           -t\tpacker\n{}
@@ -134,7 +134,7 @@ def convert_argv_list_to_dict():
                 good_arguments[arg] = ''
 
     undefined_args = ()
-    for good_argument in ('-n', '-vb', '-t'):
+    for good_argument in ('-n', '-vm', '-t'):
         if not good_arguments.get(good_argument, ''):
             undefined_args += (good_argument,)
     error_msg = '\n'
