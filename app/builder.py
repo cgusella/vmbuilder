@@ -352,12 +352,16 @@ class Packer(Builder):
             )
             main_file.write('source "virtualbox-iso" "vbox" {\n')
             for var in json_file['vbox-configs']:
+                space = (30 - len(var)) * ' '
                 if var in ['start_retry_timeout', 'iso_file']:
                     continue
-                if var == 'boot_command':
-                    main_file.write(f'  {var} = [ var.{var} ]\n')
+                elif var == 'boot_command':
+                    main_file.write(f'  {var}{space}= [ var.{var} ]\n')
                 elif var == 'iso_directory':
-                    main_file.write('  iso_target_path \t\t\t\t\t= "${var.iso_directory' + '}/${var.iso_file' + '}"\n')
+                    main_file.write(
+                        '  iso_target_path               = "${var.iso_directory'
+                        '}/${var.iso_file' + '}"\n'
+                    )
                 elif var == 'iso_link':
                     main_file.write(
                         '  iso_urls = [\n'
@@ -367,8 +371,8 @@ class Packer(Builder):
                     )
                 elif var == 'ssh_password':
                     main_file.write(
-                        '  shutdown_command \t\t\t\t\t= "echo ' + "'" 
-                        '  ${var.ssh_password' + '}' + "'" + ' | sudo -E -S poweroff"\n'
+                        f'  shutdown_command              = "echo ' + "'" 
+                        '${var.ssh_password' + '}' + "'" + ' | sudo -E -S poweroff"\n'
                     )
                     main_file.write(generate_packer_variable(var))
                 else:
@@ -378,18 +382,18 @@ class Packer(Builder):
                 '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--rtcuseutc", "off"],\n'
                 '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--vram", "128"]\n'
                 '  ]\n'
-                '  virtualbox_version_file \t\t\t\t\t= "/tmp/.vbox_version"\n'
+                '  virtualbox_version_file       = "/tmp/.vbox_version"\n'
             )
             main_file.write('}\n\n')
 
             main_file.write(
                 'build {\n\n'
-                '  sources \t\t\t\t\t= ["source.virtualbox-iso.vbox"]\n\n'
+                '  sources = ["source.virtualbox-iso.vbox"]\n\n'
                 '  provisioner "shell" {\n'
-                '    binary            = false\n'
-                '    execute_command   = "echo ' + "'${" + "var.ssh_password}" + "' | " + '{' + '{' + ' .Vars ' + '}' + '} sudo -S -E bash ' + "'" +  '{' + '{' + ' .Path ' + '}' + '}' + "'" + '"\n'
-                '    expect_disconnect = true\n'
-                '    valid_exit_codes  = [0, 2]\n'
+                '    binary               = false\n'
+                '    execute_command      = "echo ' + "'${" + "var.ssh_password}" + "' | " + '{' + '{' + ' .Vars ' + '}' + '} sudo -S -E bash ' + "'" +  '{' + '{' + ' .Path ' + '}' + '}' + "'" + '"\n'
+                '    expect_disconnect    = true\n'
+                '    valid_exit_codes     = [0, 2]\n'
                 '    scripts = [\n'
             )
 

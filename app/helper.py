@@ -26,7 +26,10 @@ def get_packer_provision_for_error():
 
 
 def generate_packer_variable(variable: str):
-    return f'  {variable}\t\t\t\t\t= ' + '"' + "${" + f'var.{variable}' + "}" + '"\n'
+    number = 30
+    chars = len(variable)
+    space = (number - chars) * ' '
+    return f'  {variable}{space}= ' + '"' + "${" + f'var.{variable}' + "}" + '"\n'
 
 
 def replace_text_in_file(search_phrase, replace_with, file_path):
