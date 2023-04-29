@@ -8,10 +8,6 @@
       "description":"Memory value for the machine in MegaByte",
       "default":"8192"
     },
-    "gfx_vram_size":{
-      "description":"Memory value for the VGA in MegaByte",
-      "default":"128"
-    },
     "disk_size":{
       "description":"Disk size of the machine in MegaByte",
       "default":"15000"
@@ -76,10 +72,6 @@
       "description":"",
       "default":false
     },
-    "user_data_location":{
-      "description":"",
-      "default":"user-data"
-    },
     "host_port_max":{
       "description":"",
       "default":"4444"
@@ -104,10 +96,6 @@
       "description":"Checksum of the downloaded image",
       "default":"sha256:0e79e00bf844929d40825b1f0e8634415cda195ba23bae0b041911fde4dfe018"
     },
-    "packer_cache_dir":{
-      "description":"",
-      "default":"${env(''PACKER_CACHE_DIR'')}"
-    },
     "keep_registered":{
       "description":"",
       "default":false
@@ -122,7 +110,7 @@
     },
     "ssh_timeout":{
       "description":"Wait time for installation",
-      "default":"15m"
+      "default":"16m"
     },
     "communicator":{
       "description":"Communicator program for the machine",
@@ -160,10 +148,6 @@
       "description":"",
       "default":"vagrant"
     },
-    "ssh_certificate_file":{
-      "description":"",
-      "default":""
-    },
     "ssh_port":{
       "description":"",
       "default":"22"
@@ -172,45 +156,21 @@
       "description":"",
       "default":true
     },
-    "vnc_vrdp_bind_address":{
+    "vrdp_bind_address":{
       "description":"",
       "default":"127.0.0.1"
     },
-    "vnc_vrdp_port_max":{
+    "vrdp_port_max":{
       "description":"",
       "default":"6000"
     },
-    "vnc_vrdp_port_min":{
+    "vrdp_port_min":{
       "description":"",
       "default":"5900"
     },
     "start_retry_timeout":{
       "description":"",
       "default":"5m"
-    },
-    "version":{
-      "description":"",
-      "default":"0.0.0"
-    },
-    "vagrantfile_template":{
-      "description":"",
-      "default":"vagrant.rb.j2"
-    },
-    "min_vagrant_version":{
-      "description":"",
-      "default":"2.3.0"
-    },
-    "archive_ubuntu_path":{
-      "description":"",
-      "default":"http://archive.ubuntu.com/ubuntu/dists"
-    },
-    "distro":{
-      "description":"",
-      "default":"focal"
-    },
-    "installer_image_path":{
-      "description":"",
-      "default":"main/installer-amd64/current/legacy-images/netboot"
     },
     "iso_file":{
       "description":"",
@@ -220,31 +180,11 @@
       "description":"",
       "default":""
     },
-    "iso_old_release_path_external":{
-      "description":"",
-      "default":"https://old-releases.ubuntu.com/releases/12.04"
-    },
-    "iso_new_release_path_external":{
-      "description":"",
-      "default":"https://releases.ubuntu.com/focal"
-    },
     "output_directory":{
       "description":"",
       "default":""
     },
     "iso_directory":{
-      "description":"",
-      "default":""
-    },
-    "proxy_host":{
-      "description":"",
-      "default":""
-    },
-    "proxy_port":{
-      "description":"",
-      "default":""
-    },
-    "ssh_password_crypted":{
       "description":"",
       "default":""
     }
