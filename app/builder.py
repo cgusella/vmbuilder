@@ -85,8 +85,8 @@ class Vagrant(Builder):
     def check_folder_vb_json_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
-        if self.arguments['-vb'] in get_local_virtual_boxes():
-            raise ExistenceVirtualBoxError(f'The virtualbox {self.arguments["-vb"]} already exists!')
+        if self.arguments['-vm'] in get_local_virtual_boxes():
+            raise ExistenceVirtualBoxError(f'The virtualbox {self.arguments["-vm"]} already exists!')
         if self.arguments['-j'] not in os.listdir(self.provisions_configs):
             shutil.copyfile(
                 src=f'{self.provisions_configs}/template.json',
@@ -105,7 +105,7 @@ class Vagrant(Builder):
         configs['extra_user'] = self.arguments['-u']
         configs['default_image'] = self.arguments['-i']
         configs['default_hostname'] = self.arguments['-ho']
-        configs['default_vbname'] = self.arguments['-vb']
+        configs['default_vbname'] = self.arguments['-vm']
         configs['ssh_insert_key'] = False if self.arguments['-s'] == 'password' else True
         if configs['extra_user'] == configs['default_user']:
             raise FlagError('Default user in provision file is the same as inserted user!')
@@ -247,7 +247,7 @@ class Packer(Builder):
         configs['iso_file'] = self.arguments['-if']
         configs['iso_link'] = self.arguments['-il']
         configs['iso_checksum'] = self.arguments['-cs']
-        configs['vb_name'] = self.arguments['-vb']
+        configs['vm_name'] = self.arguments['-vm']
         self.configs = configs.copy()
 
     def set_provisions(self):
@@ -285,6 +285,11 @@ class Packer(Builder):
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
+        shutil.copytree(
+            src=f'{constants.packer_http_path}/',
+            dst=f'{project_folder}/http'
+        )        
+
         if self.provisions['upload']:
             shutil.copytree(
                 src=f'{constants.upload_path}/',
@@ -293,24 +298,31 @@ class Packer(Builder):
 
     def _generate_vars_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/vars.pkr.hcl', 'w') as vars_file:
-            for var in json_file['vbox-configs']:
-                if var in {'iso_file', 'iso_link', 'iso_checksum', 'vb_name'}:
-                    json_file['vbox-configs'][var]["default"] = self.configs[var]
-                if isinstance(json_file['vbox-configs'][var]["default"], str):
+            for var in json_file:
+                if var in {'iso_file', 'iso_link', 'iso_checksum', 'vm_name'}:
+                    json_file[var]["default"] = self.configs[var]
+                if var == 'output_directory':
+                    if not json_file[var]["default"]:
+                        json_file[var]["default"] = constants.packer_builds_path
+                if var == 'iso_directory':
+                    if not json_file[var]["default"]:
+                        json_file[var]["default"] = constants.iso_path
+
+                if isinstance(json_file[var]["default"], str):
                     default_type = 'string'
                     vars_file.write(
                         f'variable "{var}" ' + '{\n'
-                        f'  description\t= "{json_file["vbox-configs"][var]["description"]}"\n'
+                        f'  description\t= "{json_file[var]["description"]}"\n'
                         f'  type\t= {default_type}\n'
-                        f'  default\t= "{json_file["vbox-configs"][var]["default"]}"\n'
+                        f'  default\t= "{json_file[var]["default"]}"\n'
                         '}\n\n'
                     )
-                elif isinstance(json_file['vbox-configs'][var]["default"], bool):
+                elif isinstance(json_file[var]["default"], bool):
                     default_type = 'bool'
-                    default_value = str(json_file["vbox-configs"][var]["default"]).lower()
+                    default_value = str(json_file[var]["default"]).lower()
                     vars_file.write(
                         f'variable "{var}" ' + '{\n'
-                        f'  description\t= "{json_file["vbox-configs"][var]["description"]}"\n'
+                        f'  description\t= "{json_file[var]["description"]}"\n'
                         f'  type\t= {default_type}\n'
                         f'  default\t= {default_value}\n'
                         '}\n\n'
@@ -319,7 +331,8 @@ class Packer(Builder):
     def provision(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
             json_provision = json.loads(provisions.read())
-        self._generate_vars_file(json_provision)
+        vbox_configs = json_provision['vbox-configs']
+        self._generate_vars_file(vbox_configs)
 
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
