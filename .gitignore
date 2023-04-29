@@ -15,3 +15,10 @@ templates/vagrant/provisions_configs/*
 !templates/vagrant/provisions_configs/template.json
 templates/packer/provisions_configs/*
 !templates/packer/provisions_configs/template.json
+builds/packer/*
+!builds/packer/README.md
+builds/vagrant/*
+!builds/vagrant/README.md
+iso/*
+!iso/README.md
+
