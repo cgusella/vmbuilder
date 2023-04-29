@@ -1,0 +1,5 @@
+<<-EOF
+  <esc><wait2>
+  install<wait1> auto=true<wait1> priority=critical<wait1> url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait1> 
+  <enter>
+  EOF
