@@ -42,7 +42,7 @@
     },
     "boot_command":{
       "description":"string",
-      "default":"<<-EOF"
+      "default":""
     },
     "boot_wait":{
       "description":"Wait time for boot",
