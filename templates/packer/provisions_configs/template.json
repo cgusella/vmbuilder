@@ -40,7 +40,7 @@
       "description":"",
       "default":"1"
     },
-    "vb_name":{
+    "vm_name":{
       "description":"",
       "default":""
     },
