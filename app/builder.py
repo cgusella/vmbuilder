@@ -7,12 +7,14 @@ from error import ExistenceProjectError
 from error import ExistenceVirtualBoxError
 from error import JsonConfigNotFoundError
 from error import FileExtesionError
+from error import NoFileToUploadError
 from helper import VAGRANT_FLAGS_TO_ERROR
 from helper import PACKER_FLAGS_TO_ERROR
 from helper import convert_argv_list_to_dict
 from helper import get_local_virtual_boxes
 from helper import replace_configs_in_vagrantfile
 from helper import generate_packer_variable
+from helper import empty_script
 import constants
 
 
@@ -142,14 +144,15 @@ class Vagrant(Builder):
 
     def _generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
-        with open(src) as src_file:
-            lines = src_file.readlines()
+        empty_file, lines = empty_script(script=src)
+        # with open(src) as src_file:
+        #     lines = src_file.readlines()
 
-        for line in lines:
-            if line in ['#!/bin/bash', '#!/bin/bash\n']:
-                lines.remove(line)
+        # for line in lines:
+        #     if line in ['#!/bin/bash', '#!/bin/bash\n']:
+        #         lines.remove(line)
 
-        empty_file = not any(lines)
+        # empty_file = not any(lines)
 
         if title.lower() in ['config'] and empty_file:
             pass
@@ -397,28 +400,69 @@ class Packer(Builder):
                 '    scripts = [\n'
             )
 
-            script = '../../../templates/programs/bash/update-upgrade.sh'
-            main_file.write(f'      "{script}",\n')
+            programs = json_file['vbox-provisions']['programs']
+            custom_scripts = json_file['vbox-provisions']['custom-scripts']
+            upload = json_file['vbox-provisions']['upload']
+            files_to_upload = json_file['vbox-provisions']['files_to_upload']
+            templates_path = '../../../templates'
+            # templates_path = constants.templates_path
+            
+            if programs['update-upgrade']:
+                script = f'{templates_path}/programs/bash/update-upgrade.sh'
+                main_file.write(f'      "{script}",\n')
+            if programs['update-upgrade-full']:
+                script = f'{templates_path}/programs/bash/update-upgrade-full.sh'
+                main_file.write(f'      "{script}",\n')
+            if programs['install']:
+                for program in programs['install']:
+                    script = f'{templates_path}/programs/{program}/install.sh'
+                    main_file.write(f'      "{script}",\n')
+                    templates_path = constants.templates_path
+                    # config_file = open(f'{templates_path}/programs/{program}/configs/config.sh')
+                    config_file = f'{templates_path}/programs/{program}/configs/config.sh'
+                    script_is_empty, _ = empty_script(config_file)
+                    if not script_is_empty:
+                        print(templates_path)
+                        script = f'{templates_path}/programs/{program}/configs/config.sh'
+                        main_file.write(f'      "{script}",\n')
+
+
+            if programs['uninstall']:
+                for program in programs['uninstall']:
+                    script = f'{templates_path}/programs/{program}/uninstall.sh'
+                    main_file.write(f'      "{script}",\n')
+            if programs['clean']:
+                script = f'{templates_path}/programs/bash/clean.sh'
+                main_file.write(f'      "{script}",\n')    
+            if custom_scripts:
+                for script in custom_scripts:
+                    script = f'{templates_path}/custom-scripts/{script}'  
+                    main_file.write(f'      "{script}",\n')    
+            if upload:
+                script = f'{templates_path}/programs/bash/prepare-for-upload.sh'
+                main_file.write(f'      "{script}",\n') 
 
             main_file.write('    ]\n')
             main_file.write(f'  {generate_packer_variable("start_retry_timeout")}')
             main_file.write('  }\n\n')
 
-            upload = json_file['vbox-provisions']['upload']
             if upload:
-                file_to_upload = "upload/configurations/bash-terminator/bashrc"
                 main_file.write(
                     '  provisioner "file" {\n'
                     '    sources = [\n'
                 )
-                main_file.write(f'      "{file_to_upload}",\n')
-                main_file.write(
-                    '    ]\n'
-                    '    destination = "/home/vagrant/upload"\n'
-                    '  }\n'
-                )
+                if files_to_upload:
+                    for file in files_to_upload:
+                        file_to_upload = f"upload/{file}"
+                        main_file.write(f'      "{file_to_upload}",\n')
+                    main_file.write(
+                        '    ]\n'
+                        '    destination = "/home/vagrant/upload"\n'
+                        '  }\n'
+                    )
+                # else:
+                #     raise NoFileToUploadError(f"You've specified upload true in {self.arguments['-j']} file but didn't specify any files to upload!")
 
-                    
 
             main_file.write('}\n')
 
