@@ -197,6 +197,7 @@
       "clean": true
     },
     "custom-scripts": [],
-    "upload": true
+    "upload": true,
+    "files_to_upload": []
   }
 }
