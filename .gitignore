@@ -21,4 +21,6 @@ builds/vagrant/*
 !builds/vagrant/README.md
 iso/*
 !iso/README.md
+logs/*
+!logs/README.md
 
