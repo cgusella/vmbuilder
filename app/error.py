@@ -37,3 +37,7 @@ class FileExtesionError(Error):
 
 class EmptyScriptError(Error):
     pass
+
+
+class NoFileToUploadError(Error):
+    pass
