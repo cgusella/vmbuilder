@@ -150,3 +150,15 @@ def convert_argv_list_to_dict():
             error_msg += f'\t{undefined_flag}\t{COMMON_FLAGS_TO_ERROR[undefined_flag]}\n'
         raise FlagError(error_msg)
     return good_arguments
+
+
+def empty_script(script: str):
+    with open(script) as script_file:
+        lines = script_file.readlines()
+    
+    for line in lines:
+        if line in ['#!/bin/bash', '#!/bin/bash\n']:
+            lines.remove(line)
+
+    empty_file = not any(lines)
+    return empty_file, lines
