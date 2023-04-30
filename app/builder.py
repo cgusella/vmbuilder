@@ -177,14 +177,14 @@ class Vagrant(Builder):
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
         if self.configs['extra_user']:
             self._generate_provision_text(
-                    src=f'{constants.programs_path}/bash/create-extra-user.sh',
+                    src=f'{constants.bash_path}/create-extra-user.sh',
                     dst=vagrantfile_path,
                     title=f"CREATE USER {self.configs['extra_user']}",
                     program=''
                 )
         if update_upgrade:
             self._generate_provision_text(
-                    src=f'{constants.programs_path}/bash/update-upgrade.sh',
+                    src=f'{constants.bash_path}/update-upgrade.sh',
                     dst=vagrantfile_path,
                     title="UPDATE and UPGRADE",
                     program='apt'
@@ -213,7 +213,7 @@ class Vagrant(Builder):
                 )
         if clean:
             self._generate_provision_text(
-                src=f'{constants.programs_path}/bash/clean.sh',
+                src=f'{constants.bash_path}/clean.sh',
                 dst=vagrantfile_path,
                 title="CLEAN apt packages",
                 program=''
@@ -316,36 +316,21 @@ class Packer(Builder):
                         lines = boot_command.read()
                     json_file[var]["default"] = lines
 
-
-                if isinstance(json_file[var]["default"], str):
-                    if var == 'boot_command':
-                        default_type = 'string'
-                        vars_file.write(
-                            f'variable "{var}" ' + '{\n'
-                            f'  description\t= "{json_file[var]["description"]}"\n'
-                            f'  type\t= {default_type}\n'
-                            f'  default\t= {json_file[var]["default"]}\n'
-                            '}\n\n'
-                        )
-                    else:                        
-                        default_type = 'string'
-                        vars_file.write(
-                            f'variable "{var}" ' + '{\n'
-                            f'  description\t= "{json_file[var]["description"]}"\n'
-                            f'  type\t= {default_type}\n'
-                            f'  default\t= "{json_file[var]["default"]}"\n'
-                            '}\n\n'
-                        )
-                elif isinstance(json_file[var]["default"], bool):
-                    default_type = 'bool'
-                    default_value = str(json_file[var]["default"]).lower()
-                    vars_file.write(
-                        f'variable "{var}" ' + '{\n'
-                        f'  description\t= "{json_file[var]["description"]}"\n'
-                        f'  type\t= {default_type}\n'
-                        f'  default\t= {default_value}\n'
-                        '}\n\n'
+                description = json_file[var]["description"]
+                variable_value = json_file[var]["default"]
+                if isinstance(variable_value, str):
+                    variable_type = 'string'
+                elif isinstance(variable_value, bool):
+                    variable_type = 'bool'
+                    variable_value = str(variable_value).lower()
+                self.write_variable_directive(
+                    variable_file=vars_file,
+                    variable_name=var,
+                    description=description,
+                    variable_type=variable_type,
+                    value=variable_value
                     )
+
     def _generate_main_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/main.pkr.hcl', 'w') as main_file:
             main_file.write(
@@ -392,80 +377,76 @@ class Packer(Builder):
             main_file.write(
                 'build {\n\n'
                 '  sources = ["source.virtualbox-iso.vbox"]\n\n'
-                '  provisioner "shell" {\n'
-                '    binary               = false\n'
-                '    execute_command      = "echo ' + "'${" + "var.ssh_password}" + "' | " + '{' + '{' + ' .Vars ' + '}' + '} sudo -S -E bash ' + "'" +  '{' + '{' + ' .Path ' + '}' + '}' + "'" + '"\n'
-                '    expect_disconnect    = true\n'
-                '    valid_exit_codes     = [0, 2]\n'
-                '    scripts = [\n'
             )
 
+            scripts = list()
             programs = json_file['vbox-provisions']['programs']
             custom_scripts = json_file['vbox-provisions']['custom-scripts']
             upload = json_file['vbox-provisions']['upload']
-            files_to_upload = json_file['vbox-provisions']['files_to_upload']
-            templates_path = '../../../templates'
-            # templates_path = constants.templates_path
+            files_to_be_uploaded = json_file['vbox-provisions']['files_to_upload']
             
             if programs['update-upgrade']:
-                script = f'{templates_path}/programs/bash/update-upgrade.sh'
-                main_file.write(f'      "{script}",\n')
+                script = f'{constants.bash_path}/update-upgrade.sh'
+                scripts.append(script)
             if programs['update-upgrade-full']:
-                script = f'{templates_path}/programs/bash/update-upgrade-full.sh'
-                main_file.write(f'      "{script}",\n')
+                script = f'{constants.bash_path}/update-upgrade-full.sh'
+                scripts.append(script)
             if programs['install']:
                 for program in programs['install']:
-                    script = f'{templates_path}/programs/{program}/install.sh'
-                    main_file.write(f'      "{script}",\n')
-                    templates_path = constants.templates_path
-                    # config_file = open(f'{templates_path}/programs/{program}/configs/config.sh')
-                    config_file = f'{templates_path}/programs/{program}/configs/config.sh'
+                    script = f'{constants.programs_path}/{program}/install.sh'
+                    scripts.append(script)
+                    config_file = f'{constants.programs_path}/{program}/configs/config.sh'
                     script_is_empty, _ = empty_script(config_file)
                     if not script_is_empty:
-                        print(templates_path)
-                        script = f'{templates_path}/programs/{program}/configs/config.sh'
-                        main_file.write(f'      "{script}",\n')
-
-
+                        scripts.append(script)
+                
             if programs['uninstall']:
                 for program in programs['uninstall']:
-                    script = f'{templates_path}/programs/{program}/uninstall.sh'
-                    main_file.write(f'      "{script}",\n')
+                    script = f'{constants.programs_path}/{program}/uninstall.sh'
+                    scripts.append(script)
             if programs['clean']:
-                script = f'{templates_path}/programs/bash/clean.sh'
-                main_file.write(f'      "{script}",\n')    
+                script = f'{constants.bash_path}/clean.sh'
+                scripts.append(script)
+
+            if upload:
+                script = f'{constants.bash_path}/prepare-for-upload.sh'
+                scripts.append(script)
+
+            self.provisioner_shell(scripts=scripts, main_file=main_file)
+
+            if upload and files_to_be_uploaded:
+                files_to_upload = [f"{constants.upload_path}/{file}" for file in files_to_be_uploaded]
+                self.provisioner_file(files=files_to_upload, main_file=main_file)
+            if upload and not files_to_upload:
+                print("warning! there are no files specified to upload!")
+
             if custom_scripts:
-                for script in custom_scripts:
-                    script = f'{templates_path}/custom-scripts/{script}'  
-                    main_file.write(f'      "{script}",\n')    
-            if upload:
-                script = f'{templates_path}/programs/bash/prepare-for-upload.sh'
-                main_file.write(f'      "{script}",\n') 
-
-            main_file.write('    ]\n')
-            main_file.write(f'  {generate_packer_variable("start_retry_timeout")}')
-            main_file.write('  }\n\n')
-
-            if upload:
-                main_file.write(
-                    '  provisioner "file" {\n'
-                    '    sources = [\n'
-                )
-                if files_to_upload:
-                    for file in files_to_upload:
-                        file_to_upload = f"upload/{file}"
-                        main_file.write(f'      "{file_to_upload}",\n')
-                    main_file.write(
-                        '    ]\n'
-                        '    destination = "/home/vagrant/upload"\n'
-                        '  }\n'
-                    )
-                # else:
-                #     raise NoFileToUploadError(f"You've specified upload true in {self.arguments['-j']} file but didn't specify any files to upload!")
-
+                custom_scripts = [f'{constants.custom_scripts_path}/{script}' for script in custom_scripts]
+                self.provisioner_shell(scripts=custom_scripts, main_file=main_file)
+                files_to_upload_from_scripts = list()
+                with open(script, 'r') as script_file:
+                    lines = script_file.readlines()
+                for line in lines:
+                    if line:
+                        if line.startswith('cp '):
+                            file = line.strip().split()[1].split('/')[-1]
+                            files_to_upload_from_scripts.append(file)
+                if files_to_be_uploaded:
+                    extra_upload_files = list()
+                    for file in files_to_be_uploaded:
+                        if file not in files_to_upload_from_scripts:
+                            extra_upload_files.append(file)
+                    if extra_upload_files:
+                        print(f'The files [{" ,".join(extra_upload_files)}] are uploaded but not used!')
+                        missing_upload_files = list()
+                    for file in files_to_upload_from_scripts:
+                        if file not in files_to_be_uploaded:
+                            missing_upload_files.append(file)
+                    if missing_upload_files:
+                        print(f'The files [{" ,".join(missing_upload_files)}] are needed but not uploaded!')
+                        exit()
 
             main_file.write('}\n')
-
 
     def provision(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
@@ -474,5 +455,52 @@ class Packer(Builder):
         self._generate_vars_file(vbox_configs)
         self._generate_main_file(json_provision)
 
+    def provisioner_shell(self, scripts ,main_file):
+        main_file.write(
+        '  provisioner "shell" {\n'
+        '    binary               = false\n'
+        '    execute_command      = "echo ' + "'${" + "var.ssh_password}" + "' | " + '{' + '{' + ' .Vars ' + '}' + '} sudo -S -E bash ' + "'" +  '{' + '{' + ' .Path ' + '}' + '}' + "'" + '"\n'
+        '    expect_disconnect    = true\n'
+        '    valid_exit_codes     = [0, 2]\n'
+        '    scripts = [\n'
+        )
+        for script in scripts:
+            main_file.write(f'      "{script}",\n')
+        main_file.write(
+            '    ]\n'
+            f'  {generate_packer_variable("start_retry_timeout")}'
+            '  }\n\n'
+        )
+
+    def provisioner_file(self, files, main_file):
+        main_file.write(
+            '  provisioner "file" {\n'
+            '    sources = [\n'
+        )
+        for file in files:
+            main_file.write(f'      "{file}",\n')
+        main_file.write(
+            '    ]\n'
+            '    destination = "/vagrant/upload/"\n'
+            '  }\n\n'
+        )
+
+    def write_variable_directive(self, variable_file, variable_name, description, variable_type, value):
+        variable_file.write(
+            f'variable "{variable_name}" ' + '{\n'
+            f'  description\t= "{description}"\n'
+            f'  type\t= {variable_type}\n'
+        )
+        if variable_type == 'bool' or variable_name == 'boot_command':
+            variable_file.write(
+                f'  default\t= {value}\n'
+            )
+        else:
+            variable_file.write(
+                f'  default\t= "{value}"\n'
+            )
+        variable_file.write(
+            '}\n\n'
+        )
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
