@@ -1,5 +1,6 @@
 import abc
 import os
+import logging
 import shutil
 import json
 from error import FlagError
@@ -121,7 +122,6 @@ class Vagrant(Builder):
         self.provisions = provisions.copy()
 
     def create_project_folder(self):
-        self.set_provisions()
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
@@ -145,14 +145,6 @@ class Vagrant(Builder):
     def _generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
         empty_file, lines = empty_script(script=src)
-        # with open(src) as src_file:
-        #     lines = src_file.readlines()
-
-        # for line in lines:
-        #     if line in ['#!/bin/bash', '#!/bin/bash\n']:
-        #         lines.remove(line)
-
-        # empty_file = not any(lines)
 
         if title.lower() in ['config'] and empty_file:
             pass
@@ -292,13 +284,7 @@ class Packer(Builder):
         shutil.copytree(
             src=f'{constants.packer_http_path}/',
             dst=f'{project_folder}/http'
-        )        
-
-        if self.provisions['upload']:
-            shutil.copytree(
-                src=f'{constants.upload_path}/',
-                dst=f'{project_folder}/upload'
-            )
+        )
 
     def _generate_vars_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/vars.pkr.hcl', 'w') as vars_file:
@@ -334,7 +320,7 @@ class Packer(Builder):
     def _generate_main_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/main.pkr.hcl', 'w') as main_file:
             main_file.write(
-                'locals {\n' 
+                'locals {\n'
                 f'{generate_packer_variable("output_directory")}'
                 '}\n\n'
             )
@@ -383,8 +369,8 @@ class Packer(Builder):
             programs = json_file['vbox-provisions']['programs']
             custom_scripts = json_file['vbox-provisions']['custom-scripts']
             upload = json_file['vbox-provisions']['upload']
-            files_to_be_uploaded = json_file['vbox-provisions']['files_to_upload']
-            
+            files_to_upload_from_json = json_file['vbox-provisions']['files_to_upload']
+
             if programs['update-upgrade']:
                 script = f'{constants.bash_path}/update-upgrade.sh'
                 scripts.append(script)
@@ -414,8 +400,8 @@ class Packer(Builder):
 
             self.provisioner_shell(scripts=scripts, main_file=main_file)
 
-            if upload and files_to_be_uploaded:
-                files_to_upload = [f"{constants.upload_path}/{file}" for file in files_to_be_uploaded]
+            if upload and files_to_upload_from_json:
+                files_to_upload = [f"{constants.upload_path}/{file}" for file in files_to_upload_from_json]
                 self.provisioner_file(files=files_to_upload, main_file=main_file)
             if upload and not files_to_upload:
                 print("warning! there are no files specified to upload!")
@@ -424,27 +410,27 @@ class Packer(Builder):
                 custom_scripts = [f'{constants.custom_scripts_path}/{script}' for script in custom_scripts]
                 self.provisioner_shell(scripts=custom_scripts, main_file=main_file)
                 files_to_upload_from_scripts = list()
-                with open(script, 'r') as script_file:
-                    lines = script_file.readlines()
-                for line in lines:
-                    if line:
-                        if line.startswith('cp '):
-                            file = line.strip().split()[1].split('/')[-1]
-                            files_to_upload_from_scripts.append(file)
-                if files_to_be_uploaded:
+                for custom_script in custom_scripts:
+                    with open(custom_script, 'r') as script_file:
+                        lines = script_file.readlines()
+                    for line in lines:
+                        if line:
+                            if line.startswith('cp '):
+                                file = line.strip().split()[1].split('/')[-1]
+                                files_to_upload_from_scripts.append(file)
+                if files_to_upload_from_json:
                     extra_upload_files = list()
-                    for file in files_to_be_uploaded:
+                    for file in files_to_upload_from_json:
                         if file not in files_to_upload_from_scripts:
                             extra_upload_files.append(file)
                     if extra_upload_files:
-                        print(f'The files [{" ,".join(extra_upload_files)}] are uploaded but not used!')
-                        missing_upload_files = list()
+                        logging.warning(f'The files [{" ,".join(extra_upload_files)}] are uploaded but not used!')
+                    missing_upload_files = list()
                     for file in files_to_upload_from_scripts:
-                        if file not in files_to_be_uploaded:
+                        if file not in files_to_upload_from_json:
                             missing_upload_files.append(file)
                     if missing_upload_files:
-                        print(f'The files [{" ,".join(missing_upload_files)}] are needed but not uploaded!')
-                        exit()
+                        raise NoFileToUploadError(f'The files [{" ,".join(missing_upload_files)}] are needed but not uploaded!')
 
             main_file.write('}\n')
 
@@ -502,5 +488,6 @@ class Packer(Builder):
         variable_file.write(
             '}\n\n'
         )
+
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
