@@ -7,6 +7,7 @@ from error import ScriptNotFoundError
 from error import EmptyScriptError
 from error import NoFileToUploadError
 from helper import get_upload_files_from_scripts
+from helper import empty_script
 from newprogram import make_program_folder
 
 
@@ -69,11 +70,12 @@ class ProvisionConfigReader:
     def check_install_scripts_emptyness(self):
         empty_scripts = list()
         for program in self.provisions['programs']['install']:
-            with open(f'{constants.programs_path}/{program}/install.sh') as install_script:
-                lines = set(install_script.readlines())
+            # with open(f'{constants.programs_path}/{program}/install.sh') as install_script:
+            #     lines = set(install_script.readlines())
 
-            lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
-            empty_file = not any(lines)
+            # lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
+            # empty_file = not any(lines)
+            empty_file, _ = empty_script(f'{constants.programs_path}/{program}/install.sh')
 
             if empty_file:
                 empty_scripts.append(program)
@@ -84,17 +86,18 @@ class ProvisionConfigReader:
     def check_uninstall_scripts_emptyness(self):
         empty_scripts = list()
         for program in self.provisions['programs']['uninstall']:
-            with open(f'{constants.programs_path}/{program}/uninstall.sh') as uninstall_script:
-                lines = set(uninstall_script.readlines())
+            # with open(f'{constants.programs_path}/{program}/uninstall.sh') as uninstall_script:
+            #     lines = set(uninstall_script.readlines())
 
-            lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
-            empty_file = not any(lines)
+            # lines = lines.difference(set(['#!/bin/bash', '#!/bin/bash\n']))
+            # empty_file = not any(lines)
+            empty_file, _ = empty_script(f'{constants.programs_path}/{program}/uninstall.sh')
 
             if empty_file:
                 empty_scripts.append(program)
 
         if empty_scripts:
-            raise EmptyScriptError(f'The script uninstall.sh is empty for programs {", ".join(empty_scripts)}')
+            raise EmptyScriptError(f'The script "uninstall.sh" is empty for programs {", ".join(empty_scripts)}')
 
     def check_upload_files_existence(self):
         if self.provisions['upload']:
@@ -111,27 +114,37 @@ class ProvisionConfigReader:
                     missing_files_to_upload.append(file)
             if missing_files_to_upload:
                 raise NoFileToUploadError(
-                    'The missing files to upload are '
+                    'The following files are missing from upload folder:\n'
                     f'{", ".join(missing_files_to_upload)}'
                 )
 
     def check_script_dependency_from_file_to_upload(self):
-        upload_files = get_upload_files_from_scripts(
+        upload_files_scripts = get_upload_files_from_scripts(
             self.provisions['custom-scripts']
         )
         missing_files_to_upload = list()
-        for file in upload_files:
+        for file in upload_files_scripts:
             if file not in self.provisions['files-to-upload']:
                 missing_files_to_upload.append(file)
-        if upload_files and not self.provisions['upload']:
+        if upload_files_scripts and not self.provisions['upload']:
+            if len(missing_files_to_upload) > 1:
+                message_1 = 'The following files are requested by the scripts.\n'
+            else:
+                message_1 = 'The following file is requested by the script.\n'
+
+            message_2 = '\n'.join(['\t--> ' + file + ' by\t ' + upload_files_scripts[file] for file in missing_files_to_upload])
+            message_3 = f'\nBe sure to set "upload" as true in the json file\n'
             raise NoFileToUploadError(
-                f'Files {", ".join(upload_files)} '
-                'are requested by scripts. Be sure to set "upload" as true '
-                'in json file'
+                message_1 + message_2 + message_3
             )
         if missing_files_to_upload:
+            if len(missing_files_to_upload) > 1:
+                message_1 = 'The following files are requested by the scripts.\n'
+            else:
+                message_1 = 'The following file is requested by the script.\n'
+
+            message_2 = '\n'.join(['\t--> ' + file + ' by\t ' + upload_files_scripts[file] for file in missing_files_to_upload])
+            message_3 = f'\nBe sure to include them into "files-to-upload" in the json file\n'
             raise NoFileToUploadError(
-                f'Files {", ".join(missing_files_to_upload)} '
-                'are requested by scripts. Be sure to include them '
-                'into "files-to-upload"'
+                message_1 + message_2 + message_3
             )

@@ -1,17 +1,14 @@
 import constants
 import json
-import logging
 import os
 import shutil
 from builder.builder import Builder
 from error import (
     FlagError,
     ExistenceProjectError,
-    NoFileToUploadError
 )
 from helper import (
     convert_argv_list_to_dict,
-    get_upload_files_from_scripts,
     PACKER_FLAGS_TO_ERROR,
 )
 

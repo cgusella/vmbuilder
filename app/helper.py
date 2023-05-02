@@ -35,17 +35,6 @@ def get_preseed_files_for_error():
     )
 
 
-def replace_text_in_file(search_phrase, replace_with, file_path):
-    replaced_content = ""
-    with open(file_path, "r") as file:
-        for line in file:
-            line = line.strip()
-            new_line = line.replace(search_phrase, replace_with)
-            replaced_content = replaced_content + new_line + '\n'
-    with open(file_path, "w") as new_file:
-        new_file.write(replaced_content)
-
-
 def get_local_vagrant_boxes():
     bash_command = "vagrant box list"
     process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
@@ -82,6 +71,17 @@ PACKER_FLAGS_TO_ERROR = {
     '-pf': f'[PRESEED FILE]\n{get_preseed_files_for_error()}'
 }
 COMMON_VALID_FLAGS = ('-n', '-vm', '-t')
+
+
+def replace_text_in_file(search_phrase, replace_with, file_path):
+    replaced_content = ""
+    with open(file_path, "r") as file:
+        for line in file:
+            line = line.strip()
+            new_line = line.replace(search_phrase, replace_with)
+            replaced_content = replaced_content + new_line + '\n'
+    with open(file_path, "w") as new_file:
+        new_file.write(replaced_content)
 
 
 def get_local_virtual_boxes():
@@ -169,13 +169,13 @@ def empty_script(script: str):
 
 
 def get_upload_files_from_scripts(scripts: list):
-    upload_files = list()
+    upload_files_scripts = dict()
     for script in scripts:
         with open(f'{constants.custom_scripts_path}/{script}', 'r') as file:
             lines = file.readlines()
         for line in lines:
             if line.startswith('cp '):
-                upload_files.append(
+                upload_files_scripts[
                     line.strip().split()[1].split('/')[-1]
-                )
-    return upload_files
+                ] = script
+    return upload_files_scripts
