@@ -1,7 +1,8 @@
 #!/usr/bin/python3
+import sys
 from builder import get_project_class
 from provisionsreader import ProvisionConfigReader
-import sys
+from error import NoFileToUploadError
 
 sys.tracebacklimit = 0
 
@@ -21,7 +22,7 @@ def main():
     try:
         builder.create_project_folder()
         builder.provision()
-    except (FileNotFoundError, KeyError):
+    except (FileNotFoundError, KeyError, NoFileToUploadError):
         builder.delete_project()
 
 
