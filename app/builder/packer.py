@@ -133,28 +133,28 @@ class Packer(Builder):
                     main_file.write(f'  {var}{space}= [ var.{var} ]\n')
                 elif var == 'iso_directory':
                     main_file.write(
-                        '  iso_target_path               = "${var.iso_directory'
-                        '}/${var.iso_file' + '}"\n'
+                        '  iso_target_path               = '
+                        '"${var.iso_directory}/${var.iso_file}"\n'
                     )
                 elif var == 'iso_link':
                     main_file.write(
                         '  iso_urls = [\n'
-                        '    "${var.output_directory' + '}/${var.iso_file' + '}",\n'
-                        '    "${var.iso_link' + '}",\n'
+                        '    "${var.output_directory}/${var.iso_file}",\n'
+                        '    "${var.iso_link}",\n'
                         '  ]\n'
                     )
                 elif var == 'ssh_password':
                     main_file.write(
-                        f'  shutdown_command              = "echo ' + "'" 
-                        '${var.ssh_password' + '}' + "'" + ' | sudo -E -S poweroff"\n'
+                        '  shutdown_command              = "echo '
+                        '\'${var.ssh_password}\' | sudo -E -S poweroff"\n'
                     )
                     main_file.write(self._generate_packer_variable(var))
                 else:
                     main_file.write(self._generate_packer_variable(var))
             main_file.write(
                 '  vboxmanage = [\n'
-                '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--rtcuseutc", "off"],\n'
-                '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--vram", "128"]\n'
+                '      ["modifyvm", "{{ .Name }}", "--rtcuseutc", "off"],\n'
+                '      ["modifyvm", "{{ .Name }}", "--vram", "128"]\n'
                 '  ]\n'
                 '  virtualbox_version_file       = "/tmp/.vbox_version"\n'
             )
@@ -241,14 +241,14 @@ class Packer(Builder):
         self._generate_vars_file(vbox_configs)
         self._generate_main_file(json_provision)
 
-    def provisioner_shell(self, scripts ,main_file):
+    def provisioner_shell(self, scripts, main_file):
         main_file.write(
-        '  provisioner "shell" {\n'
-        '    binary               = false\n'
-        '    execute_command      = "echo ' + "'${" + "var.ssh_password}" + "' | " + '{' + '{' + ' .Vars ' + '}' + '} sudo -S -E bash ' + "'" +  '{' + '{' + ' .Path ' + '}' + '}' + "'" + '"\n'
-        '    expect_disconnect    = true\n'
-        '    valid_exit_codes     = [0, 2]\n'
-        '    scripts = [\n'
+            '  provisioner "shell" {\n'
+            '    binary               = false\n'
+            '    execute_command      = "echo \'${var.ssh_password}\' | {{ .Vars }} sudo -S -E bash \'{{ .Path }}\'\"\n'
+            '    expect_disconnect    = true\n'
+            '    valid_exit_codes     = [0, 2]\n'
+            '    scripts = [\n'
         )
         for script in scripts:
             main_file.write(f'      "{script}",\n')
