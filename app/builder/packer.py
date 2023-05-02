@@ -11,7 +11,7 @@ from error import (
 )
 from helper import (
     convert_argv_list_to_dict,
-    empty_script,
+    get_upload_files_from_scripts,
     PACKER_FLAGS_TO_ERROR,
 )
 
@@ -79,6 +79,25 @@ class Packer(Builder):
         chars = len(variable)
         space = (number - chars) * ' '
         return f'  {variable}{space}= \"${{var.{variable}}}\"\n'
+
+    def _get_provisions_scripts(self):
+        scripts = list()
+        for key in self.provisions['programs']:
+            value = self.provisions['programs'][key]
+            if value:
+                if isinstance(value, bool):
+                    script = f'{constants.bash_path}/{key}.sh'
+                    scripts.append(script)
+                elif isinstance(value, list):
+                    for program in value:
+                        scripts.append(
+                            f'{constants.programs_path}/{program}/{key}.sh'
+                        )
+        if self.provisions['upload']:
+            scripts.append(
+                f'{constants.bash_path}/prepare-for-upload.sh'
+            )
+        return scripts
 
     def _generate_vars_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/vars.pkr.hcl', 'w') as vars_file:
@@ -165,73 +184,28 @@ class Packer(Builder):
                 '  sources = ["source.virtualbox-iso.vbox"]\n\n'
             )
 
-            scripts = list()
-            programs = json_file['vbox-provisions']['programs']
-            custom_scripts = json_file['vbox-provisions']['custom-scripts']
-            upload = json_file['vbox-provisions']['upload']
-            files_to_upload_from_json = json_file['vbox-provisions']['files_to_upload']
+            provision_scripts = self._get_provisions_scripts()
 
-            if programs['update-upgrade']:
-                script = f'{constants.bash_path}/update-upgrade.sh'
-                scripts.append(script)
-            if programs['update-upgrade-full']:
-                script = f'{constants.bash_path}/update-upgrade-full.sh'
-                scripts.append(script)
-            if programs['install']:
-                for program in programs['install']:
-                    script = f'{constants.programs_path}/{program}/install.sh'
-                    scripts.append(script)
-                    config_file = f'{constants.programs_path}/{program}/configs/config.sh'
-                    script_is_empty, _ = empty_script(config_file)
-                    if not script_is_empty:
-                        scripts.append(script)
-
-            if programs['uninstall']:
-                for program in programs['uninstall']:
-                    script = f'{constants.programs_path}/{program}/uninstall.sh'
-                    scripts.append(script)
-            if programs['clean']:
-                script = f'{constants.bash_path}/clean.sh'
-                scripts.append(script)
-
-            if upload:
-                script = f'{constants.bash_path}/prepare-for-upload.sh'
-                scripts.append(script)
-
-            self.provisioner_shell(scripts=scripts, main_file=main_file)
-
-            if upload and files_to_upload_from_json:
-                files_to_upload = [f"{constants.upload_path}/{file}" for file in files_to_upload_from_json]
-                self.provisioner_file(files=files_to_upload, main_file=main_file)
-            if upload and not files_to_upload:
-                print("warning! there are no files specified to upload!")
-
-            if custom_scripts:
-                custom_scripts = [f'{constants.custom_scripts_path}/{script}' for script in custom_scripts]
-                self.provisioner_shell(scripts=custom_scripts, main_file=main_file)
-                files_to_upload_from_scripts = list()
-                for custom_script in custom_scripts:
-                    with open(custom_script, 'r') as script_file:
-                        lines = script_file.readlines()
-                    for line in lines:
-                        if line:
-                            if line.startswith('cp '):
-                                file = line.strip().split()[1].split('/')[-1]
-                                files_to_upload_from_scripts.append(file)
-                if files_to_upload_from_json:
-                    extra_upload_files = list()
-                    for file in files_to_upload_from_json:
-                        if file not in files_to_upload_from_scripts:
-                            extra_upload_files.append(file)
-                    if extra_upload_files:
-                        logging.warning(f'The files [{" ,".join(extra_upload_files)}] are uploaded but not used!')
-                    missing_upload_files = list()
-                    for file in files_to_upload_from_scripts:
-                        if file not in files_to_upload_from_json:
-                            missing_upload_files.append(file)
-                    if missing_upload_files:
-                        raise NoFileToUploadError(f'The files [{" ,".join(missing_upload_files)}] are needed but not uploaded!')
-
+            self.provisioner_shell(
+                scripts=provision_scripts,
+                main_file=main_file
+            )
+            if self.provisions['upload']:
+                upload_files = list()
+                for file in self.provisions['files-to-upload']:
+                    upload_files.append(
+                        f'{constants.upload_path}/{file}'
+                    )
+                self.provisioner_file(upload_files, main_file)
+            if self.provisions['custom-scripts']:
+                custom_scripts = [
+                    f'{constants.custom_scripts_path}/{script}'
+                    for script in self.provisions['custom-scripts']
+                ]
+                self.provisioner_shell(
+                    scripts=custom_scripts,
+                    main_file=main_file
+                )
             main_file.write('}\n')
 
     def provision(self):
@@ -265,9 +239,15 @@ class Packer(Builder):
         )
         for file in files:
             main_file.write(f'      "{file}",\n')
+        with open(f'{constants.bash_path}/prepare-for-upload.sh', 'r') as preparer:
+            lines = preparer.readlines()
+        for line in lines:
+            if line.startswith('mkdir '):
+                upload_folder_path = line.strip().split()[-1]
+
         main_file.write(
             '    ]\n'
-            '    destination = "/vagrant/upload/"\n'
+            f'    destination = "{upload_folder_path}"\n'
             '  }\n\n'
         )
 

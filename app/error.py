@@ -1,10 +1,6 @@
-import logging
-
-
 class Error(Exception):
 
     def __init__(self, msg):
-        logging.error(msg)
         self.msg = msg
 
     def __str__(self):

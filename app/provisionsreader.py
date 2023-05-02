@@ -1,11 +1,13 @@
 #!/bin/python3
+import constants
 import json
 import os
 from error import ProgramNotFoundError
 from error import ScriptNotFoundError
 from error import EmptyScriptError
+from error import NoFileToUploadError
+from helper import get_upload_files_from_scripts
 from newprogram import make_program_folder
-import constants
 
 
 class ProvisionConfigReader:
@@ -93,3 +95,43 @@ class ProvisionConfigReader:
 
         if empty_scripts:
             raise EmptyScriptError(f'The script uninstall.sh is empty for programs {", ".join(empty_scripts)}')
+
+    def check_upload_files_existence(self):
+        if self.provisions['upload']:
+            if not self.provisions['files-to-upload']:
+                raise NoFileToUploadError(
+                    'There is no file to upload. Be sure '
+                    'to set "upload" to false if you do not '
+                    'want to upload any file.'
+                )
+            files_to_upload = self.provisions['files-to-upload']
+            missing_files_to_upload = list()
+            for file in files_to_upload:
+                if file not in os.listdir(constants.upload_path):
+                    missing_files_to_upload.append(file)
+            if missing_files_to_upload:
+                raise NoFileToUploadError(
+                    'The missing files to upload are '
+                    f'{", ".join(missing_files_to_upload)}'
+                )
+
+    def check_script_dependency_from_file_to_upload(self):
+        upload_files = get_upload_files_from_scripts(
+            self.provisions['custom-scripts']
+        )
+        missing_files_to_upload = list()
+        for file in upload_files:
+            if file not in self.provisions['files-to-upload']:
+                missing_files_to_upload.append(file)
+        if upload_files and not self.provisions['upload']:
+            raise NoFileToUploadError(
+                f'Files {", ".join(upload_files)} '
+                'are requested by scripts. Be sure to set "upload" as true '
+                'in json file'
+            )
+        if missing_files_to_upload:
+            raise NoFileToUploadError(
+                f'Files {", ".join(missing_files_to_upload)} '
+                'are requested by scripts. Be sure to include them '
+                'into "files-to-upload"'
+            )

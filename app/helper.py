@@ -166,3 +166,16 @@ def empty_script(script: str):
 
     empty_file = not any(lines)
     return empty_file, lines
+
+
+def get_upload_files_from_scripts(scripts: list):
+    upload_files = list()
+    for script in scripts:
+        with open(f'{constants.custom_scripts_path}/{script}', 'r') as file:
+            lines = file.readlines()
+        for line in lines:
+            if line.startswith('cp '):
+                upload_files.append(
+                    line.strip().split()[1].split('/')[-1]
+                )
+    return upload_files
