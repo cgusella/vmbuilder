@@ -16,15 +16,16 @@ from helper import (
 class Packer(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
-        self.machine_path: str = constants.vmbuilder_path + '/machines/packer'
+        # self.machines_path: str = constants.vmbuilder_path + '/machines/packer'
+        self.machines_path: str = constants.packer_machines_path
         self.provisions_configs = constants.packer_provs_confs_path
         self.configs: dict = dict()
         self.provisions: dict = dict()
 
     def set_configs(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
-        with open(config_provision_file_path, 'r') as provisions:
-            configs = json.loads(provisions.read())["vbox-configs"]
+        with open(config_provision_file_path, 'r') as file:
+            configs = json.loads(file.read())["vbox-configs"]
         configs['iso_file'] = self.arguments['-if']
         configs['iso_link'] = self.arguments['-il']
         configs['iso_checksum'] = self.arguments['-cs']
@@ -33,8 +34,8 @@ class Packer(Builder):
 
     def set_provisions(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
-        with open(config_provision_file_path, 'r') as provisions:
-            self.provisions = json.loads(provisions.read())["vbox-provisions"].copy()
+        with open(config_provision_file_path, 'r') as file:
+            self.provisions = json.loads(file.read())["vbox-provisions"].copy()
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
@@ -59,11 +60,11 @@ class Packer(Builder):
             raise FlagError(error_msg)
 
     def check_folder_vb_json_existence(self):
-        if self.arguments['-n'] in os.listdir(self.machine_path):
-            raise ExistenceProjectError("[ERROR] Project already exists!")
+        if self.arguments['-n'] in os.listdir(self.machines_path):
+            raise ExistenceProjectError(f"Project {self.arguments['-n']} already exists!")
 
     def create_project_folder(self):
-        project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
+        project_folder = f'{self.machines_path}/{self.arguments["-n"]}'
         os.mkdir(project_folder)
 
         shutil.copytree(
@@ -267,4 +268,4 @@ class Packer(Builder):
         )
 
     def delete_project(self):
-        shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
+        shutil.rmtree(f'{self.machines_path}/{self.arguments["-n"]}')

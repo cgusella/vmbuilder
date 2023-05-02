@@ -2,12 +2,16 @@
 import constants
 import json
 import os
-from error import ProgramNotFoundError
-from error import ScriptNotFoundError
-from error import EmptyScriptError
-from error import NoFileToUploadError
-from helper import get_upload_files_from_scripts
-from helper import empty_script
+from error import (
+    ProgramNotFoundError,
+    ScriptNotFoundError,
+    EmptyScriptError,
+    NoFileToUploadError
+)
+from helper import (
+    get_upload_files_from_scripts,
+    empty_script
+)
 from newprogram import make_program_folder
 
 
@@ -49,9 +53,15 @@ class ProvisionConfigReader:
                 stop = True
         if stop:
             programs = not_found_install_programs[:] + not_found_uninstall_programs[:]
+            if len(programs) > 1:
+                s = 's '
+                are = 'are '
+            else:
+                s = ' '
+                are = 'is '
             raise ProgramNotFoundError(
-                f'The programs {", ".join(programs)} '
-                'are created at /templates/programs folder.\nFill the '
+                f'The following program{s}{", ".join(programs)} '
+                f'{are} created at /templates/programs folder.\nFill the '
                 'appropriate files [install.sh, uninstall.sh, config.sh] '
                 'and come back then!'
             )
@@ -65,7 +75,11 @@ class ProvisionConfigReader:
                     not_found_scripts.append(script)
 
             if not_found_scripts:
-                raise ScriptNotFoundError(f'Scripts {", ".join(not_found_scripts)} not found!')
+                if len(not_found_scripts) > 1:
+                    s = 's '
+                else:
+                    s = ' '
+                raise ScriptNotFoundError(f'Custom script{s}{", ".join(not_found_scripts)} not found!')
 
     def check_install_scripts_emptyness(self):
         empty_scripts = list()
@@ -81,7 +95,11 @@ class ProvisionConfigReader:
                 empty_scripts.append(program)
 
         if empty_scripts:
-            raise EmptyScriptError(f'The script install.sh is empty for programs {", ".join(empty_scripts)}')
+            if len(empty_scripts) > 1:
+                s = 's '
+            else:
+                s = ' '
+            raise EmptyScriptError(f'The script install.sh is empty for program{s}{", ".join(empty_scripts)}')
 
     def check_uninstall_scripts_emptyness(self):
         empty_scripts = list()
