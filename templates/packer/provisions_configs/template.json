@@ -192,12 +192,13 @@
   "vbox-provisions": {
     "programs": {
       "update-upgrade": true,
+      "update-upgrade-full": true,
       "install": [],
       "uninstall": [],
       "clean": true
     },
     "custom-scripts": [],
-    "upload": true,
+    "upload": false,
     "files_to_upload": []
   }
 }
