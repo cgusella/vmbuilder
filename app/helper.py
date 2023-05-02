@@ -25,6 +25,16 @@ def get_packer_provision_for_error():
     )
 
 
+def get_preseed_files_for_error():
+    return '\n'.join(
+        [
+            '\t\t\t\t--> ' + file for file in os.listdir(
+                constants.packer_http_path
+            ) if file.startswith('preseed')
+        ]
+    )
+
+
 def replace_text_in_file(search_phrase, replace_with, file_path):
     replaced_content = ""
     with open(file_path, "r") as file:
@@ -68,7 +78,8 @@ PACKER_FLAGS_TO_ERROR = {
     '-il': '[ISO LINK]',
     '-if': '[ISO FILE]',
     '-cs': '[CHECKSUM]',
-    '-j': f'[PACKER CONFIG FILE]\n{get_packer_provision_for_error()}'
+    '-j': f'[PACKER CONFIG FILE]\n{get_packer_provision_for_error()}',
+    '-pf': f'[PRESEED FILE]\n{get_preseed_files_for_error()}'
 }
 COMMON_VALID_FLAGS = ('-n', '-vm', '-t')
 

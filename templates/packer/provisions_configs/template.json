@@ -1,5 +1,7 @@
 {
   "vbox-configs": {
+    "default_user": "vagrant",
+    "default_pass": "vagrant",
     "cpus":{
       "description":"Number of CPU cores for the machine",
       "default":"2"

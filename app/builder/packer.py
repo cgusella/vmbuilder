@@ -83,6 +83,8 @@ class Packer(Builder):
     def _generate_vars_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/vars.pkr.hcl', 'w') as vars_file:
             for var in json_file:
+                if not isinstance(json_file[var], dict):
+                    continue
                 if var in {'iso_file', 'iso_link', 'iso_checksum', 'vm_name'}:
                     json_file[var]["default"] = self.configs[var]
                 if var == 'output_directory':
@@ -93,8 +95,10 @@ class Packer(Builder):
                         json_file[var]["default"] = constants.iso_path
                 if var == 'boot_command':
                     with open(f'{constants.packer_http_path}/boot_command.txt') as boot_command:
-                        lines = boot_command.read()
-                    json_file[var]["default"] = lines
+                        lines = boot_command.readlines()
+                    for count, line in enumerate(lines):
+                        lines[count] = line.replace('preseed-file', self.arguments['-pf'])
+                    json_file[var]["default"] = ''.join(lines)
 
                 description = json_file[var]["description"]
                 variable_value = json_file[var]["default"]
@@ -120,6 +124,8 @@ class Packer(Builder):
             )
             main_file.write('source "virtualbox-iso" "vbox" {\n')
             for var in json_file['vbox-configs']:
+                if not isinstance(json_file['vbox-configs'][var], dict):
+                    continue
                 space = (30 - len(var)) * ' '
                 if var in ['start_retry_timeout', 'iso_file']:
                     continue
