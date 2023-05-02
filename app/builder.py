@@ -14,7 +14,6 @@ from helper import PACKER_FLAGS_TO_ERROR
 from helper import convert_argv_list_to_dict
 from helper import get_local_virtual_boxes
 from helper import replace_configs_in_vagrantfile
-from helper import generate_packer_variable
 from helper import empty_script
 import constants
 
@@ -286,6 +285,12 @@ class Packer(Builder):
             dst=f'{project_folder}/http'
         )
 
+    def _generate_packer_variable(self, variable: str):
+        number = 30
+        chars = len(variable)
+        space = (number - chars) * ' '
+        return f'  {variable}{space}= \"${{var.{variable}}}\"\n'
+
     def _generate_vars_file(self, json_file: dict):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/vars.pkr.hcl', 'w') as vars_file:
             for var in json_file:
@@ -321,7 +326,7 @@ class Packer(Builder):
         with open(f'{constants.packer_machines_path}/{self.arguments["-n"]}/main.pkr.hcl', 'w') as main_file:
             main_file.write(
                 'locals {\n'
-                f'{generate_packer_variable("output_directory")}'
+                f'{self._generate_packer_variable("output_directory")}'
                 '}\n\n'
             )
             main_file.write('source "virtualbox-iso" "vbox" {\n')
@@ -348,9 +353,9 @@ class Packer(Builder):
                         f'  shutdown_command              = "echo ' + "'" 
                         '${var.ssh_password' + '}' + "'" + ' | sudo -E -S poweroff"\n'
                     )
-                    main_file.write(generate_packer_variable(var))
+                    main_file.write(self._generate_packer_variable(var))
                 else:
-                    main_file.write(generate_packer_variable(var))
+                    main_file.write(self._generate_packer_variable(var))
             main_file.write(
                 '  vboxmanage = [\n'
                 '    ["modifyvm", "' + '{' + '{' + ' .Name ' + '}' + '}", "--rtcuseutc", "off"],\n'
@@ -454,7 +459,7 @@ class Packer(Builder):
             main_file.write(f'      "{script}",\n')
         main_file.write(
             '    ]\n'
-            f'  {generate_packer_variable("start_retry_timeout")}'
+            f'  {self._generate_packer_variable("start_retry_timeout")}'
             '  }\n\n'
         )
 

@@ -25,13 +25,6 @@ def get_packer_provision_for_error():
     )
 
 
-def generate_packer_variable(variable: str):
-    number = 30
-    chars = len(variable)
-    space = (number - chars) * ' '
-    return f'  {variable}{space}= ' + '"' + "${" + f'var.{variable}' + "}" + '"\n'
-
-
 def replace_text_in_file(search_phrase, replace_with, file_path):
     replaced_content = ""
     with open(file_path, "r") as file:
@@ -155,7 +148,7 @@ def convert_argv_list_to_dict():
 def empty_script(script: str):
     with open(script) as script_file:
         lines = script_file.readlines()
-    
+
     for line in lines:
         if line in ['#!/bin/bash', '#!/bin/bash\n']:
             lines.remove(line)
