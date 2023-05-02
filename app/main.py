@@ -1,10 +1,25 @@
 #!/usr/bin/python3
 import sys
-from builder import get_project_class
 from provisionsreader import ProvisionConfigReader
-from error import NoFileToUploadError
-
+from error import (
+    NoFileToUploadError,
+    FlagError,
+)
+from helper import convert_argv_list_to_dict
+from builder.packer import Packer
+from builder.vagrant import Vagrant
 sys.tracebacklimit = 0
+
+
+def get_project_class():
+    arguments = convert_argv_list_to_dict()
+    project_type = arguments['-t']
+    if project_type == 'vagrant':
+        return Vagrant()
+    if project_type == 'packer':
+        return Packer()
+    else:
+        raise FlagError("Select from [packer|vagrant]")
 
 
 def main():
