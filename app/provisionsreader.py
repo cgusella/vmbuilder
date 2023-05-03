@@ -55,7 +55,7 @@ class ProvisionConfigReader:
         if programs_not_found:
             plural = ('s', 'are')
             singular = ('', 'is')
-            numerality = plural if len(programs) > 1 else singular
+            numerality = plural if len(programs_not_found) > 1 else singular
             error_msg = (
                 'The following program{} '
                 f'{", ".join(programs_not_found)} '
