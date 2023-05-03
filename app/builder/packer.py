@@ -10,6 +10,7 @@ from error import (
 from helper import (
     convert_argv_list_to_dict,
     PACKER_FLAGS_TO_ERROR,
+    replace_text_in_file
 )
 
 
@@ -61,15 +62,17 @@ class Packer(Builder):
 
     def check_folder_vb_json_existence(self):
         if self.arguments['-n'] in os.listdir(self.machines_path):
-            raise ExistenceProjectError(f"Project {self.arguments['-n']} already exists!")
+            raise ExistenceProjectError(
+                f"Project {self.arguments['-n']} already exists!"
+            )
 
     def create_project_folder(self):
         project_folder = f'{self.machines_path}/{self.arguments["-n"]}'
-        os.mkdir(project_folder)
+        os.makedirs(f'{project_folder}/http')
 
-        shutil.copytree(
-            src=f'{constants.packer_http_path}/',
-            dst=f'{project_folder}/http'
+        shutil.copyfile(
+            src=f'{constants.packer_http_path}/{self.arguments["-pf"]}',
+            dst=f'{project_folder}/http/{self.arguments["-pf"]}'
         )
 
     def _generate_packer_variable(self, variable: str):
@@ -206,12 +209,30 @@ class Packer(Builder):
                 )
             main_file.write('}\n')
 
+    def _add_user_password_preseed(self, credentials: dict):
+        project_folder = f'{self.machines_path}/{self.arguments["-n"]}'
+        replace_text_in_file(
+            search_phrase="default_user",
+            replace_with=credentials['default_user'],
+            file_path=f'{project_folder}/http/{self.arguments["-pf"]}'
+        )
+        replace_text_in_file(
+            search_phrase="default_pass",
+            replace_with=credentials['default_pass'],
+            file_path=f'{project_folder}/http/{self.arguments["-pf"]}'
+        )
+
     def provision(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
             json_provision = json.loads(provisions.read())
         vbox_configs = json_provision['vbox-configs']
         self._generate_vars_file(vbox_configs)
         self._generate_main_file(json_provision)
+        credentials = {
+            key: value for (key, value) in vbox_configs.items()
+            if key in ("default_user", "default_pass")
+        }
+        self._add_user_password_preseed(credentials)
 
     def provisioner_shell(self, scripts, main_file):
         main_file.write(
