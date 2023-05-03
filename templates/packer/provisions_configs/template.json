@@ -1,5 +1,5 @@
 {
-  "vbox-configs": {
+  "vbox_configs": {
     "default_user": "vagrant",
     "default_pass": "vagrant",
     "cpus":{
@@ -191,15 +191,15 @@
       "default":""
     }
   },
-  "vbox-provisions": {
+  "vbox_provisions": {
     "programs": {
-      "update-upgrade": true,
-      "update-upgrade-full": true,
+      "update_upgrade": true,
+      "update_upgrade_full": true,
       "install": [],
       "uninstall": [],
       "clean": true
     },
-    "custom-scripts": [],
+    "custom_scripts": [],
     "upload": false,
     "files_to_upload": []
   }
