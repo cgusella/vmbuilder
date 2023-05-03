@@ -2,6 +2,7 @@
 import constants
 import json
 import os
+import sys
 from error import (
     ProgramNotFoundError,
     ScriptNotFoundError,
@@ -23,11 +24,11 @@ class ProvisionConfigReader:
 
     def set_provisions(self):
         with open(self.file_path, 'r') as provision_config_file:
-            self.provisions = json.loads(provision_config_file.read())["vbox-provisions"]
+            self.provisions = json.loads(provision_config_file.read())["vbox_provisions"]
 
     def set_configs(self):
         with open(self.file_path, 'r') as provision_config_file:
-            self.configs = json.loads(provision_config_file.read())["vbox-configs"]
+            self.configs = json.loads(provision_config_file.read())["vbox_configs"]
 
     def check_programs_existence(self):
         programs = self.provisions["programs"]
@@ -66,7 +67,7 @@ class ProvisionConfigReader:
             raise ProgramNotFoundError(error_msg)
 
     def check_scripts_existence(self):
-        scripts = self.provisions["custom-scripts"]
+        scripts = self.provisions["custom_scripts"]
         if scripts:
             not_found_scripts = list()
             for script in scripts:
@@ -102,13 +103,13 @@ class ProvisionConfigReader:
 
     def check_upload_files_existence(self):
         if self.provisions['upload']:
-            if not self.provisions['files-to-upload']:
+            if not self.provisions['files_to_upload']:
                 raise NoFileToUploadError(
                     'There is no file to upload. Be sure '
                     'to set "upload" to false if you do not '
                     'want to upload any file.'
                 )
-            files_to_upload = self.provisions['files-to-upload']
+            files_to_upload = self.provisions['files_to_upload']
             missing_files_to_upload = list()
             for file in files_to_upload:
                 if file not in os.listdir(constants.upload_path):
@@ -121,11 +122,11 @@ class ProvisionConfigReader:
 
     def check_script_dependency_from_file_to_upload(self):
         upload_files_scripts = get_upload_files_from_scripts(
-            self.provisions['custom-scripts']
+            self.provisions['custom_scripts']
         )
         missing_files_to_upload = list()
         for file in upload_files_scripts:
-            if file not in self.provisions['files-to-upload']:
+            if file not in self.provisions['files_to_upload']:
                 missing_files_to_upload.append(file)
         err_msg_singular = (
             'The following file is requested by the script.\n'
@@ -140,7 +141,10 @@ class ProvisionConfigReader:
                 [f"--> {file} by\t {upload_files_scripts[file]}"
                  for file in missing_files_to_upload]
             )
-            error_msg += '\nBe sure to set "upload" as true in the json file\n'
+            error_msg += (
+                '\nBe sure to set "upload" as true in '
+                f'the "{sys.argv[sys.argv.index("-j") + 1]}" file\n'
+            )
             raise NoFileToUploadError(error_msg)
         if missing_files_to_upload:
             error_msg = err_msg_plural if len(missing_files_to_upload) > 1 else err_msg_singular
