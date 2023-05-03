@@ -30,41 +30,40 @@ class ProvisionConfigReader:
             self.configs = json.loads(provision_config_file.read())["vbox-configs"]
 
     def check_programs_existence(self):
-        stop = False
         programs = self.provisions["programs"]
+        not_found_install_programs = list()
         if programs["install"]:
-            not_found_install_programs = list()
             for program in programs["install"]:
                 if program not in os.listdir(constants.programs_path):
                     not_found_install_programs.append(program)
 
             if not_found_install_programs:
                 make_program_folder(not_found_install_programs)
-                stop = True
 
+        not_found_uninstall_programs = list()
         if programs["uninstall"]:
-            not_found_uninstall_programs = list()
             for program in programs["uninstall"]:
                 if program not in os.listdir(constants.programs_path):
                     not_found_uninstall_programs.append(program)
 
             if not_found_uninstall_programs:
                 make_program_folder(not_found_uninstall_programs)
-                stop = True
-        if stop:
-            programs = not_found_install_programs[:] + not_found_uninstall_programs[:]
-            if len(programs) > 1:
-                s = 's '
-                are = 'are '
-            else:
-                s = ' '
-                are = 'is '
-            raise ProgramNotFoundError(
-                f'The following program{s}{", ".join(programs)} '
-                f'{are} created at /templates/programs folder.\nFill the '
+
+        programs_not_found = (
+            not_found_install_programs[:] + not_found_uninstall_programs[:]
+        )
+        if programs_not_found:
+            plural = ('s', 'are')
+            singular = ('', 'is')
+            numerality = plural if len(programs) > 1 else singular
+            error_msg = (
+                'The following program{} '
+                f'{", ".join(programs_not_found)} '
+                '{} created at /templates/programs folder.\nFill the '
                 'appropriate files [install.sh, uninstall.sh, config.sh] '
-                'and come back then!'
+                'and come back then!'.format(*numerality)
             )
+            raise ProgramNotFoundError(error_msg)
 
     def check_scripts_existence(self):
         scripts = self.provisions["custom-scripts"]
@@ -88,7 +87,7 @@ class ProvisionConfigReader:
 
         if empty_scripts:
             s = 's' if len(empty_scripts) > 1 else ''
-            raise EmptyScriptError(f'The script install.sh is empty for program{s}{", ".join(empty_scripts)}')
+            raise EmptyScriptError(f'The script install.sh is empty for program{s} {", ".join(empty_scripts)}')
 
     def check_uninstall_scripts_emptyness(self):
         empty_scripts = list()
