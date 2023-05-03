@@ -71,7 +71,7 @@ class Vagrant(Builder):
     def set_configs(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
         with open(config_provision_file_path, 'r') as provisions:
-            configs = json.loads(provisions.read())["vbox-configs"]
+            configs = json.loads(provisions.read())["vbox_configs"]
         configs['extra_user'] = self.arguments['-u']
         configs['default_image'] = self.arguments['-i']
         configs['default_hostname'] = self.arguments['-ho']
@@ -84,7 +84,7 @@ class Vagrant(Builder):
     def set_provisions(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
         with open(config_provision_file_path, 'r') as provisions:
-            provisions = json.loads(provisions.read())["vbox-provisions"]
+            provisions = json.loads(provisions.read())["vbox_provisions"]
         self.provisions = provisions.copy()
 
     def create_project_folder(self):
@@ -126,11 +126,11 @@ class Vagrant(Builder):
 
     def provision(self):
         vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
-        update_upgrade = self.provisions['programs']['update-upgrade']
+        update_upgrade = self.provisions['programs']['update_upgrade']
         clean = self.provisions['programs']['clean']
         programs_to_install = self.provisions['programs']['install']
         programs_to_uninstall = self.provisions['programs']['uninstall']
-        custom_scripts = self.provisions['custom-scripts']
+        custom_scripts = self.provisions['custom_scripts']
         with open(vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
         if self.configs['extra_user']:

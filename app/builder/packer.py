@@ -17,7 +17,6 @@ from helper import (
 class Packer(Builder):
     def __init__(self) -> None:
         self.arguments: dict = convert_argv_list_to_dict()
-        # self.machines_path: str = constants.vmbuilder_path + '/machines/packer'
         self.machines_path: str = constants.packer_machines_path
         self.provisions_configs = constants.packer_provs_confs_path
         self.configs: dict = dict()
@@ -26,7 +25,7 @@ class Packer(Builder):
     def set_configs(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
         with open(config_provision_file_path, 'r') as file:
-            configs = json.loads(file.read())["vbox-configs"]
+            configs = json.loads(file.read())["vbox_configs"]
         configs['iso_file'] = self.arguments['-if']
         configs['iso_link'] = self.arguments['-il']
         configs['iso_checksum'] = self.arguments['-cs']
@@ -36,7 +35,7 @@ class Packer(Builder):
     def set_provisions(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
         with open(config_provision_file_path, 'r') as file:
-            self.provisions = json.loads(file.read())["vbox-provisions"].copy()
+            self.provisions = json.loads(file.read())["vbox_provisions"].copy()
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
@@ -193,15 +192,15 @@ class Packer(Builder):
             )
             if self.provisions['upload']:
                 upload_files = list()
-                for file in self.provisions['files-to-upload']:
+                for file in self.provisions['files_to_upload']:
                     upload_files.append(
                         f'{constants.upload_path}/{file}'
                     )
                 self.provisioner_file(upload_files, main_file)
-            if self.provisions['custom-scripts']:
+            if self.provisions['custom_scripts']:
                 custom_scripts = [
                     f'{constants.custom_scripts_path}/{script}'
-                    for script in self.provisions['custom-scripts']
+                    for script in self.provisions['custom_scripts']
                 ]
                 self.provisioner_shell(
                     scripts=custom_scripts,
