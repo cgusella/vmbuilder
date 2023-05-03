@@ -40,7 +40,7 @@ def main():
     try:
         builder.create_project_folder()
         builder.provision()
-    except (NoFileToUploadError):
+    except (NoFileToUploadError, KeyError):
         builder.delete_project()
 
 

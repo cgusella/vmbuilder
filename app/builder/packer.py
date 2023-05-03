@@ -142,8 +142,8 @@ class Packer(Builder):
                 '}\n\n'
             )
             main_file.write('source "virtualbox-iso" "vbox" {\n')
-            for var in json_file['vbox-configs']:
-                if not isinstance(json_file['vbox-configs'][var], dict):
+            for var in json_file['vbox_configs']:
+                if not isinstance(json_file['vbox_configs'][var], dict):
                     continue
                 space = (30 - len(var)) * ' '
                 if var in ['start_retry_timeout', 'iso_file']:
@@ -224,7 +224,7 @@ class Packer(Builder):
     def provision(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
             json_provision = json.loads(provisions.read())
-        vbox_configs = json_provision['vbox-configs']
+        vbox_configs = json_provision['vbox_configs']
         self._generate_vars_file(vbox_configs)
         self._generate_main_file(json_provision)
         credentials = {
