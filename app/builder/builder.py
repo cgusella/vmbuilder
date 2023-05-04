@@ -8,7 +8,15 @@ class Builder(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def check_folder_vb_json_existence(self):
+    def check_new_project_folder_existence(self):
+        pass
+
+    @abc.abstractmethod
+    def check_virtualbox_existence(self):
+        pass
+
+    @abc.abstractmethod
+    def check_provision_cfg_json_existence(self):
         pass
 
     @abc.abstractmethod

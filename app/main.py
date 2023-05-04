@@ -9,7 +9,7 @@ from helper import convert_argv_list_to_dict
 from builder.packer import Packer
 from builder.vagrant import Vagrant
 
-sys.tracebacklimit = 0
+# sys.tracebacklimit = 0
 
 
 def get_project_class():
@@ -26,7 +26,9 @@ def get_project_class():
 def main():
     builder = get_project_class()
     builder.check_flags()
-    builder.check_folder_vb_json_existence()
+    builder.check_new_project_folder_existence()
+    builder.check_virtualbox_existence()
+    builder.check_provision_cfg_json_existence()
     builder.set_configs()
     builder.set_provisions()
     provisions_configs_reader = ProvisionConfigReader(f'{builder.provisions_configs}/{builder.arguments["-j"]}')

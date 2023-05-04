@@ -46,22 +46,29 @@ class Vagrant(Builder):
         if forgotten_flags:
             error_msg = '\n'
             for forgotten_flag in forgotten_flags:
-                error_msg += f'\t\t{forgotten_flag}:\t{VAGRANT_FLAGS_TO_ERROR[forgotten_flag]}\n'
+                error_msg += (
+                    f'\t\t{forgotten_flag}:\t'
+                    f'{VAGRANT_FLAGS_TO_ERROR[forgotten_flag]}\n'
+                )
             raise FlagError(error_msg)
 
         if not self.arguments['-j'].endswith('.json'):
-            raise FileExtesionError(f'The config file {self.arguments["-j"]} is not a JSON file!')
+            raise FileExtesionError(
+                f'The config file {self.arguments["-j"]} is not a JSON file!'
+            )
 
-    def check_folder_vb_json_existence(self):
+    def check_new_project_folder_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
+
+    def check_virtualbox_existence(self):
         if self.arguments['-vm'] in get_local_virtual_boxes():
-            raise ExistenceVirtualBoxError(f'The virtualbox {self.arguments["-vm"]} already exists!')
-        if self.arguments['-j'] not in os.listdir(self.provisions_configs):
-            shutil.copyfile(
-                src=f'{self.provisions_configs}/template.json',
-                dst=f'{self.provisions_configs}/{self.arguments["-j"]}'
+            raise ExistenceVirtualBoxError(
+                f'The virtualbox {self.arguments["-vm"]} already exists!'
             )
+
+    def check_provision_cfg_json_existence(self):
+        if self.arguments['-j'] not in os.listdir(self.provisions_configs):
             raise JsonConfigNotFoundError(
                 f'The json file {self.arguments["-j"]} '
                 'is created at /templates/vagrant/provisions_configs folder.\n'

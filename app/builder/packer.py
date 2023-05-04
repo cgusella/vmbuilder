@@ -6,11 +6,14 @@ from builder.builder import Builder
 from error import (
     FlagError,
     ExistenceProjectError,
+    JsonConfigNotFoundError,
+    ExistenceVirtualBoxError
 )
 from helper import (
     convert_argv_list_to_dict,
+    get_local_virtual_boxes,
     PACKER_FLAGS_TO_ERROR,
-    replace_text_in_file
+    replace_text_in_file,
 )
 
 
@@ -59,10 +62,22 @@ class Packer(Builder):
                 error_msg += f'\t\t{forgotten_flag}:\t{PACKER_FLAGS_TO_ERROR[forgotten_flag]}\n'
             raise FlagError(error_msg)
 
-    def check_folder_vb_json_existence(self):
-        if self.arguments['-n'] in os.listdir(self.machines_path):
-            raise ExistenceProjectError(
-                f"Project {self.arguments['-n']} already exists!"
+    def check_new_project_folder_existence(self):
+        if self.arguments['-n'] in os.listdir(self.machine_path):
+            raise ExistenceProjectError("[ERROR] Project already exists!")
+
+    def check_virtualbox_existence(self):
+        if self.arguments['-vm'] in get_local_virtual_boxes():
+            raise ExistenceVirtualBoxError(
+                f'The virtualbox {self.arguments["-vm"]} already exists!'
+            )
+
+    def check_provision_cfg_json_existence(self):
+        if self.arguments['-j'] not in os.listdir(self.provisions_configs):
+            raise JsonConfigNotFoundError(
+                f'The json file {self.arguments["-j"]} '
+                'is created at /templates/vagrant/provisions_configs folder.\n'
+                'Fill it up and come back then!'
             )
 
     def create_project_folder(self):
