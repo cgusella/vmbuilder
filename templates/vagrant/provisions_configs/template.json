@@ -1,17 +1,18 @@
 {
-  "vbox-configs": {
-    "default_user": "vagrant",
-    "default_pass": "vagrant",
-    "disk_size": "30000"
+  "vbox_configs": {
+    "default_user": "user",
+    "default_pass": "pass",
+    "disk_size": "size_in_MB"
   },
-  "vbox-provisions": {
+  "vbox_provisions": {
     "programs": {
-      "update-upgrade": true,
+      "update_upgrade": false,
       "install": [],
       "uninstall": [],
-      "clean": true
+      "clean": false
     },
-    "custom-scripts": [],
-    "upload": true
+    "custom_scripts": [],
+    "upload": false,
+    "files_to_upload": []
   }
 }
