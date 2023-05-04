@@ -5,24 +5,25 @@ from error import FlagError
 import constants
 
 
-def get_vagrant_provision_for_error():
-    return '\n'.join(
-        [
-            '\t\t\t\t--> ' + file for file in os.listdir(
-                constants.vagrant_provs_confs_path
-            )
+def get_provision_for_error(path_to_provs_confs: str):
+    provision_files = [
+            file for file in os.listdir(
+                path_to_provs_confs
+            ) if file != 'template.json'
         ]
-    )
-
-
-def get_packer_provision_for_error():
-    return '\n'.join(
-        [
-            '\t\t\t\t--> ' + file for file in os.listdir(
-                constants.packer_provs_confs_path
-            )
-        ]
-    )
+    if not provision_files:
+        message = (
+            "\t\t\t\tThere are no provision files.\n"
+            "\t\t\t\tTo create a new one just specify it\n"
+            "\t\t\t\tusing \"-j\""
+        )
+    else:
+        message = '\n'.join(
+            [
+                f'\t\t\t\t--> {file}' for file in provision_files
+            ]
+        )
+    return message
 
 
 def get_preseed_files_for_error():
@@ -60,14 +61,18 @@ VAGRANT_FLAGS_TO_ERROR = {
     '-u': '[EXTRA SUDOER USER]',
     '-ho': '[HOSTNAME]',
     '-i': f'[VAGRANT IMAGE]\n{get_vagrant_images_for_error()}',
-    '-j': f'[VAGRANT PROVISION FILE]\n{get_vagrant_provision_for_error()}',
+    '-j': f'''[VAGRANT PROVISION FILE]\n{get_provision_for_error(
+        constants.vagrant_provs_confs_path
+    )}''',
     '-s': '[VAGRANT SSH CONNECTION TYPE]\n\t\t\t\t[password|key]'
 }
 PACKER_FLAGS_TO_ERROR = {
     '-il': '[ISO LINK]',
     '-if': '[ISO FILE]',
     '-cs': '[CHECKSUM]',
-    '-j': f'[PACKER CONFIG FILE]\n{get_packer_provision_for_error()}',
+    '-j': f'''[PACKER CONFIG FILE]\n{get_provision_for_error(
+        constants.packer_provs_confs_path
+    )}''',
     '-pf': f'[PRESEED FILE]\n{get_preseed_files_for_error()}'
 }
 COMMON_VALID_FLAGS = ('-n', '-vm', '-t')
