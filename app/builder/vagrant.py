@@ -69,9 +69,13 @@ class Vagrant(Builder):
 
     def check_provision_cfg_json_existence(self):
         if self.arguments['-j'] not in os.listdir(self.provisions_configs):
+            shutil.copyfile(
+                src=f'{self.provisions_configs}/template.json',
+                dst=f'{self.provisions_configs}/{self.arguments["-j"]}'
+            )
             raise JsonConfigNotFoundError(
-                f'The json file {self.arguments["-j"]} '
-                'is created at /templates/vagrant/provisions_configs folder.\n'
+                f'The json file "{self.arguments["-j"]}" '
+                f'is created at {constants.vagrant_provs_confs_path} folder.\n'
                 'Fill it up and come back then!'
             )
 
