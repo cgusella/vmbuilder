@@ -205,14 +205,6 @@ class VagrantCheckFlags(unittest.TestCase):
 class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
 
     def test_check_new_project_folder_existence(self):
-        # new_project_name_in_folder = False
-        # while not new_project_name_in_folder:
-        #     new_project_name = ''.join(
-        #         random.choices(string.ascii_lowercase, k=5)
-        #     )
-        #     created_machines = os.listdir(constants.vagrant_machines_path)
-        #     if new_project_name in created_machines:
-        #         new_project_name_in_folder = True
         existing_machines = os.listdir(constants.vagrant_machines_path)
         if existing_machines:
             error_msg = launch_main_with_custom_arguments(
@@ -234,6 +226,16 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
                 error_msg
             )
             os.rmdir(f"{constants.vagrant_machines_path}/test")
+
+    def test_check_provision_cfg_json_existence(self):
+        provision_file_in_folder = False
+        while not provision_file_in_folder:
+            new_project_name = f"""{''.join(
+                random.choices(string.ascii_lowercase, k=5)
+            )}.json"""
+            existing_provisions = os.listdir(constants.vagrant_machines_path)
+            if new_project_name in existing_provisions:
+                provision_file_in_folder = True
 
 
 if __name__ == '__main__':
