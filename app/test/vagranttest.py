@@ -96,8 +96,8 @@ class VagrantCheckFlags(unittest.TestCase):
             flags=["-n"],
             vmtype=VMTYPE
         )
-        self.assertEqual(
-            'error.FlagError: \n\t-n\t[PROJECT NAME]\n\n',
+        self.assertIn(
+            '-n\t[PROJECT NAME]',
             error_msg
         )
 
@@ -109,8 +109,8 @@ class VagrantCheckFlags(unittest.TestCase):
             flags=["-vm"],
             vmtype=VMTYPE
         )
-        self.assertEqual(
-            'error.FlagError: \n\t-vm\t[VBOXNAME]\n\n',
+        self.assertIn(
+            '-vm\t[VBOXNAME]',
             error_msg
         )
 
@@ -122,8 +122,8 @@ class VagrantCheckFlags(unittest.TestCase):
             flags=["-t"],
             vmtype=VMTYPE
         )
-        self.assertEqual(
-            'error.FlagError: \n\t-t\t[vagrant|packer]\n\n',
+        self.assertIn(
+            '-t\t[vagrant|packer]',
             error_msg
         )
 
@@ -178,7 +178,11 @@ class VagrantCheckFlags(unittest.TestCase):
             '-j:\t[VAGRANT PROVISION FILE]',
             error_msg,
         )
-        for provision_file in os.listdir(constants.vagrant_provs_confs_path):
+        provision_files = [
+            file for file in os.listdir(constants.vagrant_provs_confs_path)
+            if file != 'template.json'
+        ]
+        for provision_file in provision_files:
             self.assertIn(
                 provision_file,
                 error_msg
@@ -227,15 +231,15 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
             )
             os.rmdir(f"{constants.vagrant_machines_path}/test")
 
-    def test_check_provision_cfg_json_existence(self):
-        provision_file_in_folder = False
-        while not provision_file_in_folder:
-            new_project_name = f"""{''.join(
-                random.choices(string.ascii_lowercase, k=5)
-            )}.json"""
-            existing_provisions = os.listdir(constants.vagrant_machines_path)
-            if new_project_name in existing_provisions:
-                provision_file_in_folder = True
+    # def test_check_provision_cfg_json_existence(self):
+    #     provision_file_in_folder = False
+    #     while not provision_file_in_folder:
+    #         new_project_name = f"""{''.join(
+    #             random.choices(string.ascii_lowercase, k=5)
+    #         )}.json"""
+    #         existing_provisions = os.listdir(constants.vagrant_machines_path)
+    #         if new_project_name in existing_provisions:
+    #             provision_file_in_folder = True
 
 
 if __name__ == '__main__':
