@@ -231,15 +231,27 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
             )
             os.rmdir(f"{constants.vagrant_machines_path}/test")
 
-    # def test_check_provision_cfg_json_existence(self):
-    #     provision_file_in_folder = False
-    #     while not provision_file_in_folder:
-    #         new_project_name = f"""{''.join(
-    #             random.choices(string.ascii_lowercase, k=5)
-    #         )}.json"""
-    #         existing_provisions = os.listdir(constants.vagrant_machines_path)
-    #         if new_project_name in existing_provisions:
-    #             provision_file_in_folder = True
+    def test_check_provision_cfg_json_existence(self):
+        provision_file_in_folder = False
+        while not provision_file_in_folder:
+            new_provision_file_name = f"""{''.join(
+                random.choices(string.ascii_lowercase, k=5)
+            )}.json"""
+            existing_provisions = os.listdir(constants.vagrant_provs_confs_path)
+            if new_provision_file_name not in existing_provisions:
+                provision_file_in_folder = True
+        result = launch_main_with_custom_arguments(
+            {"-j": new_provision_file_name},
+            vmtype=VMTYPE
+        )
+        self.assertIn(
+            'JsonConfigCopiedError',
+            result
+        )
+        self.assertIn(
+            new_provision_file_name,
+            os.listdir(constants.vagrant_provs_confs_path)
+        )
 
 
 if __name__ == '__main__':
