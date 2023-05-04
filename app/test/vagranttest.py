@@ -3,20 +3,24 @@ Test file for Vagrant.
 To launch these tests, add first
 $export PYTHONPATH="${PYTHONPATH}:/path-to-vmbuilder/
 """
+import random
+import string
 import os
 import unittest
 from app import constants
-from helpertest import missing_flag_error_test
+from helpertest import (
+    missing_flag_error_test,
+    launch_main_with_custom_arguments
+)
 
 VAGRANT_FLAGS = {"-n": "name", "-vm": "vboxname", "-t": "vagrant",
                  "-u": "user", "-ho": "hostname", "-i": "image",
                  "-j": "provision-file.json", "-s": "key"}
 
+VMTYPE = 'vagrant'
+
 
 class VagrantCheckFlags(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.vmtype = 'vagrant'
 
     def test_no_flag_at_all(self):
         """Test correct info are printed when no
@@ -25,7 +29,7 @@ class VagrantCheckFlags(unittest.TestCase):
         error_msg = missing_flag_error_test(
             flags=["-n", "-vm", "-t", "-u", "-ho", "-i",
                    "-j", "-s"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertIn(
             '-n\t[PROJECT NAME]',
@@ -90,7 +94,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-n"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertEqual(
             'error.FlagError: \n\t-n\t[PROJECT NAME]\n\n',
@@ -103,7 +107,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-vm"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertEqual(
             'error.FlagError: \n\t-vm\t[VBOXNAME]\n\n',
@@ -116,7 +120,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-t"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertEqual(
             'error.FlagError: \n\t-t\t[vagrant|packer]\n\n',
@@ -129,7 +133,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-u"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertIn(
             '-u:\t[EXTRA SUDOER USER]',
@@ -142,7 +146,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-ho"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertIn(
             '-ho:\t[HOSTNAME]',
@@ -155,7 +159,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-i"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertIn(
             '-i:\t[VAGRANT IMAGE]',
@@ -168,7 +172,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-j"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertIn(
             '-j:\t[VAGRANT PROVISION FILE]',
@@ -186,7 +190,7 @@ class VagrantCheckFlags(unittest.TestCase):
         """
         error_msg = missing_flag_error_test(
             flags=["-s"],
-            vmtype=self.vmtype
+            vmtype=VMTYPE
         )
         self.assertIn(
             '-s:\t[VAGRANT SSH CONNECTION TYPE]',
@@ -196,6 +200,40 @@ class VagrantCheckFlags(unittest.TestCase):
             'password|key',
             error_msg,
         )
+
+
+class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
+
+    def test_check_new_project_folder_existence(self):
+        # new_project_name_in_folder = False
+        # while not new_project_name_in_folder:
+        #     new_project_name = ''.join(
+        #         random.choices(string.ascii_lowercase, k=5)
+        #     )
+        #     created_machines = os.listdir(constants.vagrant_machines_path)
+        #     if new_project_name in created_machines:
+        #         new_project_name_in_folder = True
+        existing_machines = os.listdir(constants.vagrant_machines_path)
+        if existing_machines:
+            error_msg = launch_main_with_custom_arguments(
+                {"-n": f"{existing_machines[0]}"},
+                vmtype=VMTYPE
+            )
+            self.assertIn(
+                "ExistenceProjectError",
+                error_msg
+            )
+        else:
+            os.mkdir(f"{constants.vagrant_machines_path}/test")
+            error_msg = launch_main_with_custom_arguments(
+                {"-n": "test"},
+                vmtype=VMTYPE
+            )
+            self.assertIn(
+                "ExistenceProjectError",
+                error_msg
+            )
+            os.rmdir(f"{constants.vagrant_machines_path}/test")
 
 
 if __name__ == '__main__':
