@@ -27,3 +27,23 @@ def missing_flag_error_test(flags: List[str], vmtype: str):
         args=argv,
         capture_output=True
     ).stderr.decode('ascii')
+
+
+def launch_main_with_custom_arguments(
+        new_args: dict,
+        vmtype: str):
+    if vmtype == 'vagrant':
+        command_line_flags = VAGRANT_FLAGS.copy()
+    elif vmtype == 'packer':
+        command_line_flags = PACKER_FLAGS.copy()
+    argv = list()
+    for key in new_args:
+        command_line_flags[key] = new_args[key]
+    for vagrant_flag in command_line_flags:
+        argv.append(vagrant_flag)
+        argv.append(command_line_flags[vagrant_flag])
+    argv.insert(0, f'{vmbuilder_path}/app/main.py')
+    return subprocess.run(
+        args=argv,
+        capture_output=True
+    ).stderr.decode('ascii')
