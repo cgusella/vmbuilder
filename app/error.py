@@ -27,7 +27,7 @@ class ScriptNotFoundError(Error):
     pass
 
 
-class JsonConfigNotFoundError(Error):
+class JsonConfigCopiedError(Error):
     pass
 
 

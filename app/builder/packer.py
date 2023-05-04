@@ -6,7 +6,7 @@ from builder.builder import Builder
 from error import (
     FlagError,
     ExistenceProjectError,
-    JsonConfigNotFoundError,
+    JsonConfigCopiedError,
     ExistenceVirtualBoxError
 )
 from helper import (
@@ -78,7 +78,7 @@ class Packer(Builder):
                 src=f'{self.provisions_configs}/template.json',
                 dst=f'{self.provisions_configs}/{self.arguments["-j"]}'
             )
-            raise JsonConfigNotFoundError(
+            raise JsonConfigCopiedError(
                 f'The json file "{self.arguments["-j"]}" '
                 f'is created at {constants.vagrant_provs_confs_path} folder.\n'
                 'Fill it up and come back then!'
