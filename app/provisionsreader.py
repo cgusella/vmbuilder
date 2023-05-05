@@ -13,6 +13,7 @@ from error import (
 )
 from helper import (
     get_upload_files_from_scripts,
+    get_upload_files_from_config_scripts,
     empty_script
 )
 from newprogram import make_program_folder
@@ -31,6 +32,24 @@ class ProvisionConfigReader:
     def set_configs(self):
         with open(self.file_path, 'r') as provision_config_file:
             self.configs = json.loads(provision_config_file.read())["vbox_configs"]
+
+    def check_config_scripts_for_upload(self):
+        programs_to_install = self.provisions['programs']['install']
+        files_to_upload = self.provisions['files_to_upload']
+        upload = self.provisions['upload']
+        files_to_upload_programs = list()
+        if programs_to_install:
+            for program in programs_to_install:
+                files_to_upload_programs.extend(*[
+                    os.listdir(f'{constants.programs_path}/{program}/configs/upload')
+                ])
+
+        if upload:
+            if programs_to_install:
+                upload_config_files = get_upload_files_from_config_scripts(programs_to_install)
+                for file in upload_config_files:
+                    if file not in files_to_upload:
+                        raise NoFileToUploadError('There are files in scripts to be uploaded but not included in upload files json')
 
     def check_programs_existence(self):
         programs = self.provisions["programs"]

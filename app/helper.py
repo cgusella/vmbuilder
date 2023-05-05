@@ -184,3 +184,16 @@ def get_upload_files_from_scripts(scripts: list):
                     line.strip().split()[1].split('/')[-1]
                 ] = script
     return upload_files_scripts
+
+
+def get_upload_files_from_config_scripts(programs: list):
+    upload_files_scripts = dict()
+    for program in programs:
+        with open(f'{constants.programs_path}/{program}/configs/upload', 'r') as file:
+            lines = file.readlines()
+        for line in lines:
+            if line.startswith('cp '):
+                upload_files_scripts[
+                    line.strip().split()[1].split('/')[-1]
+                ] = program
+    return upload_files_scripts

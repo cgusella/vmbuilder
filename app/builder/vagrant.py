@@ -57,6 +57,7 @@ class Vagrant(Builder):
                 f'The config file {self.arguments["-j"]} is not a JSON file!'
             )
 
+
     def check_new_project_folder_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
@@ -107,23 +108,23 @@ class Vagrant(Builder):
             src=f'{vagrant_folder}/Vagrantfile',
             dst=f'{project_folder}/Vagrantfile'
         )
-        for program in self.provisions['programs']['install']:
-            program_folder = f'{constants.programs_path}/{program}'
-            shutil.copytree(
-                src=program_folder,
-                dst=f'{project_folder}/programs/{program}'
-            )
         if self.provisions['upload']:
-            for upload_file in self.provisions['files_to_upload']:
+            os.mkdir(f'{project_folder}/upload')
+            for path in self.generate_upload_files_path():
                 shutil.copyfile(
-                    src=f'{constants.upload_path}/{upload_file}',
-                    dst=f'{project_folder}/upload'
+                    src=path,
+                    dst=f'{project_folder}/upload/{path.split("/")[-1]}'
                 )
-            for program in self.provisions["install"]:
-                shutil.copyfile(
-                    src=f'{constants.programs_path}/{program}/configs/upload',
-                    dst=f'{project_folder}/upload'
-                )
+
+    def generate_upload_files_path(self):
+        file_to_upload_paths = list()
+        for program in self.provisions['programs']['install']:
+            for file in self.provisions['files_to_upload']:
+                if file in os.listdir(f'{constants.programs_path}/{program}/configs/upload'):
+                    file_to_upload_paths.append(f'{constants.programs_path}/{program}/configs/upload/{file}')
+                elif file in os.listdir(constants.upload_path):
+                    file_to_upload_paths.append(f'{constants.upload_path}/{file}')
+        return file_to_upload_paths
 
     def _generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
@@ -152,14 +153,14 @@ class Vagrant(Builder):
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
         if self.configs['extra_user']:
             self._generate_provision_text(
-                    src=f'{constants.bash_path}/create-extra-user.sh',
+                    src=f'{constants.bash_path}/create_extra_user.sh',
                     dst=vagrantfile_path,
                     title=f"CREATE USER {self.configs['extra_user']}",
                     program=''
                 )
         if update_upgrade:
             self._generate_provision_text(
-                    src=f'{constants.bash_path}/update-upgrade.sh',
+                    src=f'{constants.bash_path}/update_upgrade.sh',
                     dst=vagrantfile_path,
                     title="UPDATE and UPGRADE",
                     program='apt'
