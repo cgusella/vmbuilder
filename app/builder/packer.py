@@ -114,7 +114,7 @@ class Packer(Builder):
                         )
         if self.provisions['upload']:
             scripts.append(
-                f'{constants.bash_path}/prepare-for-upload.sh'
+                f'{constants.bash_path}/prepare_to_upload.sh'
             )
         return scripts
 
@@ -209,12 +209,27 @@ class Packer(Builder):
                 scripts=provision_scripts,
                 main_file=main_file
             )
+
+            upload_program_files_path = list()
+            for program in self.provisions['programs']['install']:
+                upload_program_files_path.extend([
+                    f'{constants.programs_path}/{program}/configs/upload/{file}' 
+                    for file in os.listdir(f'{constants.programs_path}/{program}/configs/upload') 
+                    if file != 'prepare_to_upload.sh'
+                ])
             if self.provisions['upload']:
+                files_in_upload_folder = os.listdir(constants.upload_path)
                 upload_files = list()
                 for file in self.provisions['files_to_upload']:
-                    upload_files.append(
-                        f'{constants.upload_path}/{file}'
-                    )
+                    if file in files_in_upload_folder:
+                        upload_files.append(
+                            f'{constants.upload_path}/{file}'
+                        )
+                    else:
+                        for path in upload_program_files_path:
+                            if file in path:
+                                upload_files.append(path)
+
                 self.provisioner_file(upload_files, main_file)
             if self.provisions['custom_scripts']:
                 custom_scripts = [
@@ -276,7 +291,7 @@ class Packer(Builder):
         )
         for file in files:
             main_file.write(f'      "{file}",\n')
-        with open(f'{constants.bash_path}/prepare-for-upload.sh', 'r') as preparer:
+        with open(f'{constants.bash_path}/prepare_to_upload.sh', 'r') as preparer:
             lines = preparer.readlines()
         for line in lines:
             if line.startswith('mkdir '):
