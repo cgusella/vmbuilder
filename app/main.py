@@ -9,7 +9,7 @@ from helper import convert_argv_list_to_dict
 from builder.packer import Packer
 from builder.vagrant import Vagrant
 
-# sys.tracebacklimit = 0
+sys.tracebacklimit = 0
 
 
 def get_project_class():

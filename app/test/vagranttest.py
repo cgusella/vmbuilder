@@ -213,7 +213,8 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
         if existing_machines:
             error_msg = launch_main_with_custom_arguments(
                 {"-n": f"{existing_machines[0]}"},
-                vmtype=VMTYPE
+                vmtype=VMTYPE,
+                error=True
             )
             self.assertIn(
                 "ExistenceProjectError",
@@ -223,7 +224,8 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
             os.mkdir(f"{constants.vagrant_machines_path}/test")
             error_msg = launch_main_with_custom_arguments(
                 {"-n": "test"},
-                vmtype=VMTYPE
+                vmtype=VMTYPE,
+                error=True
             )
             self.assertIn(
                 "ExistenceProjectError",
@@ -242,7 +244,8 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
                 provision_file_in_folder = True
         result = launch_main_with_custom_arguments(
             {"-j": new_provision_file_name},
-            vmtype=VMTYPE
+            vmtype=VMTYPE,
+            error=True
         )
         self.assertIn(
             'JsonConfigCopiedError',
