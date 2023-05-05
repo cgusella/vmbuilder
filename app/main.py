@@ -37,6 +37,7 @@ def main():
     provisions_configs_reader.check_install_scripts_emptyness()
     provisions_configs_reader.check_uninstall_scripts_emptyness()
     provisions_configs_reader.check_upload_files_existence()
+    provisions_configs_reader.check_name_conflicts_in_upload_files()
     provisions_configs_reader.check_script_dependency_from_file_to_upload()
 
     try:

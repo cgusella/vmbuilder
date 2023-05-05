@@ -24,6 +24,14 @@ def make_program_folder(programs: list = []):
         # create config file in configs
         with open(f'{new_program_path}/configs/config.sh', 'w') as config_file:
             config_file.write("#!/bin/bash")
+        # create upload folder in configs
+        os.mkdir(f'{new_program_path}/configs/upload')
+        # create prepare to upload file
+        with open(
+            file=f'{new_program_path}/configs/upload/prepare_to_upload.sh',
+            mode='w'
+        ) as upload_file:
+            upload_file.write("#!/bin/bash")
         # create install file
         with open(f'{new_program_path}/install.sh', 'w') as install_file:
             install_file.write("#!/bin/bash")

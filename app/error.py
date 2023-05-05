@@ -41,3 +41,7 @@ class EmptyScriptError(Error):
 
 class NoFileToUploadError(Error):
     pass
+
+
+class UploadNameConflictError(Error):
+    pass

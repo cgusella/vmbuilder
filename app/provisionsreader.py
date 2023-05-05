@@ -2,12 +2,14 @@
 import constants
 import json
 import os
+import shutil
 import sys
 from error import (
     ProgramNotFoundError,
     ScriptNotFoundError,
     EmptyScriptError,
-    NoFileToUploadError
+    NoFileToUploadError,
+    UploadNameConflictError
 )
 from helper import (
     get_upload_files_from_scripts,
@@ -103,22 +105,69 @@ class ProvisionConfigReader:
 
     def check_upload_files_existence(self):
         if self.provisions['upload']:
+            # check first upload files in templates/upload folder
             if not self.provisions['files_to_upload']:
                 raise NoFileToUploadError(
                     'There is no file to upload. Be sure '
                     'to set "upload" to false if you do not '
                     'want to upload any file.'
                 )
-            files_to_upload = self.provisions['files_to_upload']
-            missing_files_to_upload = list()
-            for file in files_to_upload:
-                if file not in os.listdir(constants.upload_path):
-                    missing_files_to_upload.append(file)
-            if missing_files_to_upload:
+            program_upload_files = list()
+            for program in self.provisions['programs']['install']:
+                program_upload_files.extend(*[
+                    os.listdir(f'{constants.programs_path}/{program}/configs/upload')
+                ])
+            all_upload_files = program_upload_files[:] + os.listdir(constants.upload_path)
+            for file in self.provisions['files_to_upload']:
+                missing_files = list()
+                if file not in all_upload_files:
+                    missing_files.append(file)
+            if missing_files:
                 raise NoFileToUploadError(
-                    'The following files are missing from upload folder:\n'
-                    f'{", ".join(missing_files_to_upload)}'
+                    f"Upload files \"{', '.join(missing_files)}\" are missing."
                 )
+
+    def check_name_conflicts_in_upload_files(self):
+        all_upload_files = dict()
+        all_upload_files['upload_folder'] = [
+                file for file in os.listdir(
+                    constants.upload_path
+                ) if file != 'README.md'
+            ]
+        for program in self.provisions['programs']['install']:
+            all_upload_files[program] = list()
+            if os.listdir(f'{constants.programs_path}/{program}/configs/upload'):
+                all_upload_files[program] = [
+                    file for file in os.listdir(
+                        f'{constants.programs_path}/{program}/configs/upload'
+                    ) if file != 'prepare_to_upload.sh'
+                ]
+        multiple_file_names = list()
+        dict_to_run = all_upload_files.copy()
+        for folder in all_upload_files:
+            for file in all_upload_files[folder]:
+                del dict_to_run[folder]
+                for key in dict_to_run:
+                    if file in dict_to_run[key]:
+                        multiple_file_names.append(file)
+
+        duplicates = dict()
+        for multiple_file in multiple_file_names:
+            program_list = list()
+            for program in all_upload_files:
+                if multiple_file in all_upload_files[program]:
+                    program_list.append(program)
+            duplicates[multiple_file] = program_list
+        error_msg = "\n".join([
+            f'file "{key}" in {", ".join(duplicates[key])}'
+            for key in duplicates
+        ])
+        if error_msg:
+            raise UploadNameConflictError(
+                'There are some conflicts with upload files names. '
+                'You have:\n'
+                f'{error_msg}'
+            )
 
     def check_script_dependency_from_file_to_upload(self):
         upload_files_scripts = get_upload_files_from_scripts(

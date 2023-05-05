@@ -114,10 +114,16 @@ class Vagrant(Builder):
                 dst=f'{project_folder}/programs/{program}'
             )
         if self.provisions['upload']:
-            shutil.copytree(
-                src=f'{constants.upload_path}/',
-                dst=f'{project_folder}/upload'
-            )
+            for upload_file in self.provisions['files_to_upload']:
+                shutil.copyfile(
+                    src=f'{constants.upload_path}/{upload_file}',
+                    dst=f'{project_folder}/upload'
+                )
+            for program in self.provisions["install"]:
+                shutil.copyfile(
+                    src=f'{constants.programs_path}/{program}/configs/upload',
+                    dst=f'{project_folder}/upload'
+                )
 
     def _generate_provision_text(self, src, dst, title: str, program: str):
         hash_number = 55
