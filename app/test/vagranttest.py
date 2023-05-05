@@ -255,6 +255,9 @@ class VagrantCheckFolderVbJsonExistence(unittest.TestCase):
             new_provision_file_name,
             os.listdir(constants.vagrant_provs_confs_path)
         )
+        os.remove(
+            f'{constants.vagrant_provs_confs_path}/{new_provision_file_name}'
+        )
 
 
 if __name__ == '__main__':
