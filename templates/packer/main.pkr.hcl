@@ -87,7 +87,7 @@ build {
       # "scripts/install/install-ly.sh",
       # "scripts/install/install-vb-guest-utils.sh",
       # "scripts/clean.sh",
-      # "scripts/prepare-for-upload.sh",
+      # "scripts/prepare_to_upload.sh",
     ]
     start_retry_timeout = "${var.start_retry_timeout}"
   }
