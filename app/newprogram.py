@@ -19,16 +19,14 @@ def make_program_folder(programs: list = []):
         new_program_path = f'{constants.programs_path}/{program}'
         # create program folder
         os.mkdir(new_program_path)
-        # create configs folder
-        os.mkdir(f'{new_program_path}/configs')
         # create config file in configs
-        with open(f'{new_program_path}/configs/config.sh', 'w') as config_file:
+        with open(f'{new_program_path}/config.sh', 'w') as config_file:
             config_file.write("#!/bin/bash")
-        # create upload folder in configs
-        os.mkdir(f'{new_program_path}/configs/upload')
+        # create upload folder
+        os.mkdir(f'{new_program_path}/upload')
         # create prepare to upload file
         with open(
-            file=f'{new_program_path}/configs/upload/prepare_to_upload.sh',
+            file=f'{new_program_path}/upload/prepare_to_upload.sh',
             mode='w'
         ) as upload_file:
             upload_file.write("#!/bin/bash")
