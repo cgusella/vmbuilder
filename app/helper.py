@@ -97,7 +97,7 @@ def get_local_virtual_boxes():
     return [item.split()[0].replace('"', '') for item in items if item]
 
 
-def replace_configs_in_vagrantfile(configs: dict, file_path):
+def replace_configs_in_vagrantfile(configs: dict, file_path: str):
     with open(file_path, "r") as file:
         lines = file.readlines()
 
@@ -161,7 +161,10 @@ def convert_argv_list_to_dict():
     return good_arguments
 
 
-def empty_script(script: str):
+def is_empty_script(script: str):
+    """
+    Return True the given script is empty
+    """
     with open(script) as script_file:
         lines = script_file.readlines()
 
@@ -169,31 +172,25 @@ def empty_script(script: str):
         if line in ['#!/bin/bash', '#!/bin/bash\n']:
             lines.remove(line)
 
-    empty_file = not any(lines)
-    return empty_file, lines
+    return not any(lines)
 
 
-def get_upload_files_from_scripts(scripts: list):
-    upload_files_scripts = dict()
-    for script in scripts:
-        with open(f'{constants.custom_scripts_path}/{script}', 'r') as file:
-            lines = file.readlines()
-        for line in lines:
-            if line.startswith('cp '):
-                upload_files_scripts[
-                    line.strip().split()[1].split('/')[-1]
-                ] = script
-    return upload_files_scripts
-
-
-def get_upload_files_from_config_scripts(programs: list):
-    upload_files_scripts = dict()
+def get_programs_upload_files(programs: list) -> dict:
+    """
+    Return a dictionary with programs as keys and list of
+    upload file names as value
+    """
+    program_upload_files = dict()
     for program in programs:
-        with open(f'{constants.programs_path}/{program}/configs/config.sh', 'r') as file:
+        with open(
+            f'{constants.programs_path}/{program}/config.sh', 'r'
+        ) as file:
             lines = file.readlines()
+        program_upload_files[program] = list()
         for line in lines:
             if line.startswith('cp '):
-                upload_files_scripts[
-                    line.strip().split()[1].split('/')[-1]
-                ] = program
-    return upload_files_scripts
+                upload_file_name = line.strip().split()[1].split('/')[-1]
+                program_upload_files[program].append(
+                    upload_file_name
+                )
+    return program_upload_files

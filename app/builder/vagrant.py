@@ -9,14 +9,16 @@ from error import (
     ExistenceVirtualBoxError,
     JsonConfigCopiedError,
     FileExtesionError,
+    NoFileToUploadError
 )
 from helper import (
     convert_argv_list_to_dict,
-    empty_script,
     get_local_virtual_boxes,
-    replace_configs_in_vagrantfile,
+    get_programs_upload_files,
+    is_empty_script,
     VAGRANT_FLAGS_TO_ERROR,
 )
+from typing import List
 
 
 class Vagrant(Builder):
@@ -24,12 +26,15 @@ class Vagrant(Builder):
         self.arguments: dict = convert_argv_list_to_dict()
         self.machine_path: str = constants.vagrant_machines_path
         self.provisions_configs = constants.vagrant_provs_confs_path
+        self.vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         self.configs: dict = dict()
         self.provisions: dict = dict()
+        self.credentials: dict = dict()
 
     def check_flags(self):
         prompted_flags = set(self.arguments.keys())
-        necessary_flags = set(VAGRANT_FLAGS_TO_ERROR.keys())
+        optional_flags = {'-u'}
+        necessary_flags = set(VAGRANT_FLAGS_TO_ERROR.keys()).difference(optional_flags)
         forgotten_flags = set()
 
         # Check missing flags
@@ -57,7 +62,6 @@ class Vagrant(Builder):
                 f'The config file {self.arguments["-j"]} is not a JSON file!'
             )
 
-
     def check_new_project_folder_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
@@ -82,131 +86,171 @@ class Vagrant(Builder):
 
     def set_configs(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
-        with open(config_provision_file_path, 'r') as provisions:
-            configs = json.loads(provisions.read())["vbox_configs"]
-        configs['extra_user'] = self.arguments['-u']
-        configs['default_image'] = self.arguments['-i']
-        configs['default_hostname'] = self.arguments['-ho']
-        configs['default_vbname'] = self.arguments['-vm']
-        configs['ssh_insert_key'] = False if self.arguments['-s'] == 'password' else True
-        if configs['extra_user'] == configs['default_user']:
-            raise FlagError('Default user in provision file is the same as inserted user!')
+        with open(config_provision_file_path, 'r') as template_json:
+            configs = json.loads(template_json.read())["virtual_machine_configs"]
         self.configs = configs.copy()
 
     def set_provisions(self):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
-        with open(config_provision_file_path, 'r') as provisions:
-            provisions = json.loads(provisions.read())["vbox_provisions"]
+        with open(config_provision_file_path, 'r') as template_json:
+            provisions = json.loads(template_json.read())["provisions"]
         self.provisions = provisions.copy()
 
+    def set_credentials(self):
+        config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
+        with open(config_provision_file_path, 'r') as template_json:
+            credentials = json.loads(template_json.read())["credentials"]
+        self.credentials = credentials.copy()
+
     def create_project_folder(self):
+        """
+        Create project folder with this structure:
+        - project_name/
+            |
+            - upload/
+        """
         project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
+        # create project folder
         os.mkdir(project_folder)
 
-        vagrant_folder = constants.vagrant_templates_path
-        shutil.copyfile(
-            src=f'{vagrant_folder}/Vagrantfile',
-            dst=f'{project_folder}/Vagrantfile'
-        )
-        if self.provisions['upload']:
-            os.mkdir(f'{project_folder}/upload')
-            for path in self.generate_upload_files_path():
-                shutil.copyfile(
-                    src=path,
-                    dst=f'{project_folder}/upload/{path.split("/")[-1]}'
-                )
+        # create upload folder
+        os.mkdir(f'{project_folder}/upload')
 
-    def generate_upload_files_path(self):
-        file_to_upload_paths = list()
-        for program in self.provisions['programs']['install']:
-            for file in self.provisions['files_to_upload']:
-                if file in os.listdir(f'{constants.programs_path}/{program}/configs/upload'):
-                    file_to_upload_paths.append(f'{constants.programs_path}/{program}/configs/upload/{file}')
-                elif file in os.listdir(constants.upload_path):
-                    file_to_upload_paths.append(f'{constants.upload_path}/{file}')
-        return file_to_upload_paths
-
-    def _generate_provision_text(self, src, dst, title: str, program: str):
+    def _generate_provision_section(self, src, title: str, program: str):
+        """
+        Generate provision section in Vagrantfile.
+        It titles section as follow
+            #######################################################
+            #######   OPERATION program   #########################
+            #######################################################
+        """
         hash_number = 55
-        empty_file, lines = empty_script(script=src)
+        with open(src, 'r') as source_file:
+            lines = source_file.readlines()
 
-        if title.lower() in ['config'] and empty_file:
+        if title.lower() in ['config'] and is_empty_script(src):
             pass
         else:
-            with open(dst, 'a') as vagrantfile:
+            with open(
+                f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile',
+                'a'
+            ) as vagrantfile:
                 vagrantfile.write(f'\n\n{hash_number*"#"}\n')
                 pound_number = hash_number - 10 - len(title) - 1 - len(program) - 3
                 vagrantfile.write(f'#######   {title} {program}   {pound_number*"#"}')
                 vagrantfile.write(f'\n{hash_number*"#"}\n')
 
                 for line in lines:
+                    if line in ['#!/bin/bash', '#!/bin/bash\n']:
+                        continue
                     vagrantfile.write(f'{line.strip()}\n')
 
-    def provision(self):
-        vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
-        update_upgrade = self.provisions['programs']['update_upgrade']
-        clean = self.provisions['programs']['clean']
-        programs_to_install = self.provisions['programs']['install']
-        programs_to_uninstall = self.provisions['programs']['uninstall']
-        custom_scripts = self.provisions['custom_scripts']
-        with open(vagrantfile_path, 'a') as vagrantfile:
+    def _copy_configurations_to_upload(self, programs: List[str]):
+        """
+        Find needed files from config.sh script and copy them into project
+        upload folder
+        """
+        programs_files_upload = get_programs_upload_files(
+            programs=programs
+        )
+        missing_upload_files = str()
+        for program in programs_files_upload:
+            for upload_file in programs_files_upload[program]:
+                try:
+                    shutil.copyfile(
+                        src=f'{constants.programs_path}/{program}/upload/{upload_file}',
+                        dst=f'{self.machine_path}/{self.arguments["-n"]}/upload/{upload_file}'
+                    )
+                except FileNotFoundError:
+                    missing_upload_files += f'"{upload_file}" from "{program}"\n'
+        if missing_upload_files:
+            raise NoFileToUploadError(
+                'You specify files to upload that does not exist.\n'
+                'These are:\n'
+                f'{missing_upload_files}'
+            )
+
+    def _initialize_vagrantfile(self):
+        """Add initial configurations to Vagrantfile"""
+        with open(self.vagrantfile_path, 'w') as vagrantfile:
+            vagrantfile.write(
+                '# -*- mode: ruby -*-\n'
+                '# vi: set ft=ruby :\n'
+            )
+            vagrantfile.write(
+                'Vagrant.configure("2") do |config|\n'
+                f'    config.ssh.username = "{self.credentials["username"]}"\n'
+                f'    config.ssh.password = "{self.credentials["password"]}"\n'
+                f'    config.ssh.insert_key = "{self.arguments["-s"]}"\n'
+                f'    config.vm.hostname = "{self.arguments["-ho"]}"\n'
+                f'    config.vm.define = "{self.arguments["-ho"]}"\n'
+                f'    config.vm.provider :{self.configs["provider"]} do |vb|\n'
+                f'        vb.name = "{self.arguments["-vm"]}"\n'
+                '        vb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
+                '    end\n'
+            )
+
+    def generate_main_file(self):
+        """
+        Generate Vagrantfile following the instructions from JSON file
+        """
+        self._initialize_vagrantfile()
+        with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
-        if self.configs['extra_user']:
-            self._generate_provision_text(
-                    src=f'{constants.bash_path}/create_extra_user.sh',
-                    dst=vagrantfile_path,
-                    title=f"CREATE USER {self.configs['extra_user']}",
+        if self.arguments['-u']:
+            self._generate_provision_section(
+                    src=f'{constants.setup_scripts_path}/create_extra_user.sh',
+                    title=f"CREATE USER {self.arguments['-u']}",
                     program=''
                 )
-        if update_upgrade:
-            self._generate_provision_text(
-                    src=f'{constants.bash_path}/update_upgrade.sh',
-                    dst=vagrantfile_path,
+        if self.provisions['update_upgrade']:
+            self._generate_provision_section(
+                    src=f'{constants.setup_scripts_path}/update_upgrade.sh',
                     title="UPDATE and UPGRADE",
                     program='apt'
                 )
-        if programs_to_install:
-            for program in programs_to_install:
-                self._generate_provision_text(
+        if self.provisions['programs_to_install']:
+            for program in self.provisions['programs_to_install']:
+                self._generate_provision_section(
                     src=f'{constants.programs_path}/{program}/install.sh',
-                    dst=vagrantfile_path,
                     title="INSTALL",
                     program=program
                 )
-                self._generate_provision_text(
-                    src=f'{constants.programs_path}/{program}/configs/config.sh',
-                    dst=vagrantfile_path,
+        if self.provisions['programs_to_config']:
+            for program in self.provisions['programs_to_config']:
+                self._generate_provision_section(
+                    src=f'{constants.programs_path}/{program}/config.sh',
                     title="CONFIG",
                     program=program
                 )
-        if programs_to_uninstall:
-            for program in programs_to_uninstall:
-                self._generate_provision_text(
+            self._copy_configurations_to_upload(
+                programs=self.provisions['programs_to_config']
+            )
+        if self.provisions['programs_to_uninstall']:
+            for program in self.provisions['programs_to_uninstall']:
+                self._generate_provision_section(
                     src=f'{constants.programs_path}/{program}/uninstall.sh',
-                    dst=vagrantfile_path,
                     title="UNINSTALL",
                     program=program
                 )
-        if clean:
-            self._generate_provision_text(
-                src=f'{constants.bash_path}/clean.sh',
-                dst=vagrantfile_path,
+        if self.provisions['clean_packages']:
+            self._generate_provision_section(
+                src=f'{constants.setup_scripts_path}/clean.sh',
                 title="CLEAN apt packages",
                 program=''
             )
-        if custom_scripts:
-            for script in custom_scripts:
-                self._generate_provision_text(
+        if self.provisions['custom_scripts']:
+            for script in self.provisions['custom_scripts']:
+                self._generate_provision_section(
                     src=f'{constants.custom_scripts_path}/{script}',
-                    dst=vagrantfile_path,
                     title="CUSTOM SCRIPT",
                     program=f'{script.split(".")[0]}'
                 )
 
-        with open(vagrantfile_path, 'a') as vagrantfile:
+        with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\nSHELL\nend')
 
-        replace_configs_in_vagrantfile(self.configs, vagrantfile_path)
+        # replace_configs_in_vagrantfile(self.configs, self.vagrantfile_path)
 
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')

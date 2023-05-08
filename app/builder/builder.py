@@ -24,7 +24,7 @@ class Builder(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def provision(self):
+    def generate_main_file(self):
         pass
 
     @abc.abstractmethod

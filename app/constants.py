@@ -8,7 +8,7 @@ templates_path      = f'{vmbuilder_path}/templates'
 builds_path         = f'{vmbuilder_path}/builds'
 iso_path            = f'{vmbuilder_path}/iso'
 programs_path       = f'{vmbuilder_path}/templates/programs'
-bash_path           = f'{vmbuilder_path}/templates/programs/bash'
+setup_scripts_path  = f'{vmbuilder_path}/templates/programs/setup_scripts'
 custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
 upload_path         = f'{vmbuilder_path}/templates/upload'
 

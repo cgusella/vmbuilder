@@ -255,7 +255,7 @@ class Packer(Builder):
             file_path=f'{project_folder}/http/{self.arguments["-pf"]}'
         )
 
-    def provision(self):
+    def generate_main_file(self):
         with open(f'{constants.packer_provs_confs_path}/{self.arguments["-j"]}') as provisions:
             json_provision = json.loads(provisions.read())
         vbox_configs = json_provision['vbox_configs']
