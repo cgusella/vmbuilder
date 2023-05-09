@@ -54,7 +54,7 @@ def replace_text_in_file(search_phrase, replace_with, file_path):
     replaced_content = ""
     with open(file_path, "r") as file:
         for line in file:
-            line = line.strip()
+            line = line.rstrip()
             new_line = line.replace(search_phrase, replace_with)
             replaced_content = replaced_content + new_line + '\n'
     with open(file_path, "w") as new_file:
