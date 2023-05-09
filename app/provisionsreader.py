@@ -5,7 +5,6 @@ import os
 from error import (
     ProgramNotFoundError,
     EmptyScriptError,
-    NoFileToUploadError,
     UploadNameConflictError
 )
 from helper import (
