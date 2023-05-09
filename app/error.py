@@ -7,10 +7,6 @@ class Error(Exception):
         return self.msg
 
 
-class FlagError(Error):
-    pass
-
-
 class ExistenceProjectError(Error):
     pass
 
