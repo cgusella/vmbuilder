@@ -2,6 +2,7 @@ import constants
 import json
 import os
 import shutil
+from argparse import Namespace
 from builder.builder import Builder
 from error import (
     FlagError,
@@ -16,51 +17,19 @@ from helper import (
     get_local_virtual_boxes,
     get_programs_upload_files,
     is_empty_script,
-    VAGRANT_FLAGS_TO_ERROR,
 )
 from typing import List
 
 
 class Vagrant(Builder):
-    def __init__(self) -> None:
-        self.arguments: dict = convert_argv_list_to_dict()
+    def __init__(self, namespace) -> None:
+        self.arguments: Namespace = namespace
         self.machine_path: str = constants.vagrant_machines_path
         self.provisions_configs = constants.vagrant_provs_confs_path
         self.vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
-
-    def check_flags(self):
-        prompted_flags = set(self.arguments.keys())
-        optional_flags = {'-u'}
-        necessary_flags = set(VAGRANT_FLAGS_TO_ERROR.keys()).difference(optional_flags)
-        forgotten_flags = set()
-
-        # Check missing flags
-        if not necessary_flags.issubset(prompted_flags):
-            forgotten_flags = {
-                flag for flag in necessary_flags if flag not in prompted_flags
-            }
-
-        # Check if some flags are written but without value
-        for key in self.arguments:
-            if not self.arguments[key]:
-                forgotten_flags.add(key)
-
-        if forgotten_flags:
-            error_msg = '\n'
-            for forgotten_flag in forgotten_flags:
-                error_msg += (
-                    f'\t\t{forgotten_flag}:\t'
-                    f'{VAGRANT_FLAGS_TO_ERROR[forgotten_flag]}\n'
-                )
-            raise FlagError(error_msg)
-
-        if not self.arguments['-j'].endswith('.json'):
-            raise FileExtesionError(
-                f'The config file {self.arguments["-j"]} is not a JSON file!'
-            )
 
     def check_new_project_folder_existence(self):
         if self.arguments['-n'] in os.listdir(self.machine_path):
