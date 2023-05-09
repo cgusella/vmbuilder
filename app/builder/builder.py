@@ -4,10 +4,6 @@ import abc
 class Builder(abc.ABC):
 
     @abc.abstractmethod
-    def check_flags(self):
-        pass
-
-    @abc.abstractmethod
     def check_new_project_folder_existence(self):
         pass
 

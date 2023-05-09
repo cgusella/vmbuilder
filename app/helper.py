@@ -5,7 +5,7 @@ from error import FlagError
 import constants
 
 
-def get_provision_for_error(path_to_provs_confs: str):
+def get_json_files_for_help(path_to_provs_confs: str):
     provision_files = [
             file for file in os.listdir(
                 path_to_provs_confs
@@ -44,38 +44,12 @@ def get_local_vagrant_boxes():
     return [item.split()[0] for item in items if item]
 
 
-def get_vagrant_images_for_error():
+def get_vagrant_images_for_help():
     return '\n'.join(
         [
             '\t\t\t\t--> ' + file for file in get_local_vagrant_boxes()
         ]
     )
-
-
-COMMON_FLAGS_TO_ERROR = {
-    '-n': '[PROJECT NAME]',
-    '-vm': '[VBOXNAME]',
-    '-t': '[vagrant|packer]'
-}
-VAGRANT_FLAGS_TO_ERROR = {
-    '-u': '[EXTRA SUDOER USER]',
-    '-ho': '[HOSTNAME]',
-    '-i': f'[VAGRANT IMAGE]\n{get_vagrant_images_for_error()}',
-    '-j': f'''[VAGRANT PROVISION FILE]\n{get_provision_for_error(
-        constants.vagrant_provs_confs_path
-    )}''',
-    '-s': '[VAGRANT SSH CONNECTION TYPE]\n\t\t\t\t[password|key]'
-}
-PACKER_FLAGS_TO_ERROR = {
-    '-il': '[ISO LINK]',
-    '-if': '[ISO FILE]',
-    '-cs': '[CHECKSUM]',
-    '-j': f'''[PACKER CONFIG FILE]\n{get_provision_for_error(
-        constants.packer_provs_confs_path
-    )}''',
-    '-pf': f'[PRESEED FILE]\n{get_preseed_files_for_error()}'
-}
-COMMON_VALID_FLAGS = ('-n', '-vm', '-t')
 
 
 def replace_text_in_file(search_phrase, replace_with, file_path):

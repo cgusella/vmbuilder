@@ -1,34 +1,31 @@
 #!/usr/bin/python3
 import logging
 import sys
+from argparse import Namespace
 from provisionsreader import ProvisionConfigReader
 from error import (
     NoFileToUploadError,
     FlagError,
     ExistenceProjectError
 )
-from helper import convert_argv_list_to_dict
 from builder.packer import Packer
 from builder.vagrant import Vagrant
+from customparser import CustomArgumentParser
 
 
 sys.tracebacklimit = 0
 
-
-def get_project_class():
-    arguments = convert_argv_list_to_dict()
-    project_type = arguments['-t']
+def get_project_class(namespace: Namespace):
+    project_type = namespace.vmtype
     if project_type == 'vagrant':
-        return Vagrant()
+        return Vagrant(namespace=namespace)
     if project_type == 'packer':
-        return Packer()
-    else:
-        raise FlagError("Select from [packer|vagrant]")
+        return Packer(namespace=namespace)
 
 
 def main():
-    builder = get_project_class()
-    builder.check_flags()
+    namespace = CustomArgumentParser().get_arguments_parsed()
+    builder = get_project_class(namespace=namespace)
     try:
         builder.check_new_project_folder_existence()
     except ExistenceProjectError:

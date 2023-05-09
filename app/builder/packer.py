@@ -4,7 +4,6 @@ import os
 import shutil
 from builder.builder import Builder
 from error import (
-    FlagError,
     ExistenceProjectError,
     JsonConfigCopiedError,
     ExistenceVirtualBoxError
@@ -12,7 +11,6 @@ from error import (
 from helper import (
     convert_argv_list_to_dict,
     get_local_virtual_boxes,
-    PACKER_FLAGS_TO_ERROR,
     replace_text_in_file,
 )
 
@@ -39,28 +37,6 @@ class Packer(Builder):
         config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
         with open(config_provision_file_path, 'r') as file:
             self.provisions = json.loads(file.read())["vbox_provisions"].copy()
-
-    def check_flags(self):
-        prompted_flags = set(self.arguments.keys())
-        necessary_flags = set(PACKER_FLAGS_TO_ERROR.keys())
-        forgotten_flags = set()
-
-        # Check missing flags
-        if not necessary_flags.issubset(prompted_flags):
-            forgotten_flags = {
-                flag for flag in necessary_flags if flag not in prompted_flags
-            }
-
-        # Check if some flags are written but without value
-        for key in self.arguments:
-            if not self.arguments[key]:
-                forgotten_flags.add(key)
-
-        if forgotten_flags:
-            error_msg = '\n'
-            for forgotten_flag in forgotten_flags:
-                error_msg += f'\t\t{forgotten_flag}:\t{PACKER_FLAGS_TO_ERROR[forgotten_flag]}\n'
-            raise FlagError(error_msg)
 
     def check_new_project_folder_existence(self):
         if self.arguments['-n'] in os.listdir(self.machines_path):
