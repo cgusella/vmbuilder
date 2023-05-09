@@ -1,7 +1,5 @@
 import subprocess
-import sys
 import os
-from error import FlagError
 import constants
 
 
@@ -89,50 +87,6 @@ def replace_configs_in_vagrantfile(configs: dict, file_path: str):
     with open(file_path, 'w') as file:
         for line in lines:
             file.write(line)
-
-
-def convert_argv_list_to_dict():
-    arguments = sys.argv[1:]
-    if not arguments:
-        error_msg = '''
-        vmbuilder
-          -n\t[PROJECT NAME]
-          -vm\t[VBOXNAME]
-          -t\tvagrant\n{}
-          ---------------------------
-          -t\tpacker\n{}
-        '''
-        vagrant_error_str = ''
-        packer_error_str = ''
-        for vagrant_flag in VAGRANT_FLAGS_TO_ERROR:
-            vagrant_error_str += f'\t\t{vagrant_flag}:\t\t{VAGRANT_FLAGS_TO_ERROR[vagrant_flag]}\n'
-        for packer_flag in PACKER_FLAGS_TO_ERROR:
-            packer_error_str += f'\t\t{packer_flag}:\t\t{PACKER_FLAGS_TO_ERROR[packer_flag]}\n'
-        raise FlagError(
-            error_msg.format(vagrant_error_str, packer_error_str)
-        )
-
-    good_arguments = dict()
-    for count, arg in enumerate(arguments):
-        if arg.startswith('-'):
-            try:
-                if arguments[count + 1].startswith('-'):
-                    good_arguments[arg] = ''
-                else:
-                    good_arguments[arg] = arguments[count + 1]
-            except IndexError:
-                good_arguments[arg] = ''
-
-    undefined_args = ()
-    for good_argument in ('-n', '-vm', '-t'):
-        if not good_arguments.get(good_argument, ''):
-            undefined_args += (good_argument,)
-    error_msg = '\n'
-    if undefined_args:
-        for undefined_flag in undefined_args:
-            error_msg += f'\t{undefined_flag}\t{COMMON_FLAGS_TO_ERROR[undefined_flag]}\n'
-        raise FlagError(error_msg)
-    return good_arguments
 
 
 def is_empty_script(script: str):

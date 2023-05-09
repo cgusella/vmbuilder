@@ -5,15 +5,12 @@ import shutil
 from argparse import Namespace
 from builder.builder import Builder
 from error import (
-    FlagError,
     ExistenceProjectError,
     ExistenceVirtualBoxError,
     JsonConfigCopiedError,
-    FileExtesionError,
     NoFileToUploadError
 )
 from helper import (
-    convert_argv_list_to_dict,
     get_local_virtual_boxes,
     get_programs_upload_files,
     is_empty_script,

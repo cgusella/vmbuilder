@@ -9,7 +9,6 @@ from error import (
     ExistenceVirtualBoxError
 )
 from helper import (
-    convert_argv_list_to_dict,
     get_local_virtual_boxes,
     replace_text_in_file,
 )

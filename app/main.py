@@ -5,7 +5,6 @@ from argparse import Namespace
 from provisionsreader import ProvisionConfigReader
 from error import (
     NoFileToUploadError,
-    FlagError,
     ExistenceProjectError
 )
 from builder.packer import Packer
@@ -24,7 +23,7 @@ def get_project_class(namespace: Namespace):
 
 
 def main():
-    namespace = CustomArgumentParser().get_arguments_parsed()
+    namespace = CustomArgumentParser().get_namespace()
     builder = get_project_class(namespace=namespace)
     try:
         builder.check_new_project_folder_existence()
