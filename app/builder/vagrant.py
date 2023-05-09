@@ -16,6 +16,7 @@ from helper import (
     get_local_virtual_boxes,
     get_programs_upload_files,
     is_empty_script,
+    replace_text_in_file,
     VAGRANT_FLAGS_TO_ERROR,
 )
 from typing import List
@@ -120,11 +121,11 @@ class Vagrant(Builder):
         """
         Generate provision section in Vagrantfile.
         It titles section as follow
-            #######################################################
-            #######   OPERATION program   #########################
-            #######################################################
+            ######################################################################
+            echo ==OPERATION program==============================================
+            ######################################################################
         """
-        hash_number = 55
+        hash_number = 70
         with open(src, 'r') as source_file:
             lines = source_file.readlines()
 
@@ -135,15 +136,16 @@ class Vagrant(Builder):
                 f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile',
                 'a'
             ) as vagrantfile:
-                vagrantfile.write(f'\n\n\t{hash_number*"#"}\n')
-                pound_number = hash_number - 10 - len(title) - 1 - len(program) - 3
-                vagrantfile.write(f'\t#######   {title} {program}   {pound_number*"#"}')
-                vagrantfile.write(f'\n\t{hash_number*"#"}\n')
+                vagrantfile.write(f'\n\n\t\t{hash_number*"#"}\n')
+                pound_number = hash_number - 8 - len(title) - len(program)
+                # vagrantfile.write(f'\t#######   {title} {program}   {pound_number*"#"}')
+                vagrantfile.write(f'\t\techo =={title} {program}{pound_number*"="}')
+                vagrantfile.write(f'\n\t\t{hash_number*"#"}\n')
 
                 for line in lines:
                     if line in ['#!/bin/bash', '#!/bin/bash\n']:
                         continue
-                    vagrantfile.write(f'\t{line.strip()}\n')
+                    vagrantfile.write(f'\t\t{line.strip()}\n')
 
     def _copy_configurations_to_upload(self, programs: List[str]):
         """
@@ -179,16 +181,16 @@ class Vagrant(Builder):
             )
             vagrantfile.write(
                 'Vagrant.configure("2") do |config|\n'
-                f'    config.vm.box = "{self.arguments["-i"]}"\n'
-                f'    config.ssh.username = "{self.credentials["username"]}"\n'
-                f'    config.ssh.password = "{self.credentials["password"]}"\n'
-                f'    config.ssh.insert_key = "{self.arguments["-s"]}"\n'
-                f'    config.vm.hostname = "{self.arguments["-ho"]}"\n'
-                f'    config.vm.define "{self.arguments["-ho"]}"\n'
-                f'    config.vm.provider :{self.configs["provider"]} do |vb|\n'
-                f'        vb.name = "{self.arguments["-vm"]}"\n'
-                '        vb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
-                '    end\n'
+                f'\tconfig.vm.box = "{self.arguments["-i"]}"\n'
+                f'\tconfig.ssh.username = "{self.credentials["username"]}"\n'
+                f'\tconfig.ssh.password = "{self.credentials["password"]}"\n'
+                f'\tconfig.ssh.insert_key = "{self.arguments["-s"]}"\n'
+                f'\tconfig.vm.hostname = "{self.arguments["-ho"]}"\n'
+                f'\tconfig.vm.define "{self.arguments["-ho"]}"\n'
+                f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'
+                f'\t\tvb.name = "{self.arguments["-vm"]}"\n'
+                '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
+                '\tend\n'
             )
 
     def generate_main_file(self):
@@ -197,7 +199,7 @@ class Vagrant(Builder):
         """
         self._initialize_vagrantfile()
         with open(self.vagrantfile_path, 'a') as vagrantfile:
-            vagrantfile.write('\nconfig.vm.provision "shell", inline: <<-SHELL\n')
+            vagrantfile.write('\n\tconfig.vm.provision "shell", inline: <<-SHELL\n')
         if self.arguments['-u']:
             self._generate_provision_section(
                     src=f'{constants.setup_scripts_path}/create_extra_user.sh',
@@ -251,6 +253,11 @@ class Vagrant(Builder):
         with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\nSHELL\nend')
 
+        replace_text_in_file(
+            search_phrase='extra_user',
+            replace_with=self.arguments['-u'],
+            file_path=f'{constants.machines_path}/vagrant/{self.arguments["-n"]}/Vagrantfile'
+        )
         # replace_configs_in_vagrantfile(self.configs, self.vagrantfile_path)
 
     def delete_project(self):
