@@ -11,6 +11,7 @@ from helper import convert_argv_list_to_dict
 from builder.packer import Packer
 from builder.vagrant import Vagrant
 
+
 sys.tracebacklimit = 0
 
 
@@ -43,7 +44,6 @@ def main():
     provisions_configs_reader = ProvisionConfigReader(
         f'{builder.provisions_configs}/{builder.arguments["-j"]}'
     )
-    provisions_configs_reader.check_program_upload_files_existence()
     provisions_configs_reader.check_programs_existence_for(
         provision_key="programs_to_install"
     )
@@ -62,6 +62,7 @@ def main():
     provisions_configs_reader.check_scripts_emptyness_for(
         provision_key='programs_to_config'
     )
+    provisions_configs_reader.check_program_upload_files_existence()
     provisions_configs_reader.check_upload_file_name_duplicates()
     provisions_configs_reader.check_custom_script_existence()
 
