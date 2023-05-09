@@ -1,4 +1,5 @@
 import argparse
+import sys
 import constants
 from helper import (
     get_json_files_for_help,
@@ -25,11 +26,17 @@ class CustomArgumentParser:
             choices=['vagrant', 'packer'],
             required=True
         )
-        common_namespace, _ = self.parser.parse_known_args()
-        if common_namespace.vmtype == 'vagrant':
+        if sys.argv[1] in ['-h', '--help']:
+            print('dentro')
             self.add_vagrant_args()
-        elif common_namespace.vmtype == 'packer':
             self.add_packer_args()
+        else:
+            common_namespace, _ = self.parser.parse_known_args()
+            print(common_namespace)
+            if common_namespace.vmtype == 'vagrant':
+                self.add_vagrant_args()
+            elif common_namespace.vmtype == 'packer':
+                self.add_packer_args()
 
     def get_arguments_parsed(self):
         return self.parser.parse_args()
@@ -60,7 +67,6 @@ class CustomArgumentParser:
             '--ssh',
             dest='connection',
             choices=['password', 'key'],
-            help='If expressed, set connection to "ssh". Otherwise "password"',
             required=True
         )
 
