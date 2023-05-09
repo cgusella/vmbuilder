@@ -1,10 +1,13 @@
 import argparse
+import logging
 import sys
 import constants
 from helper import (
     get_json_files_for_help,
     get_vagrant_images_for_help,
 )
+
+logger = logging.getLogger('vmbuilder')
 
 
 class CustomArgumentParser:
@@ -14,6 +17,25 @@ class CustomArgumentParser:
             prog='vmbuilder',
             description='Create a virtual machines, Vagrant or Packer'
         )
+        if not sys.argv[1:]:
+            logger.error('Need arguments. Specify "-h/--help" for more info')
+            exit()
+        elif sys.argv[1:][0] in ['-h', '--help']:
+            self.parse_all_arguments()
+            exit()
+
+    def get_namespace(self):
+        self.add_common_flags()
+        common_namespace, _ = self.parser.parse_known_args()
+        if common_namespace.vmtype == 'vagrant':
+            self.add_vagrant_args()
+        elif common_namespace.vmtype == 'packer':
+            self.add_packer_args()
+
+        return self.parser.parse_args()
+
+    def add_common_flags(self):
+        """Add flags common with both Vagrant and Packer"""
         self.parser.add_argument(
             '-n', '--name', required=True
         )
@@ -26,19 +48,11 @@ class CustomArgumentParser:
             choices=['vagrant', 'packer'],
             required=True
         )
-        if sys.argv[1] in ['-h', '--help']:
-            print('dentro')
-            self.add_vagrant_args()
-            self.add_packer_args()
-        else:
-            common_namespace, _ = self.parser.parse_known_args()
-            print(common_namespace)
-            if common_namespace.vmtype == 'vagrant':
-                self.add_vagrant_args()
-            elif common_namespace.vmtype == 'packer':
-                self.add_packer_args()
 
-    def get_arguments_parsed(self):
+    def parse_all_arguments(self):
+        self.add_common_flags()
+        self.add_vagrant_args()
+        self.add_packer_args()
         return self.parser.parse_args()
 
     def add_vagrant_args(self):
