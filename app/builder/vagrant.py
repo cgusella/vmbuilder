@@ -15,7 +15,6 @@ from helper import (
     get_programs_upload_files,
     is_empty_script,
     replace_text_in_file,
-    VAGRANT_FLAGS_TO_ERROR,
 )
 from typing import List
 
