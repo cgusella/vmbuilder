@@ -25,7 +25,8 @@ class CustomArgumentParser:
             exit()
 
     def get_namespace(self):
-        self.add_common_flags()
+        """Return the namespace after vagrant or packer is specified"""
+        self.add_common_args()
         common_namespace, _ = self.parser.parse_known_args()
         if common_namespace.vmtype == 'vagrant':
             self.add_vagrant_args()
@@ -34,7 +35,7 @@ class CustomArgumentParser:
 
         return self.parser.parse_args()
 
-    def add_common_flags(self):
+    def add_common_args(self):
         """Add flags common with both Vagrant and Packer"""
         self.parser.add_argument(
             '-n', '--name', required=True
@@ -50,7 +51,7 @@ class CustomArgumentParser:
         )
 
     def parse_all_arguments(self):
-        self.add_common_flags()
+        self.add_common_args()
         self.add_vagrant_args()
         self.add_packer_args()
         return self.parser.parse_args()
