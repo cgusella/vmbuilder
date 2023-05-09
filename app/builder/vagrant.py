@@ -135,15 +135,15 @@ class Vagrant(Builder):
                 f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile',
                 'a'
             ) as vagrantfile:
-                vagrantfile.write(f'\n\n{hash_number*"#"}\n')
+                vagrantfile.write(f'\n\n\t{hash_number*"#"}\n')
                 pound_number = hash_number - 10 - len(title) - 1 - len(program) - 3
-                vagrantfile.write(f'#######   {title} {program}   {pound_number*"#"}')
-                vagrantfile.write(f'\n{hash_number*"#"}\n')
+                vagrantfile.write(f'\t#######   {title} {program}   {pound_number*"#"}')
+                vagrantfile.write(f'\n\t{hash_number*"#"}\n')
 
                 for line in lines:
                     if line in ['#!/bin/bash', '#!/bin/bash\n']:
                         continue
-                    vagrantfile.write(f'{line.strip()}\n')
+                    vagrantfile.write(f'\t{line.strip()}\n')
 
     def _copy_configurations_to_upload(self, programs: List[str]):
         """
@@ -175,15 +175,16 @@ class Vagrant(Builder):
         with open(self.vagrantfile_path, 'w') as vagrantfile:
             vagrantfile.write(
                 '# -*- mode: ruby -*-\n'
-                '# vi: set ft=ruby :\n'
+                '# vi: set ft=ruby :\n\n'
             )
             vagrantfile.write(
                 'Vagrant.configure("2") do |config|\n'
+                f'    config.vm.box = "{self.arguments["-i"]}"\n'
                 f'    config.ssh.username = "{self.credentials["username"]}"\n'
                 f'    config.ssh.password = "{self.credentials["password"]}"\n'
                 f'    config.ssh.insert_key = "{self.arguments["-s"]}"\n'
                 f'    config.vm.hostname = "{self.arguments["-ho"]}"\n'
-                f'    config.vm.define = "{self.arguments["-ho"]}"\n'
+                f'    config.vm.define "{self.arguments["-ho"]}"\n'
                 f'    config.vm.provider :{self.configs["provider"]} do |vb|\n'
                 f'        vb.name = "{self.arguments["-vm"]}"\n'
                 '        vb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
