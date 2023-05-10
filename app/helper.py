@@ -4,6 +4,10 @@ import constants
 
 
 def get_json_files_for_help(path_to_provs_confs: str):
+    """
+    Return json files available but template.json as string.\n
+    Each name is separated by a pipe.
+    """
     provision_files = [
             file for file in os.listdir(
                 path_to_provs_confs
@@ -11,9 +15,9 @@ def get_json_files_for_help(path_to_provs_confs: str):
         ]
     if not provision_files:
         message = (
-            "\t\t\t\tThere are no provision files.\n"
-            "\t\t\t\tTo create a new one just specify it\n"
-            "\t\t\t\tusing \"-j\""
+            'There are no JSON files. '
+            'To create a new one is sufficient to specify it '
+            'using the relative JSON flag from the main app. '
         )
     else:
         message = ' | '.join(
@@ -24,23 +28,33 @@ def get_json_files_for_help(path_to_provs_confs: str):
     return message
 
 
-def get_preseed_files_for_error():
-    return '\n'.join(
+def get_preseed_files_for_help():
+    """
+    Return preseed file names available in http folder for packer machines
+    as string.\n
+    Each name is separated by a pipe.
+    """
+    help_message = " | ".join(
         [
-            '\t\t\t\t--> ' + file for file in os.listdir(
+            f'{file}' for file in os.listdir(
                 constants.packer_http_path
             ) if file.startswith('preseed')
         ]
     )
+    return help_message
 
 
 def get_local_vagrant_boxes():
+    """
+    Return installed vagrant box list as string.\n
+    Each vagrant box name is separated by a pipe.
+    """
     output = subprocess.run(
         "vagrant box list",
         shell=True,
         capture_output=True
-    )
-    return output.stdout.decode("ascii").strip().replace("\n", " | ")
+    ).stdout.decode("ascii").strip().replace("\n", " | ")
+    return output
 
 
 def replace_text_in_file(search_phrase, replace_with, file_path):

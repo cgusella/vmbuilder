@@ -4,7 +4,8 @@ import sys
 import constants
 from helper import (
     get_json_files_for_help,
-    get_local_vagrant_boxes
+    get_local_vagrant_boxes,
+    get_preseed_files_for_help
 )
 
 logger = logging.getLogger('vmbuilder')
@@ -106,4 +107,9 @@ class CustomArgumentParser:
             ),
             required=True
         )
-        packer_flags.add_argument('-pf', '--preseedfile', dest='preseed')
+        packer_flags.add_argument(
+            '-pf',
+            '--preseedfile',
+            dest='preseed',
+            help=get_preseed_files_for_help()
+        )
