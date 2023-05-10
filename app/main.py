@@ -9,7 +9,7 @@ from error import (
 )
 from builder.packer import Packer
 from builder.vagrant import Vagrant
-from customparser import CustomArgumentParser
+from argumentparser.customparser import CustomArgumentParser
 
 
 sys.tracebacklimit = 0

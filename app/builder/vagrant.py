@@ -4,13 +4,13 @@ import os
 import shutil
 from argparse import Namespace
 from builder.builder import Builder
-from error import (
+from builder.error import (
     ExistenceProjectError,
     ExistenceVirtualBoxError,
     JsonConfigCopiedError,
     NoFileToUploadError
 )
-from helper import (
+from builder.helper import (
     get_local_virtual_boxes,
     get_programs_upload_files,
     is_empty_script,
