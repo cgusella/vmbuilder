@@ -2,12 +2,12 @@
 import constants
 import json
 import os
-from error import (
+from builder.error import (
     ProgramNotFoundError,
     EmptyScriptError,
     UploadNameConflictError
 )
-from helper import (
+from builder.helper import (
     is_empty_script,
     get_programs_upload_files
 )
