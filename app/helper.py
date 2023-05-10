@@ -16,9 +16,9 @@ def get_json_files_for_help(path_to_provs_confs: str):
             "\t\t\t\tusing \"-j\""
         )
     else:
-        message = '\n'.join(
+        message = ' | '.join(
             [
-                f'\t\t\t\t--> {file}' for file in provision_files
+                f'{file}' for file in provision_files
             ]
         )
     return message
@@ -35,19 +35,12 @@ def get_preseed_files_for_error():
 
 
 def get_local_vagrant_boxes():
-    bash_command = "vagrant box list"
-    process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
-    output, _ = process.communicate()
-    items = output.decode("utf-8").split('\n')
-    return [item.split()[0] for item in items if item]
-
-
-def get_vagrant_images_for_help():
-    return '\n'.join(
-        [
-            '\t\t\t\t--> ' + file for file in get_local_vagrant_boxes()
-        ]
+    output = subprocess.run(
+        "vagrant box list",
+        shell=True,
+        capture_output=True
     )
+    return output.stdout.decode("ascii").strip().replace("\n", " | ")
 
 
 def replace_text_in_file(search_phrase, replace_with, file_path):
