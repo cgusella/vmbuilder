@@ -3,7 +3,7 @@ import logging
 import sys
 from argparse import Namespace
 from provisionsreader import ProvisionConfigReader
-from error import (
+from builder.error import (
     NoFileToUploadError,
     ExistenceProjectError
 )
