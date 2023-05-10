@@ -69,31 +69,15 @@ def replace_text_in_file(search_phrase, replace_with, file_path):
 
 
 def get_local_virtual_boxes():
-    bash_command = "VBoxManage list vms"
-    process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
-    output, _ = process.communicate()
-    items = output.decode("utf-8").split('\n')
-    return [item.split()[0].replace('"', '') for item in items if item]
-
-
-def replace_configs_in_vagrantfile(configs: dict, file_path: str):
-    with open(file_path, "r") as file:
-        lines = file.readlines()
-
-    for default_key in configs:
-        if isinstance(configs[default_key], str):
-            for count, line in enumerate(lines):
-                lines[count] = line.replace(default_key, configs[default_key])
-        elif isinstance(configs[default_key], bool):
-            bool_value = "true" if configs[default_key] else "false"
-            for count, line in enumerate(lines):
-                if "SSH_INSERT_KEY" in line:
-                    lines[count] = line.replace(default_key, bool_value)
-                    lines[count] = ''.join(lines[count].split('"'))
-
-    with open(file_path, 'w') as file:
-        for line in lines:
-            file.write(line)
+    """
+    Return the virtual machine names list as string.
+    """
+    vmbox_list = subprocess.run(
+        "VBoxManage list vms",
+        shell=True,
+        capture_output=True
+    ).stdout.decode("ascii")
+    return vmbox_list
 
 
 def is_empty_script(script: str):

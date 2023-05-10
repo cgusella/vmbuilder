@@ -225,7 +225,6 @@ class Vagrant(Builder):
                 replace_with=self.arguments.user,
                 file_path=f'{constants.machines_path}/vagrant/{self.arguments.name}/Vagrantfile'
             )
-        # replace_configs_in_vagrantfile(self.configs, self.vagrantfile_path)
 
     def delete_project(self):
         shutil.rmtree(f'{self.machine_path}/{self.arguments.name}')
