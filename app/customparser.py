@@ -39,13 +39,13 @@ class CustomArgumentParser:
     def add_common_args(self):
         """Add flags common with both Vagrant and Packer"""
         self.parser.add_argument(
-            '-n', '--name', required=True, dest='name'
+            '-n', required=True, dest='name'
         )
         self.parser.add_argument(
-            '-vm', '--vboxname', required=True, dest='vboxname'
+            '-vm', required=True, dest='vboxname'
         )
         self.parser.add_argument(
-            '-t', '--vmtype',
+            '-t',
             dest='vmtype',
             choices=['vagrant', 'packer'],
             required=True
@@ -63,15 +63,17 @@ class CustomArgumentParser:
             'Vagrant flags',
             'manage vagrant flags'
         )
-        vagrant_flags.add_argument('-u', '--user', dest='user', required=False)
-        vagrant_flags.add_argument('-o', '--hostname', dest='hostname',
-                                   required=True)
-        vagrant_flags.add_argument('-i', '--image', dest='image',
-                                   help=get_local_vagrant_boxes(),
+        vagrant_flags.add_argument('-u', dest='user', required=False)
+        vagrant_flags.add_argument('-o', dest='hostname',
                                    required=True)
         vagrant_flags.add_argument(
+            '-i',
+            dest='image',
+            help=get_local_vagrant_boxes(),
+            required=True
+        )
+        vagrant_flags.add_argument(
             '-vj',
-            '--vagrantjson',
             dest='json',
             help=get_json_files_for_help(
                 constants.vagrant_provs_confs_path
@@ -80,7 +82,6 @@ class CustomArgumentParser:
         )
         vagrant_flags.add_argument(
             '-s',
-            '--ssh',
             dest='connection',
             choices=['password', 'key'],
             required=True
@@ -92,15 +93,11 @@ class CustomArgumentParser:
             'Packer flags',
             'manage packer flags'
         )
-        packer_flags.add_argument('-il', '--isolink', dest='isolink',
-                                  required=True)
-        packer_flags.add_argument('-if', '--isofile', dest='isofile',
-                                  required=True)
-        packer_flags.add_argument('-cs', '--checksum', dest='checksum',
-                                  required=True)
+        packer_flags.add_argument('-il', dest='isolink', required=True)
+        packer_flags.add_argument('-if', dest='isofile', required=True)
+        packer_flags.add_argument('-cs', dest='checksum', required=True)
         packer_flags.add_argument(
             '-pj',
-            '--packerjson',
             dest='json',
             help=get_json_files_for_help(
                 constants.packer_provs_confs_path
@@ -109,7 +106,6 @@ class CustomArgumentParser:
         )
         packer_flags.add_argument(
             '-pf',
-            '--preseedfile',
             dest='preseed',
             help=get_preseed_files_for_help()
         )

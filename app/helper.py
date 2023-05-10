@@ -20,7 +20,8 @@ def get_json_files_for_help(path_to_provs_confs: str):
             'using the relative JSON flag from the main app. '
         )
     else:
-        message = ' | '.join(
+        message = 'Select among: '
+        message += ' | '.join(
             [
                 f'{file}' for file in provision_files
             ]
@@ -34,7 +35,8 @@ def get_preseed_files_for_help():
     as string.\n
     Each name is separated by a pipe.
     """
-    help_message = " | ".join(
+    help_message = 'Select among: '
+    help_message += " | ".join(
         [
             f'{file}' for file in os.listdir(
                 constants.packer_http_path
