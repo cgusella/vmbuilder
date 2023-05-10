@@ -23,7 +23,6 @@ class CustomArgumentParser:
             exit()
         elif sys.argv[1:][0] in ['-h', '--help']:
             self.parse_all_arguments()
-            exit()
 
     def get_namespace(self):
         """Return the namespace after vagrant or packer is specified"""
@@ -55,7 +54,7 @@ class CustomArgumentParser:
         self.add_common_args()
         self.add_vagrant_args()
         self.add_packer_args()
-        return self.parser.parse_args()
+        self.parser.parse_args()
 
     def add_vagrant_args(self):
         """Parse vagrant argument"""

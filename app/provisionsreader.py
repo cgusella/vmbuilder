@@ -79,6 +79,7 @@ class ProvisionConfigReader:
         Chack that programs specified exist.
         If it does not, create a program folder and raise an error
         """
+        operation = provision_key.split('_')[-1]
         programs = self.provisions[provision_key]
         not_found_provision_programs = list()
         if programs:
@@ -96,7 +97,7 @@ class ProvisionConfigReader:
                     'The following program{} '
                     f'{", ".join(not_found_provision_programs)} '
                     '{} created at /templates/programs folder.\nFill the '
-                    'appropriate files [install.sh, uninstall.sh, config.sh] '
+                    f'appropriate {operation}.sh files '
                     'and come back then!'.format(*numerality)
                 )
                 raise ProgramNotFoundError(error_msg)
