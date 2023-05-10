@@ -24,47 +24,47 @@ class Vagrant(Builder):
         self.arguments: Namespace = namespace
         self.machine_path: str = constants.vagrant_machines_path
         self.provisions_configs = constants.vagrant_provs_confs_path
-        self.vagrantfile_path = f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile'
+        self.vagrantfile_path = f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
 
     def check_new_project_folder_existence(self):
-        if self.arguments['-n'] in os.listdir(self.machine_path):
+        if self.arguments.name in os.listdir(self.machine_path):
             raise ExistenceProjectError("[ERROR] Project already exists!")
 
     def check_virtualbox_existence(self):
-        if self.arguments['-vm'] in get_local_virtual_boxes():
+        if self.arguments.vboxname in get_local_virtual_boxes():
             raise ExistenceVirtualBoxError(
-                f'The virtualbox {self.arguments["-vm"]} already exists!'
+                f'The virtualbox {self.arguments.vboxname} already exists!'
             )
 
     def check_provision_cfg_json_existence(self):
-        if self.arguments['-j'] not in os.listdir(self.provisions_configs):
+        if self.arguments.json not in os.listdir(self.provisions_configs):
             shutil.copyfile(
                 src=f'{self.provisions_configs}/template.json',
-                dst=f'{self.provisions_configs}/{self.arguments["-j"]}'
+                dst=f'{self.provisions_configs}/{self.arguments.json}'
             )
             raise JsonConfigCopiedError(
-                f'The json file "{self.arguments["-j"]}" '
+                f'The json file "{self.arguments.json}" '
                 f'is created at {constants.vagrant_provs_confs_path} folder.\n'
                 'Fill it up and come back then!'
             )
 
     def set_configs(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
+        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
         with open(config_provision_file_path, 'r') as template_json:
             configs = json.loads(template_json.read())["virtual_machine_configs"]
         self.configs = configs.copy()
 
     def set_provisions(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
+        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
         with open(config_provision_file_path, 'r') as template_json:
             provisions = json.loads(template_json.read())["provisions"]
         self.provisions = provisions.copy()
 
     def set_credentials(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments["-j"]}'
+        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
         with open(config_provision_file_path, 'r') as template_json:
             credentials = json.loads(template_json.read())["credentials"]
         self.credentials = credentials.copy()
@@ -76,7 +76,7 @@ class Vagrant(Builder):
             |
             - upload/
         """
-        project_folder = f'{self.machine_path}/{self.arguments["-n"]}'
+        project_folder = f'{self.machine_path}/{self.arguments.name}'
         # create project folder
         os.mkdir(project_folder)
 
@@ -99,7 +99,7 @@ class Vagrant(Builder):
             pass
         else:
             with open(
-                f'{self.machine_path}/{self.arguments["-n"]}/Vagrantfile',
+                f'{self.machine_path}/{self.arguments.name}/Vagrantfile',
                 'a'
             ) as vagrantfile:
                 vagrantfile.write(f'\n\n\t\t{hash_number*"#"}\n')
@@ -127,7 +127,7 @@ class Vagrant(Builder):
                 try:
                     shutil.copyfile(
                         src=f'{constants.programs_path}/{program}/upload/{upload_file}',
-                        dst=f'{self.machine_path}/{self.arguments["-n"]}/upload/{upload_file}'
+                        dst=f'{self.machine_path}/{self.arguments.name}/upload/{upload_file}'
                     )
                 except FileNotFoundError:
                     missing_upload_files += f'"{upload_file}" from "{program}"\n'
@@ -147,14 +147,14 @@ class Vagrant(Builder):
             )
             vagrantfile.write(
                 'Vagrant.configure("2") do |config|\n'
-                f'\tconfig.vm.box = "{self.arguments["-i"]}"\n'
+                f'\tconfig.vm.box = "{self.arguments.image}"\n'
                 f'\tconfig.ssh.username = "{self.credentials["username"]}"\n'
                 f'\tconfig.ssh.password = "{self.credentials["password"]}"\n'
-                f'\tconfig.ssh.insert_key = "{self.arguments["-s"]}"\n'
-                f'\tconfig.vm.hostname = "{self.arguments["-ho"]}"\n'
-                f'\tconfig.vm.define "{self.arguments["-ho"]}"\n'
+                f'\tconfig.ssh.insert_key = "{self.arguments.connection}"\n'
+                f'\tconfig.vm.hostname = "{self.arguments.hostname}"\n'
+                f'\tconfig.vm.define "{self.arguments.hostname}"\n'
                 f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'
-                f'\t\tvb.name = "{self.arguments["-vm"]}"\n'
+                f'\t\tvb.name = "{self.arguments.vboxname}"\n'
                 '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
                 '\tend\n'
             )
@@ -166,10 +166,10 @@ class Vagrant(Builder):
         self._initialize_vagrantfile()
         with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\tconfig.vm.provision "shell", inline: <<-SHELL\n')
-        if self.arguments['-u']:
+        if self.arguments.user:
             self._generate_provision_section(
                     src=f'{constants.setup_scripts_path}/create_extra_user.sh',
-                    title=f"CREATE USER {self.arguments['-u']}",
+                    title=f"CREATE USER {self.arguments.user}",
                     program=''
                 )
         if self.provisions['update_upgrade']:
@@ -219,12 +219,13 @@ class Vagrant(Builder):
         with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\nSHELL\nend')
 
-        replace_text_in_file(
-            search_phrase='extra_user',
-            replace_with=self.arguments['-u'],
-            file_path=f'{constants.machines_path}/vagrant/{self.arguments["-n"]}/Vagrantfile'
-        )
+        if self.arguments.user:
+            replace_text_in_file(
+                search_phrase='extra_user',
+                replace_with=self.arguments.user,
+                file_path=f'{constants.machines_path}/vagrant/{self.arguments.name}/Vagrantfile'
+            )
         # replace_configs_in_vagrantfile(self.configs, self.vagrantfile_path)
 
     def delete_project(self):
-        shutil.rmtree(f'{self.machine_path}/{self.arguments["-n"]}')
+        shutil.rmtree(f'{self.machine_path}/{self.arguments.name}')

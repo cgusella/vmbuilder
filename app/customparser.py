@@ -4,7 +4,7 @@ import sys
 import constants
 from helper import (
     get_json_files_for_help,
-    get_vagrant_images_for_help,
+    get_local_vagrant_boxes
 )
 
 logger = logging.getLogger('vmbuilder')
@@ -38,10 +38,10 @@ class CustomArgumentParser:
     def add_common_args(self):
         """Add flags common with both Vagrant and Packer"""
         self.parser.add_argument(
-            '-n', '--name', required=True
+            '-n', '--name', required=True, dest='name'
         )
         self.parser.add_argument(
-            '-vm', '--vboxname', required=True
+            '-vm', '--vboxname', required=True, dest='vboxname'
         )
         self.parser.add_argument(
             '-t', '--vmtype',
@@ -66,7 +66,7 @@ class CustomArgumentParser:
         vagrant_flags.add_argument('-o', '--hostname', dest='hostname',
                                    required=True)
         vagrant_flags.add_argument('-i', '--image', dest='image',
-                                   help=get_vagrant_images_for_help(),
+                                   help=get_local_vagrant_boxes(),
                                    required=True)
         vagrant_flags.add_argument(
             '-vj',
