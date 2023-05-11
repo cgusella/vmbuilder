@@ -12,7 +12,7 @@ from builder.vagrant import Vagrant
 from argumentparser.customparser import CustomArgumentParser
 
 
-sys.tracebacklimit = 0
+# sys.tracebacklimit = 0
 
 
 def get_project_class(namespace: Namespace):

@@ -87,7 +87,7 @@ class CustomArgumentParser:
         )
 
     def add_packer_args(self):
-        """Parse vagrant argument"""
+        """Parse packer argument"""
         packer_flags = self.parser.add_argument_group(
             'Packer flags',
             'manage packer flags'

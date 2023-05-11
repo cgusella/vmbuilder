@@ -1,7 +1,18 @@
 {
-  "vbox_configs": {
-    "default_user": "vagrant",
-    "default_pass": "vagrant",
+  "provisions": {
+    "programs_to_install": [],
+    "programs_to_uninstall": [],
+    "programs_to_config": [],
+    "custom_scripts": [],
+    "update_upgrade": false,
+    "update_upgrade_full": false,
+    "clean_packages": false
+  },
+  "credentials": {
+    "username": "default_user",
+    "password": "deafult_pass"
+  },
+  "virtual_machine_configs": {
     "cpus":{
       "description":"Number of CPU cores for the machine",
       "default":"2"
@@ -190,17 +201,5 @@
       "description":"",
       "default":""
     }
-  },
-  "vbox_provisions": {
-    "programs": {
-      "update_upgrade": true,
-      "update_upgrade_full": true,
-      "install": [],
-      "uninstall": [],
-      "clean": true
-    },
-    "custom_scripts": [],
-    "upload": false,
-    "files_to_upload": []
   }
 }
