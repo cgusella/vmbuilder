@@ -1,3 +1,3 @@
 #!/bin/bash
 apt-get update
-apt-get --yes upgrade
+DEBIAN_FRONTEND=noninteractive apt-get --yes -o Dpkg::Options::="--force-confnew" upgrade
