@@ -95,6 +95,9 @@ class Vagrant(Builder):
         with open(src, 'r') as source_file:
             lines = source_file.readlines()
 
+        if "create_extra_user.sh" in src:
+            lines = [line.replace("extra_user", self.arguments.user) for line in lines]
+            
         if title.lower() in ['config'] and is_empty_script(src):
             pass
         else:
@@ -131,6 +134,12 @@ class Vagrant(Builder):
                     )
                 except FileNotFoundError:
                     missing_upload_files += f'"{upload_file}" from "{program}"\n'
+                if upload_file == "motd":
+                    replace_text_in_file(
+                        search_phrase="extra_user",
+                        replace_with=self.arguments.user,
+                        file_path=f'{self.machine_path}/{self.arguments.name}/upload/{upload_file}'
+                    )
         if missing_upload_files:
             raise NoFileToUploadError(
                 'You specify files to upload that does not exist.\n'
@@ -204,7 +213,7 @@ class Vagrant(Builder):
                 )
         if self.provisions['clean_packages']:
             self._generate_provision_section(
-                src=f'{constants.setup_scripts_path}/clean.sh',
+                src=f'{constants.setup_scripts_path}/clean_packages.sh',
                 title="CLEAN apt packages",
                 program=''
             )
