@@ -44,6 +44,7 @@ class ProvisionConfigReader:
         upload_files = list()
         for program in program_upload_files:
             upload_files.extend(program_upload_files[program])
+
         # check rindondance between names
         duplicates = list()
         for file in upload_files:
@@ -52,18 +53,18 @@ class ProvisionConfigReader:
         if duplicates:
             # recover program name for duplicate file
             duplicates_dict = dict()
+            duplicates = set(duplicates)
 
-            # initialize dict for programs and their upload duplicate files
-            for program in program_upload_files:
-                duplicates_dict[program] = set()
-            for duplicate_file in duplicates:
+            for file in duplicates:
                 for program in program_upload_files:
-                    if duplicate_file in program_upload_files[program]:
-                        duplicates_dict[program].add(file)
+                    if file in program_upload_files[program]:
+                        duplicates_dict[program] = list()
+                        duplicates_dict[program].append(file)
+
             # prepare error message
             error_msg = "\n".join(
                 [
-                    f'{", ".join(list(duplicates_dict[program]))} in {program}'
+                    f'{", ".join(duplicates_dict[program])} in {program}'
                     for program in duplicates_dict
                 ]
             )
