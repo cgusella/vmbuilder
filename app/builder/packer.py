@@ -97,6 +97,13 @@ class Packer(Builder):
                         scripts.append(
                             f'{constants.programs_path}/{program}/{operation}.sh'
                         )
+        for key in self.provisions:
+            value = self.provisions[key]
+            if isinstance(value, list) and key != 'custom_scripts':
+                if self.provisions['upload']:
+                    scripts.append(
+                        f'{constants.bash_path}/prepare_to_upload.sh'
+                    )
         return scripts
 
     def _generate_vars_file(self, json_file: dict):
