@@ -23,8 +23,8 @@ class Vagrant(Builder):
     def __init__(self, namespace) -> None:
         self.arguments: Namespace = namespace
         self.machine_path: str = constants.vagrant_machines_path
-        self.provisions_configs = constants.vagrant_provs_confs_path
         self.vagrantfile_path = f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
+        self.provisions_configs: dict = dict()
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
@@ -40,10 +40,10 @@ class Vagrant(Builder):
             )
 
     def check_provision_cfg_json_existence(self):
-        if self.arguments.json not in os.listdir(self.provisions_configs):
+        if self.arguments.json not in os.listdir(constants.vagrant_provs_confs_path):
             shutil.copyfile(
-                src=f'{self.provisions_configs}/template.json',
-                dst=f'{self.provisions_configs}/{self.arguments.json}'
+                src=f'{constants.vagrant_provs_confs_path}/template.json',
+                dst=f'{constants.vagrant_provs_confs_path}/{self.arguments.json}'
             )
             raise JsonConfigCopiedError(
                 f'The json file "{self.arguments.json}" '
@@ -51,23 +51,25 @@ class Vagrant(Builder):
                 'Fill it up and come back then!'
             )
 
+    def set_provisions_configs(self):
+        """Set provisions_configs attribute"""
+        config_provision_file_path = f'{constants.vagrant_provs_confs_path}/{self.arguments.json}'
+        with open(config_provision_file_path, 'r') as provisions_configs:
+            self.provisions_configs = json.loads(
+                provisions_configs.read()
+            )
+
     def set_configs(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as template_json:
-            configs = json.loads(template_json.read())["virtual_machine_configs"]
-        self.configs = configs.copy()
+        """Set configs attribute"""
+        self.configs = self.provisions_configs["virtual_machine_configs"].copy()
 
     def set_provisions(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as template_json:
-            provisions = json.loads(template_json.read())["provisions"]
-        self.provisions = provisions.copy()
+        """Set provisions attribute"""
+        self.provisions = self.provisions_configs["provisions"].copy()
 
     def set_credentials(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as template_json:
-            credentials = json.loads(template_json.read())["credentials"]
-        self.credentials = credentials.copy()
+        """Set credentials attribute"""
+        self.credentials = self.provisions_configs["credentials"].copy()
 
     def create_project_folder(self):
         """

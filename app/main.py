@@ -12,7 +12,7 @@ from builder.vagrant import Vagrant
 from argumentparser.customparser import CustomArgumentParser
 
 
-sys.tracebacklimit = 0
+# sys.tracebacklimit = 0
 
 
 def get_project_class(namespace: Namespace):
@@ -35,11 +35,12 @@ def main():
         exit()
     builder.check_virtualbox_existence()
     builder.check_provision_cfg_json_existence()
+    builder.set_provisions_configs()
     builder.set_configs()
     builder.set_provisions()
     builder.set_credentials()
     provisions_configs_reader = ProvisionConfigReader(
-        f'{builder.provisions_configs}/{builder.arguments.json}'
+        builder.provisions_configs
     )
     provisions_configs_reader.check_programs_existence_for(
         provision_key="programs_to_install"

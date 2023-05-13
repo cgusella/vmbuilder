@@ -15,22 +15,10 @@ from newprogram import make_program_folder
 
 
 class ProvisionConfigReader:
-    def __init__(self, provisions_config_file_path: str) -> None:
-        self.file_path = provisions_config_file_path
-        self.set_provisions()
-        self.set_configs()
-
-    def set_provisions(self):
-        with open(self.file_path, 'r') as provision_config_file:
-            self.provisions = json.loads(
-                provision_config_file.read()
-            )["provisions"]
-
-    def set_configs(self):
-        with open(self.file_path, 'r') as provision_config_file:
-            self.configs = json.loads(
-                provision_config_file.read()
-            )["virtual_machine_configs"]
+    def __init__(self, builder_provisions_config: dict) -> None:
+        self.provisions_configs = builder_provisions_config
+        self.provisions = self.provisions_configs["provisions"]
+        self.configs = self.provisions_configs["virtual_machine_configs"]
 
     def check_upload_file_name_duplicates(self):
         """
