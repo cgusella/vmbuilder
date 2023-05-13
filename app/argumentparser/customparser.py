@@ -106,5 +106,6 @@ class CustomArgumentParser:
         packer_flags.add_argument(
             '-pf',
             dest='preseed',
-            help=get_preseed_files_for_help()
+            help=get_preseed_files_for_help(),
+            required=True
         )

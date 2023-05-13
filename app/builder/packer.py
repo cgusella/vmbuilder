@@ -19,27 +19,10 @@ class Packer(Builder):
     def __init__(self, namespace) -> None:
         self.arguments: Namespace = namespace
         self.machines_path: str = constants.packer_machines_path
-        self.provisions_configs = constants.packer_provs_confs_path
+        self.provisions_configs: dict = dict()
         self.configs: dict = dict()
         self.provisions: dict = dict()
-
-    def set_configs(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as template_json:
-            configs = json.loads(template_json.read())["virtual_machine_configs"]
-        self.configs = configs.copy()
-
-    def set_provisions(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as template_json:
-            provisions = json.loads(template_json.read())["provisions"]
-        self.provisions = provisions.copy()
-
-    def set_credentials(self):
-        config_provision_file_path = f'{self.provisions_configs}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as template_json:
-            credentials = json.loads(template_json.read())["credentials"]
-        self.credentials = credentials.copy()
+        self.credentials: dict = dict()
 
     def check_new_project_folder_existence(self):
         if self.arguments.name in os.listdir(self.machines_path):
@@ -52,10 +35,10 @@ class Packer(Builder):
             )
 
     def check_provision_cfg_json_existence(self):
-        if self.arguments.json not in os.listdir(self.provisions_configs):
+        if self.arguments.json not in os.listdir(constants.packer_provs_confs_path):
             shutil.copyfile(
-                src=f'{self.provisions_configs}/template.json',
-                dst=f'{self.provisions_configs}/{self.arguments.json}'
+                src=f'{constants.packer_provs_confs_path}/template.json',
+                dst=f'{constants.packer_provs_confs_path}/{self.arguments.json}'
             )
             raise JsonConfigCopiedError(
                 f'The json file "{self.arguments.json}" '
@@ -63,7 +46,35 @@ class Packer(Builder):
                 'Fill it up and come back then!'
             )
 
+    def set_provisions_configs(self):
+        """Set provisions_configs attribute"""
+        config_provision_file_path = f'{constants.packer_provs_confs_path}/{self.arguments.json}'
+        with open(config_provision_file_path, 'r') as provisions_configs:
+            self.provisions_configs = json.loads(
+                provisions_configs.read()
+            )
+
+    def set_configs(self):
+        """Set configs attribute"""
+        self.configs = self.provisions_configs["virtual_machine_configs"].copy()
+
+    def set_provisions(self):
+        """Set provisions attribute"""
+        self.provisions = self.provisions_configs["provisions"].copy()
+
+    def set_credentials(self):
+        """Set credentials attribute"""
+        self.credentials = self.provisions_configs["credentials"].copy()
+
     def create_project_folder(self):
+        """
+        Create project folder with this structure:
+        - project_name/
+            |
+            - http/
+                |
+                - chosen_preseed_file
+        """
         project_folder = f'{self.machines_path}/{self.arguments.name}'
         os.makedirs(f'{project_folder}/http')
 
@@ -97,13 +108,6 @@ class Packer(Builder):
                         scripts.append(
                             f'{constants.programs_path}/{program}/{operation}.sh'
                         )
-        for key in self.provisions:
-            value = self.provisions[key]
-            if isinstance(value, list) and key != 'custom_scripts':
-                if self.provisions['upload']:
-                    scripts.append(
-                        f'{constants.bash_path}/prepare_to_upload.sh'
-                    )
         return scripts
 
     def _generate_vars_file(self, json_file: dict):
@@ -141,7 +145,7 @@ class Packer(Builder):
                     value=variable_value
                     )
 
-    def _generate_main_file(self, json_file: dict):
+    def _generate_main_file(self):
         with open(f'{constants.packer_machines_path}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
             main_file.write(
                 'locals {\n'
@@ -149,9 +153,7 @@ class Packer(Builder):
                 '}\n\n'
             )
             main_file.write('source "virtualbox-iso" "vbox" {\n')
-            # for var in json_file['vbox_configs']:
             for var in self.configs:
-                # if not isinstance(json_file['vbox_configs'][var], dict):
                 if not isinstance(self.configs[var], dict):
                     continue
                 space = (30 - len(var)) * ' '
@@ -201,26 +203,12 @@ class Packer(Builder):
             )
 
             upload_program_files_path = list()
-            for program in self.provisions['programs']['install']:
+            for program in self.provisions['programs_to_install']:
                 upload_program_files_path.extend([
                     f'{constants.programs_path}/{program}/configs/upload/{file}' 
                     for file in os.listdir(f'{constants.programs_path}/{program}/configs/upload') 
                     if file != 'prepare_to_upload.sh'
                 ])
-            if self.provisions['upload']:
-                files_in_upload_folder = os.listdir(constants.upload_path)
-                upload_files = list()
-                for file in self.provisions['files_to_upload']:
-                    if file in files_in_upload_folder:
-                        upload_files.append(
-                            f'{constants.upload_path}/{file}'
-                        )
-                    else:
-                        for path in upload_program_files_path:
-                            if file in path:
-                                upload_files.append(path)
-
-                self.provisioner_file(upload_files, main_file)
             if self.provisions['custom_scripts']:
                 custom_scripts = [
                     f'{constants.custom_scripts_path}/{script}'
@@ -233,30 +221,22 @@ class Packer(Builder):
             main_file.write('}\n')
 
     def _add_user_password_preseed(self, credentials: dict):
-        project_folder = f'{self.machines_path}/{self.arguments["-n"]}'
+        project_folder = f'{self.machines_path}/{self.arguments.name}'
         replace_text_in_file(
             search_phrase="default_user",
-            replace_with=credentials['default_user'],
-            file_path=f'{project_folder}/http/{self.arguments["-pf"]}'
+            replace_with=credentials['username'],
+            file_path=f'{project_folder}/http/{self.arguments.preseed}'
         )
         replace_text_in_file(
             search_phrase="default_pass",
-            replace_with=credentials['default_pass'],
-            file_path=f'{project_folder}/http/{self.arguments["-pf"]}'
+            replace_with=credentials['password'],
+            file_path=f'{project_folder}/http/{self.arguments.preseed}'
         )
 
     def generate_main_file(self):
-        with open(f'{constants.packer_provs_confs_path}/{self.arguments.json}') as provisions:
-            json_provision = json.loads(provisions.read())
-        # vbox_configs = json_provision['vbox_configs']
         self._generate_vars_file(self.configs)
-        # self._generate_main_file(json_provision)
         self._generate_main_file(self.configs)
-        credentials = {
-            key: value for (key, value) in self.configs.items()
-            if key in ("default_user", "default_pass")
-        }
-        self._add_user_password_preseed(credentials)
+        self._add_user_password_preseed(self.credentials)
 
     def provisioner_shell(self, scripts, main_file):
         main_file.write(
