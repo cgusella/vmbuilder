@@ -29,9 +29,13 @@ def generate_new_name_in(folder_path: str):
     return random_file_name
 
 
-class VagrantExistenceTest(unittest.TestCase):
+class VagrantCommonFlagsTest(unittest.TestCase):
 
     def setUp(self):
+        """
+        Set namespace with name attribute only.
+        If there are not vagrant machine, a new name is generated.
+        """
         self.namespace = Namespace()
         self.created_new_project_folder = False
         try:
@@ -46,6 +50,7 @@ class VagrantExistenceTest(unittest.TestCase):
             self.created_new_project_folder = True
 
     def tearDown(self):
+        """Delete project folder if it was created in setUp."""
         if self.created_new_project_folder:
             os.rmdir(
                 f'{constants.vagrant_machines_path}/{self.namespace.name}'
@@ -78,6 +83,32 @@ class VagrantExistenceTest(unittest.TestCase):
             os.listdir(constants.vagrant_provs_confs_path)
         )
         os.remove(f'{constants.vagrant_provs_confs_path}/{json_name}.json')
+
+
+class VagrantAllFlagsTest(unittest.TestCase):
+
+    def setUp(self):
+        self.namespace = Namespace()
+        self.namespace.name = generate_new_name_in(
+            constants.vagrant_machines_path
+        )
+
+    def test_create_project_folder(self):
+        """Test that a new project is generated with the wanted structure"""
+        vagrant = Vagrant(self.namespace)
+        vagrant.create_project_folder()
+        self.assertIn(
+            self.namespace.name,
+            os.listdir(constants.vagrant_machines_path)
+        )
+        self.assertIn(
+            "upload",
+            os.listdir(
+                f'{constants.vagrant_machines_path}/{self.namespace.name}'
+            )
+        )
+        vagrant.delete_project()
+
 
 
 if __name__ == '__main__':
