@@ -20,8 +20,8 @@ def get_json_files_for_help(path_to_provs_confs: str):
             'using the relative JSON flag from the main app. '
         )
     else:
-        message = 'Select among: '
-        message += ' | '.join(
+        message = 'Select among: \n* '
+        message += '\n* '.join(
             [
                 f'{file}' for file in provision_files
             ]
@@ -35,14 +35,15 @@ def get_preseed_files_for_help():
     as string.\n
     Each name is separated by a pipe.
     """
-    help_message = 'Select among: '
-    help_message += " | ".join(
+    help_message = 'Select among: \n* '
+    help_message += "\n* ".join(
         [
             f'{file}' for file in os.listdir(
                 constants.packer_http_path
             ) if file.startswith('preseed')
         ]
     )
+    print(help_message)
     return help_message
 
 
@@ -55,5 +56,5 @@ def get_local_vagrant_boxes():
         "vagrant box list",
         shell=True,
         capture_output=True
-    ).stdout.decode("ascii").strip().replace("\n", " | ")
+    ).stdout.decode("ascii")
     return output

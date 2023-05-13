@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 import constants
+from argparse import RawTextHelpFormatter
 from argumentparser.helper import (
     get_json_files_for_help,
     get_local_vagrant_boxes,
@@ -16,7 +17,8 @@ class CustomArgumentParser:
     def __init__(self) -> None:
         self.parser = argparse.ArgumentParser(
             prog='vmbuilder',
-            description='Create a virtual machines, Vagrant or Packer'
+            description='Create a virtual machines, Vagrant or Packer',
+            formatter_class=RawTextHelpFormatter
         )
         if not sys.argv[1:]:
             logger.error('Need arguments. Specify "-h/--help" for more info')
