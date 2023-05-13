@@ -9,14 +9,15 @@ import random
 import string
 import unittest
 from argparse import Namespace
-from argumentparser.customparser import CustomArgumentParser
 from builder.error import ExistenceProjectError
+from builder.error import JsonConfigCopiedError
 from builder.vagrant import Vagrant
 
 
-def generate_name_in_folder(folder_path: str):
+def generate_new_name_in(folder_path: str):
     """Generate and return a string which mock the name
-    of a file or folder that does not exist in the given folder
+    of a file or folder that does not exist in the given
+    folder
     """
     name_in_folder = False
     while not name_in_folder:
@@ -28,23 +29,55 @@ def generate_name_in_folder(folder_path: str):
     return random_file_name
 
 
-class VagrantTest(unittest.TestCase):
+class VagrantExistenceTest(unittest.TestCase):
+
+    def setUp(self):
+        self.namespace = Namespace()
+        self.created_new_project_folder = False
+        try:
+            self.namespace.name = os.listdir(constants.vagrant_machines_path)[0]
+        except IndexError:
+            self.namespace.name = generate_new_name_in(
+                constants.vagrant_machines_path
+            )
+            os.mkdir(
+                f'{constants.vagrant_machines_path}/{self.namespace.name}'
+            )
+            self.created_new_project_folder = True
+
+    def tearDown(self):
+        if self.created_new_project_folder:
+            os.rmdir(
+                f'{constants.vagrant_machines_path}/{self.namespace.name}'
+            )
 
     def test_check_new_project_folder_existence(self):
         """
         Test that an error is raised when a project with a given
         name already exists
         """
-        namespace_test = Namespace()
-        project_name = generate_name_in_folder(
-            folder_path=constants.vagrant_machines_path
-        )
-        namespace_test.name = project_name
-        self.vagrant = Vagrant(namespace_test)
-        os.mkdir(f'{constants.vagrant_machines_path}/{project_name}')
+        vagrant = Vagrant(self.namespace)
         with self.assertRaises(ExistenceProjectError):
-            self.vagrant.check_new_project_folder_existence()
-        os.rmdir(f'{constants.vagrant_machines_path}/{project_name}')
+            vagrant.check_new_project_folder_existence()
+
+    def test_check_provision_cfg_json_existence(self):
+        """
+        Test that an error is raised and a new json is created when a
+        non existing json file is specified
+        """
+        json_name = generate_new_name_in(
+            constants.vagrant_provs_confs_path
+        )
+        self.namespace.json = f'{json_name}.json'
+        vagrant = Vagrant(self.namespace)
+        with self.assertRaises(JsonConfigCopiedError):
+            vagrant.check_provision_cfg_json_existence()
+
+        self.assertIn(
+            f'{json_name}.json',
+            os.listdir(constants.vagrant_provs_confs_path)
+        )
+        os.remove(f'{constants.vagrant_provs_confs_path}/{json_name}.json')
 
 
 if __name__ == '__main__':
