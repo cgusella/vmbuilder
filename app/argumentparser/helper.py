@@ -14,19 +14,19 @@ def get_json_files_for_help(path_to_provs_confs: str):
             ) if file != 'template.json'
         ]
     if not provision_files:
-        message = (
+        help_message = (
             'There are no JSON files. '
             'To create a new one is sufficient to specify it '
             'using the relative JSON flag from the main app. '
         )
     else:
-        message = 'Select among: \n* '
-        message += '\n* '.join(
+        help_message = 'Select among: \n* '
+        help_message += '\n* '.join(
             [
                 f'{file}' for file in provision_files
             ]
         )
-    return message
+    return help_message
 
 
 def get_preseed_files_for_help():
@@ -35,15 +35,19 @@ def get_preseed_files_for_help():
     as string.\n
     Each name is separated by a pipe.
     """
-    help_message = 'Select among: \n* '
-    help_message += "\n* ".join(
-        [
-            f'{file}' for file in os.listdir(
-                constants.packer_http_path
-            ) if file.startswith('preseed')
-        ]
-    )
-    print(help_message)
+    preseed_file = [
+        f'{file}' for file in os.listdir(
+            constants.packer_http_path
+        ) if file.startswith('preseed')
+    ]
+    if not preseed_file:
+        help_message = (
+            'There are no preseed files. '
+            'Add one to http folder in packer template.'
+        )
+    else:
+        help_message = 'Select among: \n* '
+        help_message += "\n* ".join(preseed_file)
     return help_message
 
 
