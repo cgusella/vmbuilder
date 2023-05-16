@@ -106,6 +106,7 @@ class Packer(Builder):
         return script_paths
 
     def _generate_vars_file(self):
+        """Generate vars file"""
         with open(f'{constants.packer_machines_path}/{self.arguments.name}/vars.pkr.hcl', 'w') as vars_file:
             for var in self.configs:
                 if not isinstance(self.configs[var], dict):
@@ -149,12 +150,20 @@ class Packer(Builder):
                         )
 
     def _add_locals_block(self, main_file: TextIOWrapper):
+        """
+        Write on packer main file the local block and variables
+        """
         # write local directive on main
         main_file.write(
             'locals {\n'
             f'{self._generate_packer_variable("output_directory")}'
             '}\n\n'
         )
+
+    def _add_source_block(self, main_file: TextIOWrapper):
+        """
+        Write the source block on packer main file
+        """
         main_file.write('source "virtualbox-iso" "vbox" {\n')
         for var in self.configs:
             if not isinstance(self.configs[var], dict):
@@ -199,6 +208,9 @@ class Packer(Builder):
         main_file.write('}\n\n')
 
     def _add_build_block(self, main_file: TextIOWrapper):
+        """
+        Write the build block on packer main file
+        """
         main_file.write(
             'build {\n\n'
             '  sources = ["source.virtualbox-iso.vbox"]\n\n'
@@ -263,6 +275,9 @@ class Packer(Builder):
         main_file.write('}\n')
 
     def _add_user_password_preseed(self):
+        """
+        Replace in preseed file the default user and password
+        """
         project_folder = f'{self.machines_path}/{self.arguments.name}'
         replace_text_in_file(
             search_phrase="default_user",
@@ -276,10 +291,11 @@ class Packer(Builder):
         )
 
     def generate_main_file(self):
-        """"""
+        """Generate main and vars files for packer"""
         self._generate_vars_file()
         with open(f'{constants.packer_machines_path}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
             self._add_locals_block(main_file=main_file)
+            self._add_source_block(main_file=main_file)
             self._add_build_block(main_file=main_file)
         self._add_user_password_preseed()
 
