@@ -43,7 +43,7 @@ class CustomArgumentParser:
             '-n', required=True, dest='name'
         )
         self.parser.add_argument(
-            '-vm', required=True, dest='vboxname'
+            '-vm', required=True, dest='vm_name'
         )
         self.parser.add_argument(
             '-t',
@@ -94,9 +94,9 @@ class CustomArgumentParser:
             'Packer flags',
             'manage packer flags'
         )
-        packer_flags.add_argument('-il', dest='isolink', required=True)
-        packer_flags.add_argument('-if', dest='isofile', required=True)
-        packer_flags.add_argument('-cs', dest='checksum', required=True)
+        packer_flags.add_argument('-il', dest='iso_link', required=True)
+        packer_flags.add_argument('-if', dest='iso_file', required=True)
+        packer_flags.add_argument('-cs', dest='iso_checksum', required=True)
         packer_flags.add_argument(
             '-pj',
             dest='json',
