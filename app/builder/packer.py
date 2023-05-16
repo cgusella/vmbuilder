@@ -12,7 +12,9 @@ from builder.error import (
 from builder.helper import (
     get_local_virtual_boxes,
     replace_text_in_file,
+    get_programs_upload_files
 )
+from io import TextIOWrapper
 
 
 class Packer(Builder):
@@ -31,7 +33,7 @@ class Packer(Builder):
     def check_virtualbox_existence(self):
         if self.arguments.vm_name in get_local_virtual_boxes():
             raise ExistenceVirtualBoxError(
-                f'The virtualbox {self.arguments.vboxname} already exists!'
+                f'The virtualbox {self.arguments.vm_name} already exists!'
             )
 
     def check_provision_cfg_json_existence(self):
@@ -89,46 +91,39 @@ class Packer(Builder):
         space = (number - chars) * ' '
         return f'  {variable}{space}= \"${{var.{variable}}}\"\n'
 
-    def _get_provisions_scripts(self):
-        scripts = list()
-        for key in self.provisions:
-            value = self.provisions[key]
-            if value:
-                if isinstance(value, bool):
-                    script_path = f'{constants.setup_scripts_path}/{key}.sh'
-                    scripts.append(script_path)
-                elif key == 'custom_scripts':
-                    for script in value:
-                        scripts.append(
-                            f'{constants.custom_scripts_path}/{script}'
-                        )
-                elif isinstance(value, list):
-                    operation = key.split('_')[-1]
-                    for program in value:
-                        scripts.append(
-                            f'{constants.programs_path}/{program}/{operation}.sh'
-                        )
-        return scripts
+    def _get_operation_scripts(self, operation: str):
+        """
+        Return list of scripts for the operation selected.
+        Operations available: "install", "uninstall", "config"
+        """
+        script_paths = list()
+        programs = self.provisions.get(f"programs_to_{operation}", '')
+        if programs:
+            for program in programs:
+                script_paths.append(
+                    f'{constants.programs_path}/{program}/{operation}.sh'
+                )
+        return script_paths
 
-    def _generate_vars_file(self, json_file: dict):
+    def _generate_vars_file(self):
         with open(f'{constants.packer_machines_path}/{self.arguments.name}/vars.pkr.hcl', 'w') as vars_file:
-            for var in json_file:
-                if not isinstance(json_file[var], dict):
+            for var in self.configs:
+                if not isinstance(self.configs[var], dict):
                     continue
                 if var == 'output_directory':
-                    if not json_file[var]["default"]:
-                        json_file[var]["default"] = constants.packer_builds_path
+                    if not self.configs[var]["default"]:
+                        self.configs[var]["default"] = constants.packer_builds_path
                 if var == 'iso_directory':
-                    if not json_file[var]["default"]:
-                        json_file[var]["default"] = constants.iso_path
+                    if not self.configs[var]["default"]:
+                        self.configs[var]["default"] = constants.iso_path
                 if var == 'boot_command':
                     with open(f'{constants.packer_http_path}/boot_command.txt') as boot_command:
                         lines = boot_command.readlines()
                     for count, line in enumerate(lines):
                         lines[count] = line.replace('preseed-file', self.arguments.preseed)
-                    json_file[var]["default"] = ''.join(lines)
-                description = json_file[var]["description"]
-                variable_value = json_file[var]["default"]
+                    self.configs[var]["default"] = ''.join(lines)
+                description = self.configs[var]["description"]
+                variable_value = self.configs[var]["default"]
                 if isinstance(variable_value, str):
                     variable_type = 'string'
                 elif isinstance(variable_value, bool):
@@ -153,154 +148,189 @@ class Packer(Builder):
                         value=variable_value
                         )
 
-    def _generate_main_file(self):
-        with open(f'{constants.packer_machines_path}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
-            # write local directive on main
-            main_file.write(
-                'locals {\n'
-                f'{self._generate_packer_variable("output_directory")}'
-                '}\n\n'
-            )
-            main_file.write('source "virtualbox-iso" "vbox" {\n')
-            for var in self.configs:
-                if not isinstance(self.configs[var], dict):
-                    continue
-                space = (30 - len(var)) * ' '
-                if var in ['start_retry_timeout', 'iso_file']:
-                    continue
-                elif var == 'boot_command':
-                    main_file.write(f'  {var}{space}= [ var.{var} ]\n')
-                elif var == 'iso_directory':
-                    main_file.write(
-                        '  iso_target_path               = '
-                        '"${var.iso_directory}/${var.iso_file}"\n'
-                    )
-                elif var == 'ssh_password':
-                    main_file.write(
-                        '  shutdown_command              = "echo '
-                        '\'${var.ssh_password}\' | sudo -E -S poweroff"\n'
-                    )
-                    main_file.write(self._generate_packer_variable(var))
-                else:
-                    main_file.write(self._generate_packer_variable(var))
+    def _add_locals_block(self, main_file: TextIOWrapper):
+        # write local directive on main
+        main_file.write(
+            'locals {\n'
+            f'{self._generate_packer_variable("output_directory")}'
+            '}\n\n'
+        )
+        main_file.write('source "virtualbox-iso" "vbox" {\n')
+        for var in self.configs:
+            if not isinstance(self.configs[var], dict):
+                continue
+            space = (30 - len(var)) * ' '
+            if var in ['start_retry_timeout', 'iso_file']:
+                continue
+            elif var == 'boot_command':
+                main_file.write(f'  {var}{space}= [ var.{var} ]\n')
+            elif var == 'iso_directory':
+                main_file.write(
+                    '  iso_target_path               = '
+                    '"${var.iso_directory}/${var.iso_file}"\n'
+                )
+            elif var == 'ssh_password':
+                main_file.write(
+                    '  shutdown_command              = "echo '
+                    '\'${var.ssh_password}\' | sudo -E -S poweroff"\n'
+                )
+                main_file.write(self._generate_packer_variable(var))
+            else:
+                main_file.write(self._generate_packer_variable(var))
 
-            # write iso_urls to main
-            main_file.write(
-                '  iso_urls = [\n'
-                '    "${var.output_directory}/${var.iso_file}",\n'
-                '    "${var.iso_link}",\n'
-                '  ]\n'
-            )
+        # write iso_urls to main
+        main_file.write(
+            '  iso_urls = [\n'
+            '    "${var.output_directory}/${var.iso_file}",\n'
+            '    "${var.iso_link}",\n'
+            '  ]\n'
+        )
 
-            # write iso_checksum
-            main_file.write('  iso_checksum= "${var.iso_checksum}"\n')
+        # write iso_checksum
+        main_file.write('  iso_checksum= "${var.iso_checksum}"\n')
 
-            main_file.write(
-                '  vboxmanage = [\n'
-                '      ["modifyvm", "{{ .Name }}", "--rtcuseutc", "off"],\n'
-                '      ["modifyvm", "{{ .Name }}", "--vram", "128"]\n'
-                '  ]\n'
-                '  virtualbox_version_file       = "/tmp/.vbox_version"\n'
-            )
-            main_file.write('}\n\n')
+        main_file.write(
+            '  vboxmanage = [\n'
+            '      ["modifyvm", "{{ .Name }}", "--rtcuseutc", "off"],\n'
+            '      ["modifyvm", "{{ .Name }}", "--vram", "128"]\n'
+            '  ]\n'
+            '  virtualbox_version_file       = "/tmp/.vbox_version"\n'
+        )
+        main_file.write('}\n\n')
 
-            main_file.write(
-                'build {\n\n'
-                '  sources = ["source.virtualbox-iso.vbox"]\n\n'
-            )
+    def _add_build_block(self, main_file: TextIOWrapper):
+        main_file.write(
+            'build {\n\n'
+            '  sources = ["source.virtualbox-iso.vbox"]\n\n'
+        )
 
-            provision_scripts = self._get_provisions_scripts()
-            if provision_scripts:
-                self.provisioner_shell(
-                    scripts=provision_scripts,
-                    main_file=main_file
+        # recover needed upload files for config files
+        needed_upload_files = get_programs_upload_files(self.provisions['programs_to_config'])
+
+        # recover upload files
+        upload_program_files_path = list()
+        for program in needed_upload_files:
+            if needed_upload_files[program]:
+                upload_program_files_path.extend(
+                    [
+                        f'{constants.programs_path}/{program}/upload/{file}'
+                        for file in os.listdir(f'{constants.programs_path}/{program}/upload')
+                        if file != 'prepare_to_upload.sh'
+                    ]
                 )
 
-            upload_program_files_path = list()
-            for program in self.provisions['programs_to_install']:
-                upload_program_files_path.extend([
-                    f'{constants.programs_path}/{program}/configs/upload/{file}' 
-                    for file in os.listdir(f'{constants.programs_path}/{program}/configs/upload') 
-                    if file != 'prepare_to_upload.sh'
-                ])
-            if self.provisions['custom_scripts']:
-                custom_scripts = [
-                    f'{constants.custom_scripts_path}/{script}'
-                    for script in self.provisions['custom_scripts']
-                ]
-                self.provisioner_shell(
-                    scripts=custom_scripts,
-                    main_file=main_file
-                )
-            main_file.write('}\n')
+        # recover install scripts
+        install_scripts = self._get_operation_scripts(operation='install')
 
-    def _add_user_password_preseed(self, credentials: dict):
+        # recover uninstall scripts
+        uninstall_scripts = self._get_operation_scripts(operation='uninstall')
+
+        # write install uninstall scripts into main file; if some needed upload file are found
+        # from config files, then the "prepare_to_upload.sh"'s path is added
+        scripts = install_scripts[:]+uninstall_scripts[:]
+        if needed_upload_files:
+            scripts.append(f'{constants.setup_scripts_path}/prepare_to_upload.sh')
+        if scripts:
+            self._generate_provisioner_shell(
+                script_paths=scripts,
+                main_file=main_file
+            )
+
+        # write upload file into main file
+        if upload_program_files_path:
+            self._generate_provisioner_file(
+                files=upload_program_files_path,
+                main_file=main_file
+            )
+
+        # write config script addresses into main file
+        config_scripts = self._get_operation_scripts(operation='config')
+        if config_scripts:
+            self._generate_provisioner_shell(
+                script_paths=config_scripts,
+                main_file=main_file
+            )
+
+        if self.provisions['custom_scripts']:
+            custom_scripts = [
+                f'{constants.custom_scripts_path}/{script}'
+                for script in self.provisions['custom_scripts']
+            ]
+            self._generate_provisioner_shell(
+                scripts=custom_scripts,
+                main_file=main_file
+            )
+        main_file.write('}\n')
+
+    def _add_user_password_preseed(self):
         project_folder = f'{self.machines_path}/{self.arguments.name}'
         replace_text_in_file(
             search_phrase="default_user",
-            replace_with=credentials['username'],
+            replace_with=self.credentials['username'],
             file_path=f'{project_folder}/http/{self.arguments.preseed}'
         )
         replace_text_in_file(
             search_phrase="default_pass",
-            replace_with=credentials['password'],
+            replace_with=self.credentials['password'],
             file_path=f'{project_folder}/http/{self.arguments.preseed}'
         )
 
     def generate_main_file(self):
-        self._generate_vars_file(self.configs)
-        self._generate_main_file()
-        self._add_user_password_preseed(self.credentials)
+        """"""
+        self._generate_vars_file()
+        with open(f'{constants.packer_machines_path}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
+            self._add_locals_block(main_file=main_file)
+            self._add_build_block(main_file=main_file)
+        self._add_user_password_preseed()
 
-    def provisioner_shell(self, scripts, main_file):
+    def _generate_provisioner_shell(
+            self,
+            script_paths: list,
+            main_file: TextIOWrapper
+    ):
         main_file.write(
-            '  provisioner "shell" {\n'
-            '    binary               = false\n'
-            '    execute_command      = "echo \'${var.ssh_password}\' | {{ .Vars }} sudo -S -E bash \'{{ .Path }}\'\"\n'
-            '    expect_disconnect    = true\n'
-            '    valid_exit_codes     = [0, 2]\n'
-            '    scripts = [\n'
+            '\tprovisioner "shell" {\n'
+            '\t\tbinary               = false\n'
+            '\t\texecute_command      = "echo \'${var.ssh_password}\' | {{ .Vars }} sudo -S -E bash \'{{ .Path }}\'\"\n'
+            '\t\texpect_disconnect    = true\n'
+            '\t\tvalid_exit_codes     = [0, 2]\n'
+            '\t\tscripts = [\n'
         )
-        for script in scripts:
-            main_file.write(f'      "{script}",\n')
+        for script in script_paths:
+            main_file.write(f'\t\t\t"{script}",\n')
         main_file.write(
-            '    ]\n'
-            f'  {self._generate_packer_variable("start_retry_timeout")}'
-            '  }\n\n'
+            '\t\t]\n'
+            f'\t\t{self._generate_packer_variable("start_retry_timeout")}'
+            '\t}\n\n'
         )
 
-    def provisioner_file(self, files, main_file):
+    def _generate_provisioner_file(self, files: list, main_file: TextIOWrapper):
         main_file.write(
-            '  provisioner "file" {\n'
-            '    sources = [\n'
+            '\tprovisioner "file" {\n'
+            '\t\tsources = [\n'
         )
         for file in files:
-            main_file.write(f'      "{file}",\n')
-        with open(f'{constants.bash_path}/prepare_to_upload.sh', 'r') as preparer:
-            lines = preparer.readlines()
-        for line in lines:
-            if line.startswith('mkdir '):
-                upload_folder_path = line.strip().split()[-1]
+            main_file.write(f'\t\t\t"{file}",\n')
 
         main_file.write(
-            '    ]\n'
-            f'    destination = "{upload_folder_path}"\n'
-            '  }\n\n'
+            '\t\t]\n'
+            '\t\tdestination = "/vagrant/upload/"\n'
+            '\t}\n\n'
         )
 
     def write_variable_directive(self, variable_file, variable_name, description, variable_type, value):
         variable_file.write(
             f'variable "{variable_name}" ' + '{\n'
-            f'  description\t= "{description}"\n'
-            f'  type\t= {variable_type}\n'
+            f'\tdescription\t= "{description}"\n'
+            f'\ttype\t= {variable_type}\n'
         )
         if variable_type == 'bool' or variable_name == 'boot_command':
             variable_file.write(
-                f'  default\t= {value}\n'
+                f'\t\tdefault\t= {value}\n'
             )
         else:
             variable_file.write(
-                f'  default\t= "{value}"\n'
+                f'\t\tdefault\t= "{value}"\n'
             )
         variable_file.write(
             '}\n\n'

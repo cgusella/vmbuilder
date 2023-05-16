@@ -42,24 +42,8 @@ def main():
     provisions_configs_reader = ProvisionConfigReader(
         builder.provisions_configs
     )
-    provisions_configs_reader.check_programs_existence_for(
-        provision_key="programs_to_install"
-    )
-    provisions_configs_reader.check_scripts_emptyness_for(
-        provision_key='programs_to_install'
-    )
-    provisions_configs_reader.check_programs_existence_for(
-        provision_key="programs_to_uninstall"
-    )
-    provisions_configs_reader.check_scripts_emptyness_for(
-        provision_key='programs_to_uninstall'
-    )
-    provisions_configs_reader.check_programs_existence_for(
-        provision_key="programs_to_config"
-    )
-    provisions_configs_reader.check_scripts_emptyness_for(
-        provision_key='programs_to_config'
-    )
+    provisions_configs_reader.check_programs_existence_for()
+
     provisions_configs_reader.check_program_upload_files_existence()
     provisions_configs_reader.check_upload_file_name_duplicates()
     provisions_configs_reader.check_custom_script_existence()

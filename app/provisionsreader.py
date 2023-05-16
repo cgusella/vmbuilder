@@ -63,33 +63,43 @@ class ProvisionConfigReader:
                 f'{error_msg}'
             )
 
-    def check_programs_existence_for(self, provision_key: str):
+    def check_programs_existence_for(self):
         """
         Chack that programs specified exist.
         If it does not, create a program folder and raise an error
         """
-        operation = provision_key.split('_')[-1]
-        programs = self.provisions[provision_key]
-        not_found_provision_programs = list()
-        if programs:
-            for program in programs:
-                if program not in os.listdir(constants.programs_path):
-                    not_found_provision_programs.append(program)
-            if not_found_provision_programs:
-                make_program_folder(not_found_provision_programs)
-                plural = ('s', 'are')
-                singular = ('', 'is')
-                numerality = plural if len(
-                    not_found_provision_programs
-                ) > 1 else singular
-                error_msg = (
-                    'The following program{} '
-                    f'{", ".join(not_found_provision_programs)} '
-                    '{} created at /templates/programs folder.\nFill the '
-                    f'appropriate {operation}.sh files '
-                    'and come back then!'.format(*numerality)
-                )
-                raise ProgramNotFoundError(error_msg)
+        provisions_to_check = {"programs_to_install", "programs_to_uninstall", "programs_to_config"}
+        operation_programs = dict()
+        for provision_to_check in provisions_to_check:
+            operation = provision_to_check.split('_')[-1]
+            operation_programs[operation] = list()
+            programs = self.provisions[provision_to_check]
+            if programs:
+                for program in programs:
+                    if program not in os.listdir(constants.programs_path):
+                        operation_programs[operation].append(program)
+
+        if any(operation_programs.values()):
+            error_msg = 'The following scripts are empty: \n'
+            for operation in operation_programs:
+                if operation_programs[operation]:
+                    error_msg += f'{operation}.sh for {", ".join(operation_programs[operation])}\n'
+                    make_program_folder(operation_programs[operation])
+                    # if not_found_provision_programs:
+                    #     make_program_folder(not_found_provision_programs)
+                    #     plural = ('s', 'are')
+                    #     singular = ('', 'is')
+                    #     numerality = plural if len(
+                    #         not_found_provision_programs
+                    #     ) > 1 else singular
+                    #     error_msg = (
+                    #         'The following program{} '
+                    #         f'{", ".join(not_found_provision_programs)} '
+                    #         '{} created at /templates/programs folder.\nFill the '
+                    #         f'appropriate {operation}.sh files '
+                    #         'and come back then!'.format(*numerality)
+                    #     )
+            raise ProgramNotFoundError(error_msg)
 
     def check_custom_script_existence(self):
         """
