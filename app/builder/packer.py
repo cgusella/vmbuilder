@@ -29,7 +29,7 @@ class Packer(Builder):
             raise ExistenceProjectError("[ERROR] Project already exists!")
 
     def check_virtualbox_existence(self):
-        if self.arguments.vboxname in get_local_virtual_boxes():
+        if self.arguments.vm_name in get_local_virtual_boxes():
             raise ExistenceVirtualBoxError(
                 f'The virtualbox {self.arguments.vboxname} already exists!'
             )
@@ -115,8 +115,6 @@ class Packer(Builder):
             for var in json_file:
                 if not isinstance(json_file[var], dict):
                     continue
-                if var in {'iso_file', 'iso_link', 'iso_checksum', 'vm_name'}:
-                    json_file[var]["default"] = self.configs[var]
                 if var == 'output_directory':
                     if not json_file[var]["default"]:
                         json_file[var]["default"] = constants.packer_builds_path
@@ -129,7 +127,6 @@ class Packer(Builder):
                     for count, line in enumerate(lines):
                         lines[count] = line.replace('preseed-file', self.arguments.preseed)
                     json_file[var]["default"] = ''.join(lines)
-
                 description = json_file[var]["description"]
                 variable_value = json_file[var]["default"]
                 if isinstance(variable_value, str):
@@ -144,9 +141,21 @@ class Packer(Builder):
                     variable_type=variable_type,
                     value=variable_value
                     )
+            terminal_values = vars(self.arguments)
+            for terminal_value in terminal_values:
+                if terminal_value in {'iso_file', 'iso_link', 'iso_checksum', 'vm_name'}:
+                    variable_value = terminal_values.get(terminal_value)
+                    self.write_variable_directive(
+                        variable_file=vars_file,
+                        variable_name=terminal_value,
+                        description="",
+                        variable_type="string",
+                        value=variable_value
+                        )
 
     def _generate_main_file(self):
         with open(f'{constants.packer_machines_path}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
+            # write local directive on main
             main_file.write(
                 'locals {\n'
                 f'{self._generate_packer_variable("output_directory")}'
@@ -166,13 +175,6 @@ class Packer(Builder):
                         '  iso_target_path               = '
                         '"${var.iso_directory}/${var.iso_file}"\n'
                     )
-                elif var == 'iso_link':
-                    main_file.write(
-                        '  iso_urls = [\n'
-                        '    "${var.output_directory}/${var.iso_file}",\n'
-                        '    "${var.iso_link}",\n'
-                        '  ]\n'
-                    )
                 elif var == 'ssh_password':
                     main_file.write(
                         '  shutdown_command              = "echo '
@@ -181,6 +183,18 @@ class Packer(Builder):
                     main_file.write(self._generate_packer_variable(var))
                 else:
                     main_file.write(self._generate_packer_variable(var))
+
+            # write iso_urls to main
+            main_file.write(
+                '  iso_urls = [\n'
+                '    "${var.output_directory}/${var.iso_file}",\n'
+                '    "${var.iso_link}",\n'
+                '  ]\n'
+            )
+
+            # write iso_checksum
+            main_file.write('  iso_checksum= "${var.iso_checksum}"\n')
+
             main_file.write(
                 '  vboxmanage = [\n'
                 '      ["modifyvm", "{{ .Name }}", "--rtcuseutc", "off"],\n'
@@ -196,11 +210,11 @@ class Packer(Builder):
             )
 
             provision_scripts = self._get_provisions_scripts()
-
-            self.provisioner_shell(
-                scripts=provision_scripts,
-                main_file=main_file
-            )
+            if provision_scripts:
+                self.provisioner_shell(
+                    scripts=provision_scripts,
+                    main_file=main_file
+                )
 
             upload_program_files_path = list()
             for program in self.provisions['programs_to_install']:
@@ -235,7 +249,7 @@ class Packer(Builder):
 
     def generate_main_file(self):
         self._generate_vars_file(self.configs)
-        self._generate_main_file(self.configs)
+        self._generate_main_file()
         self._add_user_password_preseed(self.credentials)
 
     def provisioner_shell(self, scripts, main_file):

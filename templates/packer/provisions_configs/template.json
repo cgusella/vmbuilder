@@ -49,10 +49,6 @@
       "description":"",
       "default":"1"
     },
-    "vm_name":{
-      "description":"",
-      "default":""
-    },
     "boot_command":{
       "description":"string",
       "default":""
@@ -104,11 +100,7 @@
     "http_port_min":{
       "description":"",
       "default":"8000"
-    },
-    "iso_checksum":{
-      "description":"Checksum of the downloaded image",
-      "default":"sha256:0e79e00bf844929d40825b1f0e8634415cda195ba23bae0b041911fde4dfe018"
-    },
+    }
     "keep_registered":{
       "description":"",
       "default":false
@@ -184,14 +176,6 @@
     "start_retry_timeout":{
       "description":"",
       "default":"5m"
-    },
-    "iso_file":{
-      "description":"",
-      "default":""
-    },
-    "iso_link":{
-      "description":"",
-      "default":""
     },
     "output_directory":{
       "description":"",
