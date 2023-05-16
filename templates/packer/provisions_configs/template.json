@@ -19,7 +19,7 @@
     },
     "memory":{
       "description":"Memory value for the machine in MegaByte",
-      "default":"8192"
+      "default":"4096"
     },
     "disk_size":{
       "description":"Disk size of the machine in MegaByte",
@@ -115,7 +115,7 @@
     },
     "ssh_timeout":{
       "description":"Wait time for installation",
-      "default":"16m"
+      "default":"20m"
     },
     "communicator":{
       "description":"Communicator program for the machine",
