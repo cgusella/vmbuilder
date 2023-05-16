@@ -34,9 +34,9 @@ class Vagrant(Builder):
             raise ExistenceProjectError("[ERROR] Project already exists!")
 
     def check_virtualbox_existence(self):
-        if self.arguments.vboxname in get_local_virtual_boxes():
+        if self.arguments.vm_name in get_local_virtual_boxes():
             raise ExistenceVirtualBoxError(
-                f'The virtualbox {self.arguments.vboxname} already exists!'
+                f'The virtualbox {self.arguments.vm_name} already exists!'
             )
 
     def check_provision_cfg_json_existence(self):
@@ -165,7 +165,7 @@ class Vagrant(Builder):
                 f'\tconfig.vm.hostname = "{self.arguments.hostname}"\n'
                 f'\tconfig.vm.define "{self.arguments.hostname}"\n'
                 f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'
-                f'\t\tvb.name = "{self.arguments.vboxname}"\n'
+                f'\t\tvb.name = "{self.arguments.vm_name}"\n'
                 '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
                 '\tend\n'
             )
