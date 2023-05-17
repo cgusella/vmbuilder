@@ -100,7 +100,7 @@
     "http_port_min":{
       "description":"",
       "default":"8000"
-    }
+    },
     "keep_registered":{
       "description":"",
       "default":false
