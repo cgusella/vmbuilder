@@ -1,12 +1,12 @@
 import constants
 import json
+import logging
 import os
 import shutil
 from argparse import Namespace
 from builder.builder import Builder
 from builder.error import (
     ExistenceProjectError,
-    JsonConfigCopiedError,
     ExistenceVirtualBoxError
 )
 from builder.helper import (
@@ -42,11 +42,12 @@ class Packer(Builder):
                 src=f'{constants.packer_provs_confs_path}/template.json',
                 dst=f'{constants.packer_provs_confs_path}/{self.arguments.json}'
             )
-            raise JsonConfigCopiedError(
+            logging.warning(
                 f'The json file "{self.arguments.json}" '
                 f'is created at {constants.vagrant_provs_confs_path} folder.\n'
                 'Fill it up and come back then!'
             )
+            exit(0)
 
     def set_provisions_configs(self):
         """Set provisions_configs attribute"""

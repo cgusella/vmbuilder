@@ -1,6 +1,5 @@
 #!/bin/python3
 import constants
-import json
 import os
 from builder.error import (
     PackageNotFoundError,
