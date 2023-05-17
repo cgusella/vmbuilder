@@ -52,6 +52,8 @@ def main():
     provisions_configs_reader.check_package_upload_files_existence()
     provisions_configs_reader.check_upload_file_name_duplicates()
     provisions_configs_reader.check_custom_script_existence()
+    provisions_configs_reader.check_update_upgrade_type()
+    provisions_configs_reader.check_if_clean_is_selected()
 
     # build new project
     builder = get_project_class(

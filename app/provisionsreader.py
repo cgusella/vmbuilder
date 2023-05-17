@@ -1,6 +1,7 @@
 #!/bin/python3
 import constants
 import json
+import logging
 import os
 from argparse import Namespace
 from builder.error import (
@@ -174,4 +175,18 @@ class ProvisionConfigReader:
                 'The following file{} '
                 '{} not exist in:\n'
                 f'{error_msg}'.format(*numerality)
+            )
+
+    def check_update_upgrade_type(self):
+        if self.provisions["update_upgrade"] and self.provisions["update_upgrade_full"]:
+            logging.warning(
+                "Be aware that you select all upgrade/update modes in JSON "
+                "file"
+            )
+
+    def check_if_clean_is_selected(self):
+        if self.provisions["clean_packages"]:
+            logging.warning(
+                'Be aware that you selected "clean_packages" '
+                'in JSON file'
             )

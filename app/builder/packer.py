@@ -204,6 +204,12 @@ class Packer(Builder):
         # write install uninstall scripts into main file; if some needed upload file are found
         # from config files, then the "prepare_to_upload.sh"'s path is added
         scripts = install_scripts[:]+uninstall_scripts[:]
+        if self.provisions['update_upgrade_full']:
+            scripts.insert(0, f'{constants.SETUP_SCRIPTS_PATH}/update_upgrade_full.sh')
+        if self.provisions['update_upgrade']:
+            scripts.insert(0, f'{constants.SETUP_SCRIPTS_PATH}/update_upgrade.sh')
+        if self.provisions["clean_packages"]:
+            scripts.append(f'{constants.SETUP_SCRIPTS_PATH}/clean_packages.sh')
         if needed_upload_files:
             scripts.append(f'{constants.SETUP_SCRIPTS_PATH}/prepare_to_upload.sh')
         if scripts:
