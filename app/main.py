@@ -5,7 +5,7 @@ from argumentparser.customparser import CustomArgumentParser
 from provisionsreader import ProvisionConfigReader
 from builder.packer import Packer
 from builder.vagrant import Vagrant
-from controller.controller import VagrantController, PackerController
+from existencecontroller.controller import VagrantController, PackerController
 
 
 def get_project_class(namespace: Namespace, json_file: dict):
