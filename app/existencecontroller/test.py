@@ -25,7 +25,7 @@ def generate_new_name_in(folder_path: str):
     while not name_in_folder:
         random_file_name = f"""{''.join(
             random.choices(string.ascii_lowercase, k=5)
-        )}.json"""
+        )}"""
         if random_file_name not in os.listdir(folder_path):
             name_in_folder = True
     return random_file_name
@@ -38,7 +38,7 @@ class VagrantControllerTest(unittest.TestCase):
         file with the given name and a warning is printed in terminal
         """
         namespace = Namespace()
-        json_file_name = generate_new_name_in(constants.VAGRANT_PROVS_CONFS_PATH)
+        json_file_name = f'{generate_new_name_in(constants.VAGRANT_PROVS_CONFS_PATH)}.json'
         namespace.json = json_file_name
         controller = VagrantController(namespace=namespace)
         try:
@@ -59,7 +59,7 @@ class VagrantControllerTest(unittest.TestCase):
         """
         namespace = Namespace()
         json_file_name = generate_new_name_in(constants.VAGRANT_PROVS_CONFS_PATH)
-        namespace.json = json_file_name[0:6] + '.js'
+        namespace.json = f'{json_file_name}.js'
         controller = VagrantController(namespace=namespace)
         with self.assertRaises(FileExtesionError):
             controller.check_json_existence()
@@ -84,7 +84,7 @@ class PackerControllerTest(unittest.TestCase):
         file with the given name and a warning is printed in terminal
         """
         namespace = Namespace()
-        json_file_name = generate_new_name_in(constants.PACKER_PROVS_CONFS_PATH)
+        json_file_name = f'{generate_new_name_in(constants.PACKER_PROVS_CONFS_PATH)}.json'
         namespace.json = json_file_name
         controller = PackerController(namespace=namespace)
         try:
@@ -105,7 +105,7 @@ class PackerControllerTest(unittest.TestCase):
         """
         namespace = Namespace()
         json_file_name = generate_new_name_in(constants.PACKER_PROVS_CONFS_PATH)
-        namespace.json = json_file_name[0:6] + '.js'
+        namespace.json = f'{json_file_name}.js'
         controller = PackerController(namespace=namespace)
         with self.assertRaises(FileExtesionError):
             controller.check_json_existence()
