@@ -12,7 +12,7 @@ from builder.error import (
 from builder.helper import (
     get_local_virtual_boxes,
     replace_text_in_file,
-    get_programs_upload_files
+    get_packages_upload_files
 )
 from io import TextIOWrapper
 
@@ -97,11 +97,11 @@ class Packer(Builder):
         Operations available: "install", "uninstall", "config"
         """
         script_paths = list()
-        programs = self.provisions.get(f"programs_to_{operation}", '')
-        if programs:
-            for program in programs:
+        packages = self.provisions.get(f"packages_to_{operation}", '')
+        if packages:
+            for package in packages:
                 script_paths.append(
-                    f'{constants.programs_path}/{program}/{operation}.sh'
+                    f'{constants.packages_path}/{package}/{operation}.sh'
                 )
         return script_paths
 
@@ -217,16 +217,16 @@ class Packer(Builder):
         )
 
         # recover needed upload files for config files
-        needed_upload_files = get_programs_upload_files(self.provisions['programs_to_config'])
+        needed_upload_files = get_packages_upload_files(self.provisions['packages_to_config'])
 
         # recover upload files
-        upload_program_files_path = list()
-        for program in needed_upload_files:
-            if needed_upload_files[program]:
-                upload_program_files_path.extend(
+        upload_package_files_path = list()
+        for package in needed_upload_files:
+            if needed_upload_files[package]:
+                upload_package_files_path.extend(
                     [
-                        f'{constants.programs_path}/{program}/upload/{file}'
-                        for file in os.listdir(f'{constants.programs_path}/{program}/upload')
+                        f'{constants.packages_path}/{package}/upload/{file}'
+                        for file in os.listdir(f'{constants.packages_path}/{package}/upload')
                         if file != 'prepare_to_upload.sh'
                     ]
                 )
@@ -249,9 +249,9 @@ class Packer(Builder):
             )
 
         # write upload file into main file
-        if upload_program_files_path:
+        if upload_package_files_path:
             self._generate_provisioner_file(
-                files=upload_program_files_path,
+                files=upload_package_files_path,
                 main_file=main_file
             )
 
@@ -269,7 +269,7 @@ class Packer(Builder):
                 for script in self.provisions['custom_scripts']
             ]
             self._generate_provisioner_shell(
-                scripts=custom_scripts,
+                script_paths=custom_scripts,
                 main_file=main_file
             )
         main_file.write('}\n')

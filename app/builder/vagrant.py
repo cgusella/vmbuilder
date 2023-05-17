@@ -12,7 +12,7 @@ from builder.error import (
 )
 from builder.helper import (
     get_local_virtual_boxes,
-    get_programs_upload_files,
+    get_packages_upload_files,
     is_empty_script,
     replace_text_in_file,
 )
@@ -85,12 +85,12 @@ class Vagrant(Builder):
         # create upload folder
         os.mkdir(f'{project_folder}/upload')
 
-    def _generate_provision_section(self, src, title: str, program: str):
+    def _generate_provision_section(self, src, title: str, package: str):
         """
         Generate provision section in Vagrantfile.
         It titles section as follow
             ######################################################################
-            echo ==OPERATION program==============================================
+            echo ==OPERATION package==============================================
             ######################################################################
         """
         hash_number = 70
@@ -99,7 +99,7 @@ class Vagrant(Builder):
 
         if "create_extra_user.sh" in src:
             lines = [line.replace("extra_user", self.arguments.user) for line in lines]
-            
+
         if title.lower() in ['config'] and is_empty_script(src):
             pass
         else:
@@ -108,9 +108,9 @@ class Vagrant(Builder):
                 'a'
             ) as vagrantfile:
                 vagrantfile.write(f'\n\n\t\t{hash_number*"#"}\n')
-                pound_number = hash_number - 8 - len(title) - len(program)
-                # vagrantfile.write(f'\t#######   {title} {program}   {pound_number*"#"}')
-                vagrantfile.write(f'\t\techo =={title} {program}{pound_number*"="}')
+                pound_number = hash_number - 8 - len(title) - len(package)
+                # vagrantfile.write(f'\t#######   {title} {package}   {pound_number*"#"}')
+                vagrantfile.write(f'\t\techo =={title} {package}{pound_number*"="}')
                 vagrantfile.write(f'\n\t\t{hash_number*"#"}\n')
 
                 for line in lines:
@@ -118,24 +118,24 @@ class Vagrant(Builder):
                         continue
                     vagrantfile.write(f'\t\t{line.strip()}\n')
 
-    def _copy_configurations_to_upload(self, programs: List[str]):
+    def _copy_configurations_to_upload(self, packages: List[str]):
         """
         Find needed files from config.sh script and copy them into project
         upload folder
         """
-        programs_files_upload = get_programs_upload_files(
-            programs=programs
+        packages_files_upload = get_packages_upload_files(
+            packages=packages
         )
         missing_upload_files = str()
-        for program in programs_files_upload:
-            for upload_file in programs_files_upload[program]:
+        for package in packages_files_upload:
+            for upload_file in packages_files_upload[package]:
                 try:
                     shutil.copyfile(
-                        src=f'{constants.programs_path}/{program}/upload/{upload_file}',
+                        src=f'{constants.packages_path}/{package}/upload/{upload_file}',
                         dst=f'{self.machine_path}/{self.arguments.name}/upload/{upload_file}'
                     )
                 except FileNotFoundError:
-                    missing_upload_files += f'"{upload_file}" from "{program}"\n'
+                    missing_upload_files += f'"{upload_file}" from "{package}"\n'
                 if upload_file == "motd":
                     replace_text_in_file(
                         search_phrase="extra_user",
@@ -181,50 +181,50 @@ class Vagrant(Builder):
             self._generate_provision_section(
                     src=f'{constants.setup_scripts_path}/create_extra_user.sh',
                     title=f"CREATE USER {self.arguments.user}",
-                    program=''
+                    package=''
                 )
         if self.provisions['update_upgrade']:
             self._generate_provision_section(
                     src=f'{constants.setup_scripts_path}/update_upgrade.sh',
                     title="UPDATE and UPGRADE",
-                    program='apt'
+                    package='apt'
                 )
-        if self.provisions['programs_to_install']:
-            for program in self.provisions['programs_to_install']:
+        if self.provisions['packages_to_install']:
+            for package in self.provisions['packages_to_install']:
                 self._generate_provision_section(
-                    src=f'{constants.programs_path}/{program}/install.sh',
+                    src=f'{constants.packages_path}/{package}/install.sh',
                     title="INSTALL",
-                    program=program
+                    package=package
                 )
-        if self.provisions['programs_to_config']:
-            for program in self.provisions['programs_to_config']:
+        if self.provisions['packages_to_config']:
+            for package in self.provisions['packages_to_config']:
                 self._generate_provision_section(
-                    src=f'{constants.programs_path}/{program}/config.sh',
+                    src=f'{constants.packages_path}/{package}/config.sh',
                     title="CONFIG",
-                    program=program
+                    package=package
                 )
             self._copy_configurations_to_upload(
-                programs=self.provisions['programs_to_config']
+                packages=self.provisions['packages_to_config']
             )
-        if self.provisions['programs_to_uninstall']:
-            for program in self.provisions['programs_to_uninstall']:
+        if self.provisions['packages_to_uninstall']:
+            for package in self.provisions['packages_to_uninstall']:
                 self._generate_provision_section(
-                    src=f'{constants.programs_path}/{program}/uninstall.sh',
+                    src=f'{constants.packages_path}/{package}/uninstall.sh',
                     title="UNINSTALL",
-                    program=program
+                    package=package
                 )
         if self.provisions['clean_packages']:
             self._generate_provision_section(
                 src=f'{constants.setup_scripts_path}/clean_packages.sh',
                 title="CLEAN apt packages",
-                program=''
+                package=''
             )
         if self.provisions['custom_scripts']:
             for script in self.provisions['custom_scripts']:
                 self._generate_provision_section(
                     src=f'{constants.custom_scripts_path}/{script}',
                     title="CUSTOM SCRIPT",
-                    program=f'{script.split(".")[0]}'
+                    package=f'{script.split(".")[0]}'
                 )
 
         with open(self.vagrantfile_path, 'a') as vagrantfile:

@@ -39,22 +39,22 @@ def is_empty_script(script: str):
     return not any(lines)
 
 
-def get_programs_upload_files(programs: list) -> dict:
+def get_packages_upload_files(packages: list) -> dict:
     """
-    Return a dictionary with programs as keys and list of
+    Return a dictionary with packages as keys and list of
     upload file names as value
     """
-    program_upload_files = dict()
-    for program in programs:
+    package_upload_files = dict()
+    for package in packages:
         with open(
-            f'{constants.programs_path}/{program}/config.sh', 'r'
+            f'{constants.packages_path}/{package}/config.sh', 'r'
         ) as file:
             lines = file.readlines()
-        program_upload_files[program] = list()
+        package_upload_files[package] = list()
         for line in lines:
             if line.startswith('cp '):
                 upload_file_name = line.strip().split()[1].split('/')[-1]
-                program_upload_files[program].append(
+                package_upload_files[package].append(
                     upload_file_name
                 )
-    return program_upload_files
+    return package_upload_files

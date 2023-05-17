@@ -42,7 +42,7 @@ def main():
     provisions_configs_reader = ProvisionConfigReader(
         builder.provisions_configs
     )
-    provisions_configs_reader.check_programs_existence_for()
+    provisions_configs_reader.check_packages_existence_for()
 
     provisions_configs_reader.check_program_upload_files_existence()
     provisions_configs_reader.check_upload_file_name_duplicates()

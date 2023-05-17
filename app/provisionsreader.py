@@ -3,15 +3,15 @@ import constants
 import json
 import os
 from builder.error import (
-    ProgramNotFoundError,
+    packageNotFoundError,
     EmptyScriptError,
     UploadNameConflictError
 )
 from builder.helper import (
     is_empty_script,
-    get_programs_upload_files
+    get_packages_upload_files
 )
-from newprogram import make_program_folder
+from newpackage import make_package_folder
 
 
 class ProvisionConfigReader:
@@ -25,13 +25,13 @@ class ProvisionConfigReader:
         Ckeck if some upload file names are equal. If it happens,
         then an error is raised.
         """
-        program_upload_files = get_programs_upload_files(
-            programs=self.provisions['programs_to_config']
+        package_upload_files = get_packages_upload_files(
+            packages=self.provisions['packages_to_config']
         )
         # join all upload file names into one list
         upload_files = list()
-        for program in program_upload_files:
-            upload_files.extend(program_upload_files[program])
+        for package in package_upload_files:
+            upload_files.extend(package_upload_files[package])
 
         # check rindondance between names
         duplicates = list()
@@ -39,21 +39,21 @@ class ProvisionConfigReader:
             if upload_files.count(file) > 1:
                 duplicates.append(file)
         if duplicates:
-            # recover program name for duplicate file
+            # recover package name for duplicate file
             duplicates_dict = dict()
             duplicates = set(duplicates)
 
             for file in duplicates:
-                for program in program_upload_files:
-                    if file in program_upload_files[program]:
-                        duplicates_dict[program] = list()
-                        duplicates_dict[program].append(file)
+                for package in package_upload_files:
+                    if file in package_upload_files[package]:
+                        duplicates_dict[package] = list()
+                        duplicates_dict[package].append(file)
 
             # prepare error message
             error_msg = "\n".join(
                 [
-                    f'{", ".join(duplicates_dict[program])} in {program}'
-                    for program in duplicates_dict
+                    f'{", ".join(duplicates_dict[package])} in {package}'
+                    for package in duplicates_dict
                 ]
             )
             raise UploadNameConflictError(
@@ -63,43 +63,43 @@ class ProvisionConfigReader:
                 f'{error_msg}'
             )
 
-    def check_programs_existence_for(self):
+    def check_packages_existence_for(self):
         """
-        Chack that programs specified exist.
-        If it does not, create a program folder and raise an error
+        Chack that packages specified exist.
+        If it does not, create a package folder and raise an error
         """
-        provisions_to_check = {"programs_to_install", "programs_to_uninstall", "programs_to_config"}
-        operation_programs = dict()
+        provisions_to_check = {"packages_to_install", "packages_to_uninstall", "packages_to_config"}
+        operation_packages = dict()
         for provision_to_check in provisions_to_check:
             operation = provision_to_check.split('_')[-1]
-            operation_programs[operation] = list()
-            programs = self.provisions[provision_to_check]
-            if programs:
-                for program in programs:
-                    if program not in os.listdir(constants.programs_path):
-                        operation_programs[operation].append(program)
+            operation_packages[operation] = list()
+            packages = self.provisions[provision_to_check]
+            if packages:
+                for package in packages:
+                    if package not in os.listdir(constants.packages_path):
+                        operation_packages[operation].append(package)
 
-        if any(operation_programs.values()):
+        if any(operation_packages.values()):
             error_msg = 'The following scripts are empty: \n'
-            for operation in operation_programs:
-                if operation_programs[operation]:
-                    error_msg += f'{operation}.sh for {", ".join(operation_programs[operation])}\n'
-                    make_program_folder(operation_programs[operation])
-                    # if not_found_provision_programs:
-                    #     make_program_folder(not_found_provision_programs)
+            for operation in operation_packages:
+                if operation_packages[operation]:
+                    error_msg += f'{operation}.sh for {", ".join(operation_packages[operation])}\n'
+                    make_package_folder(operation_packages[operation])
+                    # if not_found_provision_packages:
+                    #     make_package_folder(not_found_provision_packages)
                     #     plural = ('s', 'are')
                     #     singular = ('', 'is')
                     #     numerality = plural if len(
-                    #         not_found_provision_programs
+                    #         not_found_provision_packages
                     #     ) > 1 else singular
                     #     error_msg = (
-                    #         'The following program{} '
-                    #         f'{", ".join(not_found_provision_programs)} '
-                    #         '{} created at /templates/programs folder.\nFill the '
+                    #         'The following package{} '
+                    #         f'{", ".join(not_found_provision_packages)} '
+                    #         '{} created at /templates/packages folder.\nFill the '
                     #         f'appropriate {operation}.sh files '
                     #         'and come back then!'.format(*numerality)
                     #     )
-            raise ProgramNotFoundError(error_msg)
+            raise packageNotFoundError(error_msg)
 
     def check_custom_script_existence(self):
         """
@@ -123,54 +123,54 @@ class ProvisionConfigReader:
                     f'{", ".join(not_found_scripts)} '
                     '{} not exist.'.format(*numerality)
                 )
-                raise ProgramNotFoundError(error_msg)
+                raise packageNotFoundError(error_msg)
 
     def check_scripts_emptyness_for(self, provision_key: str):
         """
-        Check if program shell script is empty for selected operation.
+        Check if package shell script is empty for selected operation.
         If it does, raise an exception
         """
         operation = provision_key.split('_')[-1]
         empty_scripts = list()
-        for program in self.provisions[provision_key]:
+        for package in self.provisions[provision_key]:
             if is_empty_script(
-                f'{constants.programs_path}/{program}/{operation}.sh'
+                f'{constants.packages_path}/{package}/{operation}.sh'
             ):
-                empty_scripts.append(program)
+                empty_scripts.append(package)
 
         if empty_scripts:
             s = 's' if len(empty_scripts) > 1 else ''
             raise EmptyScriptError(
-                f'The script {operation}.sh is empty for program{s} '
+                f'The script {operation}.sh is empty for package{s} '
                 f'{", ".join(empty_scripts)}'
             )
 
-    def check_program_upload_files_existence(self):
+    def check_package_upload_files_existence(self):
         """
         Check that upload file called by config scripts exist
         """
-        program_upload_files = get_programs_upload_files(
-            programs=self.provisions['programs_to_config']
+        package_upload_files = get_packages_upload_files(
+            packages=self.provisions['packages_to_config']
         )
         # initialize not found file dict
         not_found_files = dict()
 
-        for program in program_upload_files:
-            not_found_files[program] = list()
-            for upload_file in program_upload_files[program]:
+        for package in package_upload_files:
+            not_found_files[package] = list()
+            for upload_file in package_upload_files[package]:
                 if upload_file not in os.listdir(
-                    f'{constants.programs_path}/{program}/upload'
+                    f'{constants.packages_path}/{package}/upload'
                 ):
                     print('upload_file', upload_file)
-                    not_found_files[program].append(upload_file)
+                    not_found_files[package].append(upload_file)
 
         error_msg = ''
-        for program in not_found_files:
-            if not_found_files[program]:
+        for package in not_found_files:
+            if not_found_files[package]:
                 error_msg += "\n".join(
                     [
-                        f'file {file} for {program}\n'
-                        for file in not_found_files[program]
+                        f'file {file} for {package}\n'
+                        for file in not_found_files[package]
                     ]
                 )
         if error_msg:
@@ -179,7 +179,7 @@ class ProvisionConfigReader:
             numerality = plural if len(
                 not_found_files
             ) > 1 else singular
-            raise ProgramNotFoundError(
+            raise packageNotFoundError(
                 'The following file{} '
                 '{} not exist in:\n'
                 f'{error_msg}'.format(*numerality)

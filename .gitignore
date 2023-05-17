@@ -1,8 +1,8 @@
 __pycache__
 .vscode/
-templates/programs/*
-!templates/programs/program-example/
-!templates/programs/setup_scripts
+templates/packages/*
+!templates/packages/program-example/
+!templates/packages/setup_scripts
 machines/vagrant/*
 !machines/vagrant/README.md
 machines/packer/*

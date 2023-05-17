@@ -1,19 +1,19 @@
 import constants
 import os
 
-programs = os.listdir(constants.programs_path)
+packages = os.listdir(constants.packages_path)
 
-for program in programs:
-    old_upload_folder = f'{constants.programs_path}/{program}/configs/upload'
-    old_config_script = f'{constants.programs_path}/{program}/configs/config.sh'
-    new_upload_folder = f'{constants.programs_path}/{program}/upload'
-    if program in ['program-example']:
+for package in packages:
+    old_upload_folder = f'{constants.packages_path}/{package}/configs/upload'
+    old_config_script = f'{constants.packages_path}/{package}/configs/config.sh'
+    new_upload_folder = f'{constants.packages_path}/{package}/upload'
+    if package in ['package-example']:
         continue
-    if 'upload' not in os.listdir(f'{constants.programs_path}/{program}/'):
+    if 'upload' not in os.listdir(f'{constants.packages_path}/{package}/'):
         os.mkdir(new_upload_folder)
-    if 'upload' in os.listdir(f'{constants.programs_path}/{program}/config/'):
+    if 'upload' in os.listdir(f'{constants.packages_path}/{package}/config/'):
         os.rmdir(old_upload_folder)
-    
+
     # if os.path.isdir(upload_folder):
     #     continue
     # os.mkdir(upload_folder)
