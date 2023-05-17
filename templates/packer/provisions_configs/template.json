@@ -6,11 +6,11 @@
   "provisions": {
     "update_upgrade": false,
     "update_upgrade_full": false,
-    "programs_to_install": [],
-    "programs_to_uninstall": [],
-    "programs_to_config": [],
-    "custom_scripts": [],
-    "clean_packages": false
+    "packages_to_install": [],
+    "packages_to_uninstall": [],
+    "packages_to_config": [],
+    "clean_packages": false,
+    "custom_scripts": []
   },
   "virtual_machine_configs": {
     "cpus":{
