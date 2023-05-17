@@ -1,6 +1,8 @@
 #!/bin/python3
 import constants
+import json
 import os
+from argparse import Namespace
 from builder.error import (
     PackageNotFoundError,
     EmptyScriptError,
@@ -14,10 +16,15 @@ from newpackage import make_package_folder
 
 
 class ProvisionConfigReader:
-    def __init__(self, builder_provisions_config: dict) -> None:
-        self.provisions_configs = builder_provisions_config
-        self.provisions = self.provisions_configs["provisions"]
-        self.configs = self.provisions_configs["virtual_machine_configs"]
+    def __init__(self, namespace: Namespace) -> None:
+        if namespace.vm_type == 'vagrant':
+            provision_config_file_path = constants.vagrant_provs_confs_path
+        elif namespace.vm_type == 'packer':
+            provision_config_file_path = constants.packer_provs_confs_path
+        with open(f'{provision_config_file_path}/{namespace.json}') as provs_confs_file:
+            self.json_file = json.loads(provs_confs_file.read())
+        self.provisions = self.json_file["provisions"]
+        self.configs = self.json_file["virtual_machine_configs"]
 
     def check_upload_file_name_duplicates(self):
         """

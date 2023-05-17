@@ -1,17 +1,12 @@
 import constants
-import json
 import os
 import shutil
 from argparse import Namespace
 from builder.builder import Builder
 from builder.error import (
-    ExistenceProjectError,
-    ExistenceVirtualBoxError,
-    JsonConfigCopiedError,
-    NoFileToUploadError
+    NoFileToUploadError,
 )
 from builder.helper import (
-    get_local_virtual_boxes,
     get_packages_upload_files,
     is_empty_script,
     replace_text_in_file,
@@ -20,44 +15,14 @@ from typing import List
 
 
 class Vagrant(Builder):
-    def __init__(self, namespace) -> None:
+    def __init__(self, namespace: Namespace, json_file: dict) -> None:
         self.arguments: Namespace = namespace
         self.machine_path: str = constants.vagrant_machines_path
         self.vagrantfile_path = f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
-        self.provisions_configs: dict = dict()
+        self.provisions_configs = json_file
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
-
-    def check_new_project_folder_existence(self):
-        if self.arguments.name in os.listdir(self.machine_path):
-            raise ExistenceProjectError("[ERROR] Project already exists!")
-
-    def check_virtualbox_existence(self):
-        if self.arguments.vm_name in get_local_virtual_boxes():
-            raise ExistenceVirtualBoxError(
-                f'The virtualbox {self.arguments.vm_name} already exists!'
-            )
-
-    def check_provision_cfg_json_existence(self):
-        if self.arguments.json not in os.listdir(constants.vagrant_provs_confs_path):
-            shutil.copyfile(
-                src=f'{constants.vagrant_provs_confs_path}/template.json',
-                dst=f'{constants.vagrant_provs_confs_path}/{self.arguments.json}'
-            )
-            raise JsonConfigCopiedError(
-                f'The json file "{self.arguments.json}" '
-                f'is created at {constants.vagrant_provs_confs_path} folder.\n'
-                'Fill it up and come back then!'
-            )
-
-    def set_provisions_configs(self):
-        """Set provisions_configs attribute"""
-        config_provision_file_path = f'{constants.vagrant_provs_confs_path}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as provisions_configs:
-            self.provisions_configs = json.loads(
-                provisions_configs.read()
-            )
 
     def set_configs(self):
         """Set configs attribute"""

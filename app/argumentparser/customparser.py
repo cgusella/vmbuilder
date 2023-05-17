@@ -30,9 +30,9 @@ class CustomArgumentParser:
         """Return the namespace after vagrant or packer is specified"""
         self.add_common_args()
         common_namespace, _ = self.parser.parse_known_args()
-        if common_namespace.vmtype == 'vagrant':
+        if common_namespace.vm_type == 'vagrant':
             self.add_vagrant_args()
-        elif common_namespace.vmtype == 'packer':
+        elif common_namespace.vm_type == 'packer':
             self.add_packer_args()
 
         return self.parser.parse_args()
@@ -47,9 +47,15 @@ class CustomArgumentParser:
         )
         self.parser.add_argument(
             '-t',
-            dest='vmtype',
+            dest='vm_type',
             choices=['vagrant', 'packer'],
             required=True
+        )
+        self.parser.add_argument(
+            '-d',
+            dest='debug',
+            action='store_true',
+            required=False
         )
 
     def parse_all_arguments(self):

@@ -1,5 +1,4 @@
 import constants
-import subprocess
 
 
 def replace_text_in_file(search_phrase, replace_with, file_path):
@@ -11,18 +10,6 @@ def replace_text_in_file(search_phrase, replace_with, file_path):
             replaced_content = replaced_content + new_line + '\n'
     with open(file_path, "w") as new_file:
         new_file.write(replaced_content)
-
-
-def get_local_virtual_boxes():
-    """
-    Return the virtual machine names list as string.
-    """
-    vmbox_list = subprocess.run(
-        "VBoxManage list vms",
-        shell=True,
-        capture_output=True
-    ).stdout.decode("ascii")
-    return vmbox_list
 
 
 def is_empty_script(script: str):

@@ -7,14 +7,6 @@ class Error(Exception):
         return self.msg
 
 
-class ExistenceProjectError(Error):
-    pass
-
-
-class ExistenceVirtualBoxError(Error):
-    pass
-
-
 class PackageNotFoundError(Error):
     pass
 
@@ -24,10 +16,6 @@ class ScriptNotFoundError(Error):
 
 
 class JsonConfigCopiedError(Error):
-    pass
-
-
-class FileExtesionError(Error):
     pass
 
 

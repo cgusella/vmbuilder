@@ -1,46 +1,51 @@
 #!/usr/bin/python3
-import logging
 import sys
 from argparse import Namespace
+from argumentparser.customparser import CustomArgumentParser
 from provisionsreader import ProvisionConfigReader
-from builder.error import (
-    NoFileToUploadError,
-    ExistenceProjectError
-)
 from builder.packer import Packer
 from builder.vagrant import Vagrant
-from argumentparser.customparser import CustomArgumentParser
+from controller.controller import VagrantController, PackerController
 
 
-# sys.tracebacklimit = 0
-
-
-def get_project_class(namespace: Namespace):
-    project_type = namespace.vmtype
+def get_project_class(namespace: Namespace, json_file: dict):
+    project_type = namespace.vm_type
     if project_type == 'vagrant':
-        return Vagrant(namespace=namespace)
+        return Vagrant(
+            namespace=namespace,
+            json_file=json_file
+        )
     if project_type == 'packer':
-        return Packer(namespace=namespace)
+        return Packer(
+            namespace=namespace,
+            json_file=json_file
+        )
+
+
+def get_controller_class(namespace: Namespace):
+    if namespace.vm_type == 'vagrant':
+        return VagrantController(namespace=namespace)
+    elif namespace.vm_type == 'packer':
+        return PackerController(namespace=namespace)
 
 
 def main():
+    # flags parsing
     namespace = CustomArgumentParser().get_namespace()
-    builder = get_project_class(namespace=namespace)
-    try:
-        builder.check_new_project_folder_existence()
-    except ExistenceProjectError:
-        response = input('Project already exists. Delete it?')
-        if response.lower() in ['y', 'yes']:
-            builder.delete_project()
-        exit()
-    builder.check_virtualbox_existence()
-    builder.check_provision_cfg_json_existence()
-    builder.set_provisions_configs()
-    builder.set_configs()
-    builder.set_provisions()
-    builder.set_credentials()
+
+    # debug mode to see traceback errors
+    if not namespace.debug:
+        sys.tracebacklimit = 0
+
+    # start control
+    controller = get_controller_class(namespace=namespace)
+    controller.check_virtualbox_existence()
+    controller.check_json_existence()
+    controller.check_new_project_folder_existence()
+
+    # read selected json
     provisions_configs_reader = ProvisionConfigReader(
-        builder.provisions_configs
+        namespace=namespace
     )
     provisions_configs_reader.check_packages_existence_for()
 
@@ -48,12 +53,16 @@ def main():
     provisions_configs_reader.check_upload_file_name_duplicates()
     provisions_configs_reader.check_custom_script_existence()
 
-    try:
-        builder.create_project_folder()
-        builder.generate_main_file()
-    except (NoFileToUploadError, KeyError) as exc:
-        logging.error(exc.msg)
-        builder.delete_project()
+    # build new project
+    builder = get_project_class(
+        namespace=namespace,
+        json_file=provisions_configs_reader.json_file
+    )
+    builder.set_configs()
+    builder.set_provisions()
+    builder.set_credentials()
+    builder.create_project_folder()
+    builder.generate_main_file()
 
 
 if __name__ == '__main__':

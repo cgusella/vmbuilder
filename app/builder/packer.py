@@ -1,16 +1,10 @@
 import constants
 import json
-import logging
 import os
 import shutil
 from argparse import Namespace
 from builder.builder import Builder
-from builder.error import (
-    ExistenceProjectError,
-    ExistenceVirtualBoxError
-)
 from builder.helper import (
-    get_local_virtual_boxes,
     replace_text_in_file,
     get_packages_upload_files
 )
@@ -18,44 +12,13 @@ from io import TextIOWrapper
 
 
 class Packer(Builder):
-    def __init__(self, namespace) -> None:
+    def __init__(self, namespace: Namespace, json_file: dict) -> None:
         self.arguments: Namespace = namespace
         self.machines_path: str = constants.packer_machines_path
-        self.provisions_configs: dict = dict()
+        self.provisions_configs: json_file
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
-
-    def check_new_project_folder_existence(self):
-        if self.arguments.name in os.listdir(self.machines_path):
-            raise ExistenceProjectError("[ERROR] Project already exists!")
-
-    def check_virtualbox_existence(self):
-        if self.arguments.vm_name in get_local_virtual_boxes():
-            raise ExistenceVirtualBoxError(
-                f'The virtualbox {self.arguments.vm_name} already exists!'
-            )
-
-    def check_provision_cfg_json_existence(self):
-        if self.arguments.json not in os.listdir(constants.packer_provs_confs_path):
-            shutil.copyfile(
-                src=f'{constants.packer_provs_confs_path}/template.json',
-                dst=f'{constants.packer_provs_confs_path}/{self.arguments.json}'
-            )
-            logging.warning(
-                f'The json file "{self.arguments.json}" '
-                f'is created at {constants.vagrant_provs_confs_path} folder.\n'
-                'Fill it up and come back then!'
-            )
-            exit(0)
-
-    def set_provisions_configs(self):
-        """Set provisions_configs attribute"""
-        config_provision_file_path = f'{constants.packer_provs_confs_path}/{self.arguments.json}'
-        with open(config_provision_file_path, 'r') as provisions_configs:
-            self.provisions_configs = json.loads(
-                provisions_configs.read()
-            )
 
     def set_configs(self):
         """Set configs attribute"""
