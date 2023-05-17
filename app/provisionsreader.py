@@ -3,7 +3,7 @@ import constants
 import json
 import os
 from builder.error import (
-    packageNotFoundError,
+    PackageNotFoundError,
     EmptyScriptError,
     UploadNameConflictError
 )
@@ -85,21 +85,7 @@ class ProvisionConfigReader:
                 if operation_packages[operation]:
                     error_msg += f'{operation}.sh for {", ".join(operation_packages[operation])}\n'
                     make_package_folder(operation_packages[operation])
-                    # if not_found_provision_packages:
-                    #     make_package_folder(not_found_provision_packages)
-                    #     plural = ('s', 'are')
-                    #     singular = ('', 'is')
-                    #     numerality = plural if len(
-                    #         not_found_provision_packages
-                    #     ) > 1 else singular
-                    #     error_msg = (
-                    #         'The following package{} '
-                    #         f'{", ".join(not_found_provision_packages)} '
-                    #         '{} created at /templates/packages folder.\nFill the '
-                    #         f'appropriate {operation}.sh files '
-                    #         'and come back then!'.format(*numerality)
-                    #     )
-            raise packageNotFoundError(error_msg)
+            raise PackageNotFoundError(error_msg)
 
     def check_custom_script_existence(self):
         """
@@ -123,7 +109,7 @@ class ProvisionConfigReader:
                     f'{", ".join(not_found_scripts)} '
                     '{} not exist.'.format(*numerality)
                 )
-                raise packageNotFoundError(error_msg)
+                raise PackageNotFoundError(error_msg)
 
     def check_scripts_emptyness_for(self, provision_key: str):
         """
@@ -161,7 +147,6 @@ class ProvisionConfigReader:
                 if upload_file not in os.listdir(
                     f'{constants.packages_path}/{package}/upload'
                 ):
-                    print('upload_file', upload_file)
                     not_found_files[package].append(upload_file)
 
         error_msg = ''
@@ -179,7 +164,7 @@ class ProvisionConfigReader:
             numerality = plural if len(
                 not_found_files
             ) > 1 else singular
-            raise packageNotFoundError(
+            raise PackageNotFoundError(
                 'The following file{} '
                 '{} not exist in:\n'
                 f'{error_msg}'.format(*numerality)

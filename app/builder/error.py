@@ -15,7 +15,7 @@ class ExistenceVirtualBoxError(Error):
     pass
 
 
-class ProgramNotFoundError(Error):
+class PackageNotFoundError(Error):
     pass
 
 
