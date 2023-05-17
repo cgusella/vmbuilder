@@ -18,9 +18,9 @@ from newpackage import make_package_folder
 class ProvisionConfigReader:
     def __init__(self, namespace: Namespace) -> None:
         if namespace.vm_type == 'vagrant':
-            provision_config_file_path = constants.vagrant_provs_confs_path
+            provision_config_file_path = constants.VAGRANT_PROVS_CONFS_PATH
         elif namespace.vm_type == 'packer':
-            provision_config_file_path = constants.packer_provs_confs_path
+            provision_config_file_path = constants.PACKER_PROVS_CONFS_PATH
         with open(f'{provision_config_file_path}/{namespace.json}') as provs_confs_file:
             self.json_file = json.loads(provs_confs_file.read())
         self.provisions = self.json_file["provisions"]
@@ -82,7 +82,7 @@ class ProvisionConfigReader:
             packages = self.provisions[provision_to_check]
             if packages:
                 for package in packages:
-                    if package not in os.listdir(constants.packages_path):
+                    if package not in os.listdir(constants.PACKAGES_PATH):
                         operation_packages[operation].append(package)
 
         if any(operation_packages.values()):
@@ -102,7 +102,7 @@ class ProvisionConfigReader:
         not_found_scripts = list()
         if scripts:
             for script in scripts:
-                if script not in os.listdir(constants.custom_scripts_path):
+                if script not in os.listdir(constants.CUSTOM_SCRIPTS_PATH):
                     not_found_scripts.append(script)
             if not_found_scripts:
                 plural = ('s', 'do')
@@ -126,7 +126,7 @@ class ProvisionConfigReader:
         empty_scripts = list()
         for package in self.provisions[provision_key]:
             if is_empty_script(
-                f'{constants.packages_path}/{package}/{operation}.sh'
+                f'{constants.PACKAGES_PATH}/{package}/{operation}.sh'
             ):
                 empty_scripts.append(package)
 
@@ -151,7 +151,7 @@ class ProvisionConfigReader:
             not_found_files[package] = list()
             for upload_file in package_upload_files[package]:
                 if upload_file not in os.listdir(
-                    f'{constants.packages_path}/{package}/upload'
+                    f'{constants.PACKAGES_PATH}/{package}/upload'
                 ):
                     not_found_files[package].append(upload_file)
 

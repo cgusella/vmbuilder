@@ -14,8 +14,8 @@ from io import TextIOWrapper
 class Packer(Builder):
     def __init__(self, namespace: Namespace, json_file: dict) -> None:
         self.arguments: Namespace = namespace
-        self.machines_path: str = constants.packer_machines_path
-        self.provisions_configs: json_file
+        self.machines_path: str = constants.PACKER_MACHINES_PATH
+        self.provisions_configs = json_file
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
@@ -45,7 +45,7 @@ class Packer(Builder):
         os.makedirs(f'{project_folder}/http')
 
         shutil.copyfile(
-            src=f'{constants.packer_http_path}/{self.arguments.preseed}',
+            src=f'{constants.PACKER_PRESEEDS_PATH}/{self.arguments.preseed}',
             dst=f'{project_folder}/http/{self.arguments.preseed}'
         )
 
@@ -65,24 +65,24 @@ class Packer(Builder):
         if packages:
             for package in packages:
                 script_paths.append(
-                    f'{constants.packages_path}/{package}/{operation}.sh'
+                    f'{constants.PACKAGES_PATH}/{package}/{operation}.sh'
                 )
         return script_paths
 
     def _generate_vars_file(self):
         """Generate vars file"""
-        with open(f'{constants.packer_machines_path}/{self.arguments.name}/vars.pkr.hcl', 'w') as vars_file:
+        with open(f'{constants.PACKER_MACHINES_PATH}/{self.arguments.name}/vars.pkr.hcl', 'w') as vars_file:
             for var in self.configs:
                 if not isinstance(self.configs[var], dict):
                     continue
                 if var == 'output_directory':
                     if not self.configs[var]["default"]:
-                        self.configs[var]["default"] = constants.packer_builds_path
+                        self.configs[var]["default"] = constants.PACKER_BUILDS_PATH
                 if var == 'iso_directory':
                     if not self.configs[var]["default"]:
-                        self.configs[var]["default"] = constants.iso_path
+                        self.configs[var]["default"] = constants.ISO_PATH
                 if var == 'boot_command':
-                    with open(f'{constants.packer_http_path}/boot_command.txt') as boot_command:
+                    with open(f'{constants.PACKER_PRESEEDS_PATH}/boot_command.txt') as boot_command:
                         lines = boot_command.readlines()
                     for count, line in enumerate(lines):
                         lines[count] = line.replace('preseed-file', self.arguments.preseed)
@@ -189,8 +189,8 @@ class Packer(Builder):
             if needed_upload_files[package]:
                 upload_package_files_path.extend(
                     [
-                        f'{constants.packages_path}/{package}/upload/{file}'
-                        for file in os.listdir(f'{constants.packages_path}/{package}/upload')
+                        f'{constants.PACKAGES_PATH}/{package}/upload/{file}'
+                        for file in os.listdir(f'{constants.PACKAGES_PATH}/{package}/upload')
                         if file != 'prepare_to_upload.sh'
                     ]
                 )
@@ -205,7 +205,7 @@ class Packer(Builder):
         # from config files, then the "prepare_to_upload.sh"'s path is added
         scripts = install_scripts[:]+uninstall_scripts[:]
         if needed_upload_files:
-            scripts.append(f'{constants.setup_scripts_path}/prepare_to_upload.sh')
+            scripts.append(f'{constants.SETUP_SCRIPTS_PATH}/prepare_to_upload.sh')
         if scripts:
             self._generate_provisioner_shell(
                 script_paths=scripts,
@@ -229,7 +229,7 @@ class Packer(Builder):
 
         if self.provisions['custom_scripts']:
             custom_scripts = [
-                f'{constants.custom_scripts_path}/{script}'
+                f'{constants.CUSTOM_SCRIPTS_PATH}/{script}'
                 for script in self.provisions['custom_scripts']
             ]
             self._generate_provisioner_shell(
@@ -257,7 +257,7 @@ class Packer(Builder):
     def generate_main_file(self):
         """Generate main and vars files for packer"""
         self._generate_vars_file()
-        with open(f'{constants.packer_machines_path}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
+        with open(f'{constants.PACKER_MACHINES_PATH}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
             self._add_locals_block(main_file=main_file)
             self._add_source_block(main_file=main_file)
             self._add_build_block(main_file=main_file)

@@ -1,25 +1,21 @@
 import os
 
-vmbuilder_path = f'{os.path.dirname(os.path.realpath(__file__))}/..'
+VMBUILDER_PATH = f'{os.path.dirname(os.path.realpath(__file__))}/..'
 
 
-machines_path       = f'{vmbuilder_path}/machines'
-templates_path      = f'{vmbuilder_path}/templates'
-builds_path         = f'{vmbuilder_path}/builds'
-iso_path            = f'{vmbuilder_path}/iso'
-packages_path       = f'{vmbuilder_path}/templates/packages'
-setup_scripts_path  = f'{vmbuilder_path}/templates/packages/setup_scripts'
-custom_scripts_path = f'{vmbuilder_path}/templates/custom-scripts'
-upload_path         = f'{vmbuilder_path}/templates/upload'
+MACHINE_PATH = f'{VMBUILDER_PATH}/machines'
+BUILDS_PATH = f'{VMBUILDER_PATH}/builds'
+ISO_PATH = f'{VMBUILDER_PATH}/iso'
+PACKAGES_PATH = f'{VMBUILDER_PATH}/packages'
+SETUP_SCRIPTS_PATH = f'{VMBUILDER_PATH}/packages/setup_scripts'
+CUSTOM_SCRIPTS_PATH = f'{VMBUILDER_PATH}/custom-scripts'
 
 
-vagrant_machines_path    = f'{vmbuilder_path}/machines/vagrant'
-vagrant_templates_path   = f'{vmbuilder_path}/templates/vagrant'
-vagrant_builds_path      = f'{vmbuilder_path}/builds/vagrant'
-vagrant_provs_confs_path = f'{vmbuilder_path}/templates/vagrant/provisions_configs'
+VAGRANT_MACHINES_PATH = f'{VMBUILDER_PATH}/machines/vagrant'
+VAGRANT_BUILDS_PATH = f'{VMBUILDER_PATH}/builds/vagrant'
+VAGRANT_PROVS_CONFS_PATH = f'{VMBUILDER_PATH}/provisions_configs/vagrant'
 
-packer_machines_path    = f'{vmbuilder_path}/machines/packer'
-packer_templates_path   = f'{vmbuilder_path}/templates/packer'
-packer_builds_path      = f'{vmbuilder_path}/builds/packer'
-packer_provs_confs_path = f'{vmbuilder_path}/templates/packer/provisions_configs'
-packer_http_path        = f'{vmbuilder_path}/templates/packer/http'
+PACKER_MACHINES_PATH = f'{VMBUILDER_PATH}/machines/packer'
+PACKER_BUILDS_PATH = f'{VMBUILDER_PATH}/builds/packer'
+PACKER_PROVS_CONFS_PATH = f'{VMBUILDER_PATH}/provisions_configs/packer'
+PACKER_PRESEEDS_PATH = f'{VMBUILDER_PATH}/preseeds'

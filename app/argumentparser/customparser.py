@@ -83,7 +83,7 @@ class CustomArgumentParser:
             '-vj',
             dest='json',
             help=get_json_files_for_help(
-                constants.vagrant_provs_confs_path
+                constants.VAGRANT_PROVS_CONFS_PATH
             ),
             required=True
         )
@@ -107,7 +107,7 @@ class CustomArgumentParser:
             '-pj',
             dest='json',
             help=get_json_files_for_help(
-                constants.packer_provs_confs_path
+                constants.PACKER_PROVS_CONFS_PATH
             ),
             required=True
         )

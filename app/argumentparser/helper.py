@@ -37,7 +37,7 @@ def get_preseed_files_for_help():
     """
     preseed_file = [
         f'{file}' for file in os.listdir(
-            constants.packer_http_path
+            constants.PACKER_PRESEEDS_PATH
         ) if file.startswith('preseed')
     ]
     if not preseed_file:

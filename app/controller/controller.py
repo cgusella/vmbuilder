@@ -54,20 +54,20 @@ class VagrantController(Controller):
     def check_json_existence(self):
         if not self.namespace.json.endswith(".json"):
             raise FileExtesionError('You selected inappropriate JSON file')
-        if self.namespace.json not in os.listdir(constants.vagrant_provs_confs_path):
+        if self.namespace.json not in os.listdir(constants.VAGRANT_PROVS_CONFS_PATH):
             shutil.copyfile(
-                src=f'{constants.vagrant_provs_confs_path}/template.json',
-                dst=f'{constants.vagrant_provs_confs_path}/{self.namespace.json}'
+                src=f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json',
+                dst=f'{constants.VAGRANT_PROVS_CONFS_PATH}/{self.namespace.json}'
             )
             logging.warning(
                 f'The json file "{self.namespace.json}" '
-                f'is created at {constants.vagrant_provs_confs_path} folder.\n'
+                f'is created at {constants.VAGRANT_PROVS_CONFS_PATH} folder.\n'
                 'Fill it up and come back then!'
             )
             exit(0)
 
     def check_new_project_folder_existence(self):
-        if self.namespace.name in os.listdir(constants.vagrant_machines_path):
+        if self.namespace.name in os.listdir(constants.VAGRANT_MACHINES_PATH):
             raise ExistenceProjectError("Project already exists!")
 
 
@@ -86,18 +86,18 @@ class PackerController(Controller):
     def check_json_existence(self):
         if not self.namespace.json.endswith(".json"):
             raise FileExtesionError('You selected inappropriate JSON file')
-        if self.namespace.json not in os.listdir(constants.packer_provs_confs_path):
+        if self.namespace.json not in os.listdir(constants.PACKER_PROVS_CONFS_PATH):
             shutil.copyfile(
-                src=f'{constants.packer_provs_confs_path}/template.json',
-                dst=f'{constants.packer_provs_confs_path}/{self.namespace.json}'
+                src=f'{constants.PACKER_PROVS_CONFS_PATH}/template.json',
+                dst=f'{constants.PACKER_PROVS_CONFS_PATH}/{self.namespace.json}'
             )
             logging.warning(
                 f'The json file "{self.namespace.json}" '
-                f'is created at {constants.packer_provs_confs_path} folder.\n'
+                f'is created at {constants.PACKER_PROVS_CONFS_PATH} folder.\n'
                 'Fill it up and come back then!'
             )
             exit(0)
 
     def check_new_project_folder_existence(self):
-        if self.namespace.name in os.listdir(constants.packer_machines_path):
+        if self.namespace.name in os.listdir(constants.PACKER_MACHINES_PATH):
             raise ExistenceProjectError("Project already exists!")

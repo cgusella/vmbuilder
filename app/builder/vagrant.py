@@ -17,7 +17,7 @@ from typing import List
 class Vagrant(Builder):
     def __init__(self, namespace: Namespace, json_file: dict) -> None:
         self.arguments: Namespace = namespace
-        self.machine_path: str = constants.vagrant_machines_path
+        self.machine_path: str = constants.VAGRANT_MACHINES_PATH
         self.vagrantfile_path = f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
         self.provisions_configs = json_file
         self.configs: dict = dict()
@@ -96,7 +96,7 @@ class Vagrant(Builder):
             for upload_file in packages_files_upload[package]:
                 try:
                     shutil.copyfile(
-                        src=f'{constants.packages_path}/{package}/upload/{upload_file}',
+                        src=f'{constants.PACKAGES_PATH}/{package}/upload/{upload_file}',
                         dst=f'{self.machine_path}/{self.arguments.name}/upload/{upload_file}'
                     )
                 except FileNotFoundError:
@@ -144,27 +144,27 @@ class Vagrant(Builder):
             vagrantfile.write('\n\tconfig.vm.provision "shell", inline: <<-SHELL\n')
         if self.arguments.user:
             self._generate_provision_section(
-                    src=f'{constants.setup_scripts_path}/create_extra_user.sh',
+                    src=f'{constants.SETUP_SCRIPTS_PATH}/create_extra_user.sh',
                     title=f"CREATE USER {self.arguments.user}",
                     package=''
                 )
         if self.provisions['update_upgrade']:
             self._generate_provision_section(
-                    src=f'{constants.setup_scripts_path}/update_upgrade.sh',
+                    src=f'{constants.SETUP_SCRIPTS_PATH}/update_upgrade.sh',
                     title="UPDATE and UPGRADE",
                     package='apt'
                 )
         if self.provisions['packages_to_install']:
             for package in self.provisions['packages_to_install']:
                 self._generate_provision_section(
-                    src=f'{constants.packages_path}/{package}/install.sh',
+                    src=f'{constants.PACKAGES_PATH}/{package}/install.sh',
                     title="INSTALL",
                     package=package
                 )
         if self.provisions['packages_to_config']:
             for package in self.provisions['packages_to_config']:
                 self._generate_provision_section(
-                    src=f'{constants.packages_path}/{package}/config.sh',
+                    src=f'{constants.PACKAGES_PATH}/{package}/config.sh',
                     title="CONFIG",
                     package=package
                 )
@@ -174,20 +174,20 @@ class Vagrant(Builder):
         if self.provisions['packages_to_uninstall']:
             for package in self.provisions['packages_to_uninstall']:
                 self._generate_provision_section(
-                    src=f'{constants.packages_path}/{package}/uninstall.sh',
+                    src=f'{constants.PACKAGES_PATH}/{package}/uninstall.sh',
                     title="UNINSTALL",
                     package=package
                 )
         if self.provisions['clean_packages']:
             self._generate_provision_section(
-                src=f'{constants.setup_scripts_path}/clean_packages.sh',
+                src=f'{constants.SETUP_SCRIPTS_PATH}/clean_packages.sh',
                 title="CLEAN apt packages",
                 package=''
             )
         if self.provisions['custom_scripts']:
             for script in self.provisions['custom_scripts']:
                 self._generate_provision_section(
-                    src=f'{constants.custom_scripts_path}/{script}',
+                    src=f'{constants.CUSTOM_SCRIPTS_PATH}/{script}',
                     title="CUSTOM SCRIPT",
                     package=f'{script.split(".")[0]}'
                 )
@@ -199,7 +199,7 @@ class Vagrant(Builder):
             replace_text_in_file(
                 search_phrase='extra_user',
                 replace_with=self.arguments.user,
-                file_path=f'{constants.machines_path}/vagrant/{self.arguments.name}/Vagrantfile'
+                file_path=f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
             )
 
     def delete_project(self):
