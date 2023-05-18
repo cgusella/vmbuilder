@@ -46,14 +46,14 @@ class VagrantConfigsView(tk.Toplevel):
         vagrant_drop.pack(padx=0, pady=1, side='top', anchor='w')
 
         exit_button = tk.Button(self, text='Back', command=self.destroy)
-        exit_button.pack(side='bottom', anchor='s')
+        exit_button.pack(padx=0, pady=1, side=tk.LEFT, anchor='w')
 
         save_button = tk.Button(
             self,
             text='Next',
             command=self.go_to_provision_page
         )
-        save_button.pack(side=tk.RIGHT, anchor='w')
+        save_button.pack(padx=0, pady=1, side=tk.RIGHT, anchor='w')
 
     def go_to_provision_page(self):
         self.master.provisions_configs["name"] = self.entry_project_name.get()
