@@ -1,5 +1,6 @@
 import constants
 import os
+import shutil
 import tkinter as tk
 from gui.errors import NotValidOperation
 from cli.newpackage import make_package_folder
@@ -12,7 +13,7 @@ class VagrantProvisionsView(tk.Toplevel):
     def __init__(self, *args, **kwargs):
         self.error_msg_label = None
         tk.Toplevel.__init__(self, *args, **kwargs)
-        self.geometry("400x800")
+        self.geometry("600x800")
         self.label = tk.Label(self, text="Vagrant")
         self.label.pack(padx=0, pady=20, side='top')
         self.label = tk.Label(self, text="Provisions")
@@ -100,6 +101,15 @@ class VagrantProvisionsView(tk.Toplevel):
             side=tk.LEFT,
             anchor='s',
         )
+        delete_button = tk.Button(
+            self,
+            text='Delete Packages',
+            command=self.delete_packages
+        )
+        delete_button.pack(
+            side=tk.LEFT,
+            anchor='s',
+        )
 
     def add_new_package_button(self):
         separator = ttk.Separator(self, orient='horizontal')
@@ -144,6 +154,14 @@ class VagrantProvisionsView(tk.Toplevel):
         self.master.provisions_configs["packages_to_config"] = packages_to_config
         self.destroy()
         VagrantProvisionsView(self.master)
+
+    def delete_packages(self):
+        for pack in self.packages_listbox.curselection():
+            packages = self.packages_listbox.get(pack)
+            shutil.rmtree(f'{constants.PACKAGES_PATH}/{packages}')
+        self.destroy()
+        VagrantProvisionsView(self.master)
+
 
     def add_bottom_button(self):
         build_button = tk.Button(
