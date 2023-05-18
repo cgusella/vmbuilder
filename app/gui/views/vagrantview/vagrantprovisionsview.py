@@ -4,6 +4,7 @@ import tkinter as tk
 from gui.errors import NotValidOperation
 from cli.newpackage import make_package_folder
 from tkinter import ttk
+from builder.helper import is_empty_script
 
 
 class VagrantProvisionsView(tk.Toplevel):
@@ -11,7 +12,7 @@ class VagrantProvisionsView(tk.Toplevel):
     def __init__(self, *args, **kwargs):
         self.error_msg_label = None
         tk.Toplevel.__init__(self, *args, **kwargs)
-        self.geometry("400x400")
+        self.geometry("400x800")
         self.label = tk.Label(self, text="Vagrant")
         self.label.pack(padx=0, pady=20, side='top')
         self.label = tk.Label(self, text="Provisions")
@@ -27,11 +28,21 @@ class VagrantProvisionsView(tk.Toplevel):
             raise NotValidOperation()
         try:
             if self.master.provisions_configs[f'packages_to_{operation}']:
-                msg = f'{operation.title()}: '
+                msg_label = tk.Label(self, text=f'{operation.title()}: ')
+                msg_label.pack(padx=0, pady=1, side='top', anchor='w')
                 for package in self.master.provisions_configs[f'packages_to_{operation}']:
-                    msg += f'{package} | '
-                label = tk.Label(self, text=msg)
-                label.pack(padx=0, pady=1, side='top', anchor='w')
+                    color = 'black'
+                    if is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh'):
+                        color = 'red'
+                    label = tk.Label(self, text=package, fg=color)
+                    label.pack(padx=0, pady=1, side=tk.TOP, anchor='n')
+
+                    open_text_box = tk.Text(self, width=40, height=3, state='normal')
+                    # open_text_box.config(state=editable)
+                    with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
+                        text = file.read()
+                    open_text_box.insert('end', text)
+                    open_text_box.pack(padx=0, pady=1, side=tk.TOP, anchor='n')
         except KeyError:
             pass
 
@@ -56,6 +67,10 @@ class VagrantProvisionsView(tk.Toplevel):
         for count, package in enumerate(os.listdir(constants.PACKAGES_PATH)):
             self.packages_listbox.insert(count+1, package)
         self.packages_listbox.pack(padx=0, pady=1, side='top', anchor='w')
+
+    def open_file(self, package, operation):
+        self.destroy()
+        VagrantProvisionsView(self.master)
 
     def add_install_uninstal_conf_buttons(self):
         install_button = tk.Button(
