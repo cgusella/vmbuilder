@@ -4,7 +4,7 @@ import os
 import constants
 
 
-def make_package_folder(packages: list = []):
+def make_package_folder(packages: str | list = ''):
     if not packages:
         parser = argparse.ArgumentParser()
         parser.add_argument(
@@ -15,8 +15,11 @@ def make_package_folder(packages: list = []):
         arguments = parser.parse_args()
         packages = arguments.packages
 
+    if isinstance(packages, str):
+        packages = [packages]
+
     for package in packages:
-        new_package_path = f'{constants.packages_path}/{package}'
+        new_package_path = f'{constants.PACKAGES_PATH}/{package}'
         # create package folder
         os.mkdir(new_package_path)
         # create config file in configs
