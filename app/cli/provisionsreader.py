@@ -13,7 +13,7 @@ from builder.helper import (
     is_empty_script,
     get_packages_upload_files
 )
-from newpackage import make_package_folder
+from cli.newpackage import make_package_folder
 
 
 class ProvisionConfigReader:

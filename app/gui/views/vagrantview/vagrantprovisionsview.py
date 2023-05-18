@@ -2,7 +2,7 @@ import constants
 import os
 import tkinter as tk
 from gui.errors import NotValidOperation
-from newpackage import make_package_folder
+from cli.newpackage import make_package_folder
 from tkinter import ttk
 
 
