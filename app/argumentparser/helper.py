@@ -61,4 +61,6 @@ def get_local_vagrant_boxes():
         shell=True,
         capture_output=True
     ).stdout.decode("ascii")
-    return output
+    boxes = output.split('\n')
+    boxes = [box.split(' ')[0] for box in boxes]
+    return "\n".join(boxes)
