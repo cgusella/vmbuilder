@@ -2,7 +2,7 @@
 import sys
 from argparse import Namespace
 from argumentparser.customparser import CustomArgumentParser
-from provisionsreader import ProvisionConfigReader
+from cli.provisionsreader import ProvisionConfigReader
 from builder.packer import Packer
 from builder.vagrant import Vagrant
 from existencecontroller.controller import VagrantController, PackerController

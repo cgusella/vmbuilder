@@ -1,8 +1,9 @@
 #!/usr/bin/python3
+import constants
 import customtkinter
-from builder import get_local_vagrant_boxes
 import os
 import tkinter
+from argumentparser.helper import get_local_vagrant_boxes
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -53,7 +54,7 @@ class MyTabView(customtkinter.CTkTabview):
         self.vagrant_provision_configs = customtkinter.CTkComboBox(
             master=self.tab("vagrant"),
             values=os.listdir(
-                f'{dir_path}/../templates/vagrant/provision_configs/'
+                f'{constants.VAGRANT_PROVS_CONFS_PATH}'
             ),
             width=240
         )
