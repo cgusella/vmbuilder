@@ -33,17 +33,31 @@ class VagrantProvisionsView(tk.Toplevel):
                 msg_label.pack(padx=0, pady=1, side='top', anchor='w')
                 for package in self.master.provisions_configs[f'packages_to_{operation}']:
                     color = 'black'
-                    if is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh'):
+                    package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
+                    if package_is_empty:
                         color = 'red'
                     label = tk.Label(self, text=package, fg=color)
                     label.pack(padx=0, pady=1, side=tk.TOP, anchor='n')
 
                     open_text_box = tk.Text(self, width=40, height=3, state='normal')
-                    # open_text_box.config(state=editable)
                     with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
                         text = file.read()
                     open_text_box.insert('end', text)
                     open_text_box.pack(padx=0, pady=1, side=tk.TOP, anchor='n')
+                    if package_is_empty:
+                        button_text = 'Save'
+                    else:
+                        button_text = 'Save changes'
+                    save_button = tk.Button(
+                        self,
+                        text=button_text,
+                        command=lambda: self.save_script(
+                            package=package,
+                            operation=operation,
+                            file_text=open_text_box.get('1.0', 'end')
+                        )
+                    )
+                    save_button.pack(padx=0, pady=1, side=tk.TOP, anchor='n')
         except KeyError:
             pass
 
@@ -73,7 +87,9 @@ class VagrantProvisionsView(tk.Toplevel):
             self.packages_listbox.insert(count+1, package)
         self.packages_listbox.pack(padx=0, pady=1, side='top', anchor='w')
 
-    def open_file(self, package, operation):
+    def save_script(self, package: str, operation: str, file_text: str):
+        with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh', 'w') as file:
+            file.write(file_text)
         self.destroy()
         VagrantProvisionsView(self.master)
 
