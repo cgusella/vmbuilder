@@ -65,7 +65,11 @@ class VagrantProvisionsView(tk.Toplevel):
             width=20,
             height=5,
         )
-        for count, package in enumerate(os.listdir(constants.PACKAGES_PATH)):
+        packages = [
+            package for package in os.listdir(constants.PACKAGES_PATH)
+            if package not in ('program-example', 'setup_scripts')
+        ]
+        for count, package in enumerate(packages):
             self.packages_listbox.insert(count+1, package)
         self.packages_listbox.pack(padx=0, pady=1, side='top', anchor='w')
 
