@@ -2,6 +2,8 @@ import constants
 import os
 import shutil
 import tkinter as tk
+from argparse import Namespace
+from builder.vagrant import Vagrant
 from gui.errors import NotValidOperation
 from cli.newpackage import make_package_folder
 from tkinter import ttk
@@ -260,7 +262,7 @@ class VagrantProvisionsView(tk.Toplevel):
         build_button = tk.Button(
             self,
             text='Build',
-            command=self.destroy
+            command=self.build
         )
         build_button.grid(row=self.number_of_rows-1, column=3)
 
@@ -281,4 +283,25 @@ class VagrantProvisionsView(tk.Toplevel):
     def go_to_configs(self):
         self.destroy()
         from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        VagrantConfigsView(self.master, self.provisions_configs)
+        VagrantConfigsView(self.master, back=True,
+                           machine_name=self.provisions_configs["configurations"]['machine_name'])
+
+    def build(self):
+        machine_name = self.provisions_configs["configurations"]["machine_name"]
+
+        # create a namespace
+        namespace = Namespace()
+        namespace.name = machine_name
+        namespace.vm_type = 'vagrant'
+        namespace.vm_name = self.provisions_configs["configurations"]["vbox_name"]
+        namespace.user = self.provisions_configs["configurations"]["username"]
+        namespace.hostname = self.provisions_configs["configurations"]["hostname"]
+        namespace.image = self.provisions_configs["configurations"]["image"]
+        namespace.connection = self.provisions_configs["configurations"]["connection"]
+        vagrant_builder = Vagrant(namespace, self.provisions_configs)
+        vagrant_builder.set_configs()
+        vagrant_builder.set_provisions()
+        vagrant_builder.set_credentials()
+        vagrant_builder.create_project_folder()
+        vagrant_builder.generate_main_file()
+        exit()

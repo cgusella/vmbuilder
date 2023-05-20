@@ -1,12 +1,21 @@
+import constants
+import json
+import os
 import tkinter as tk
 from argumentparser.helper import get_local_vagrant_boxes
 from gui.views.vagrantview.vagrantprovisionsview import VagrantProvisionsView
 from tkinter import ttk
+from tkinter import messagebox as mb
 
 
 class VagrantConfigsView(tk.Toplevel):
-    def __init__(self, master, provisions_configs):
-        self.provisions_configs = provisions_configs
+    def __init__(self, master, back = False, machine_name = ''):
+        if back:
+            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{machine_name}.json') as template_json:
+                self.provisions_configs = json.loads(template_json.read())
+        else:
+            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
+                self.provisions_configs = json.loads(template_json.read())
         tk.Toplevel.__init__(self, master)
         self.geometry("600x600")
         self.set_grid()
@@ -50,7 +59,7 @@ class VagrantConfigsView(tk.Toplevel):
         self.entry_default_username = tk.Entry(self)
         self.entry_default_username.insert(
             0,
-            self.provisions_configs["configurations"]['username']
+            self.provisions_configs["credentials"]['username']
         )
         self.entry_default_username.grid(row=8, column=startcolumn)
 
@@ -59,7 +68,7 @@ class VagrantConfigsView(tk.Toplevel):
         self.entry_default_password = tk.Entry(self)
         self.entry_default_password.insert(
             0,
-            self.provisions_configs["configurations"]['password']
+            self.provisions_configs["credentials"]['password']
         )
         self.entry_default_password.grid(row=8, column=startcolumn+1)
 
@@ -123,14 +132,20 @@ class VagrantConfigsView(tk.Toplevel):
         self.rowconfigure(12, weight=2)
 
     def go_to_provision_page(self):
-        self.provisions_configs["configurations"]["machine_name"] = self.entry_project_name.get()
-        self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
-        self.provisions_configs["configurations"]["username"] = self.entry_default_username.get()
-        self.provisions_configs["configurations"]["password"] = self.entry_default_password.get()
-        self.provisions_configs["configurations"]["extra_user"] = self.entry_extra_user.get()
-        self.provisions_configs["configurations"]["vm_name"] = self.vagrant_box.get()
-        self.destroy()
-        VagrantProvisionsView(self.master, self.provisions_configs)
+        machine_name = self.entry_project_name.get()
+        if machine_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
+            mb.showerror('Error', 'A machine with this name already exists')
+        else:
+            self.provisions_configs["configurations"]["machine_name"] = machine_name
+            self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
+            self.provisions_configs["configurations"]["username"] = self.entry_default_username.get()
+            self.provisions_configs["configurations"]["password"] = self.entry_default_password.get()
+            self.provisions_configs["configurations"]["extra_user"] = self.entry_extra_user.get()
+            self.provisions_configs["configurations"]["image"] = self.vagrant_box.get()
+            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{machine_name}.json', 'w') as template_json:
+                template_json.write(json.dumps(self.provisions_configs, indent=2))
+            self.destroy()
+            VagrantProvisionsView(self.master, self.provisions_configs)
 
     def get_vagrant_configs(self):
         return self.provisions_configs

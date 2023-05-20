@@ -34,7 +34,7 @@ def get_packages_upload_files(packages: list) -> dict:
     package_upload_files = dict()
     for package in packages:
         with open(
-            f'{constants.packages_path}/{package}/config.sh', 'r'
+            f'{constants.PACKAGES_PATH}/{package}/config.sh', 'r'
         ) as file:
             lines = file.readlines()
         package_upload_files[package] = list()

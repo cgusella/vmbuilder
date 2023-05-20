@@ -26,7 +26,7 @@ class Vagrant(Builder):
 
     def set_configs(self):
         """Set configs attribute"""
-        self.configs = self.provisions_configs["virtual_machine_configs"].copy()
+        self.configs = self.provisions_configs["configurations"].copy()
 
     def set_provisions(self):
         """Set provisions attribute"""

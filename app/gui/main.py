@@ -1,11 +1,9 @@
 import tkinter as tk
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-from gui.provs_confs import PROVISIONS_CONFIGS
 
 class MainView(tk.Frame):
 
-    def __init__(self, master, provisions_configs):
-        self.provisions_configs = provisions_configs
+    def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.grid()
         self.columnconfigure(0, weight=1)
@@ -26,13 +24,10 @@ class MainView(tk.Frame):
         exit_button.grid(row=2, column=1)
 
     def go_to_vagrant_page(self):
-        VagrantConfigsView(self, self.provisions_configs)
+        VagrantConfigsView(self)
 
     def go_to_packer_page(self):
         pass
-
-    def get_provisions_config(self):
-        return self.provisions_configs
 
     def close_window(self):
         self.master.destroy()
@@ -41,8 +36,7 @@ class MainView(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.wm_geometry("400x200")
-    main = MainView(root, PROVISIONS_CONFIGS)
+    main = MainView(root)
     main.master.title('HackTheMonkey')
     main.pack(side="top", fill="both", expand=True)
     root.mainloop()
-    print(main.get_provisions_config())
