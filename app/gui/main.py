@@ -4,9 +4,9 @@ from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
 
 class MainView(tk.Frame):
 
-    def __init__(self, *args, **kwargs):
-        self.provisions_configs = dict()
-        tk.Frame.__init__(self, *args, **kwargs)
+    def __init__(self, master, provisions_configs):
+        self.provisions_configs = provisions_configs
+        tk.Frame.__init__(self, master)
         self.grid()
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
@@ -26,7 +26,7 @@ class MainView(tk.Frame):
         exit_button.grid(row=2, column=1)
 
     def go_to_vagrant_page(self):
-        self.vagrant_view = VagrantConfigsView(self)
+        self.vagrant_view = VagrantConfigsView(self, self.provisions_configs)
         self.provisions_configs = self.vagrant_view.get_vagrant_configs()
         self.vagrant_view.geometry("400x300")
 
@@ -41,10 +41,15 @@ class MainView(tk.Frame):
 
 
 if __name__ == "__main__":
+    provisions_configs = {
+        'packages_to_install': [],
+        'packages_to_uninstall': [],
+        'packages_to_config': [],
+    }
     root = tk.Tk()
     root.wm_geometry("400x200")
-    main = MainView(root)
+    main = MainView(root, provisions_configs)
     main.master.title('HackTheMonkey')
     main.pack(side="top", fill="both", expand=True)
     root.mainloop()
-    print(main.provisions_configs)
+    print(main.get_provisions_config())

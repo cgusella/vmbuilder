@@ -5,9 +5,9 @@ from tkinter import ttk
 
 
 class VagrantConfigsView(tk.Toplevel):
-    def __init__(self, *args, **kwargs):
-        self.provisions_configs = dict()
-        tk.Toplevel.__init__(self, *args, **kwargs)
+    def __init__(self, master, provisions_configs):
+        self.provisions_configs = provisions_configs
+        tk.Toplevel.__init__(self, master)
         self.geometry("600x400")
         self.set_grid()
         self.vagrant_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
@@ -81,14 +81,14 @@ class VagrantConfigsView(tk.Toplevel):
         self.rowconfigure(8, weight=2)
 
     def go_to_provision_page(self):
-        self.master.provisions_configs["name"] = self.entry_project_name.get()
-        self.master.provisions_configs["vm_name"] = self.entry_vbox_name.get()
-        self.master.provisions_configs["username"] = self.entry_default_username.get()
-        self.master.provisions_configs["password"] = self.entry_default_password.get()
-        self.master.provisions_configs["user"] = self.entry_extra_user.get()
-        self.master.provisions_configs["vm_name"] = self.vagrant_box.get()
+        self.provisions_configs["name"] = self.entry_project_name.get()
+        self.provisions_configs["vm_name"] = self.entry_vbox_name.get()
+        self.provisions_configs["username"] = self.entry_default_username.get()
+        self.provisions_configs["password"] = self.entry_default_password.get()
+        self.provisions_configs["user"] = self.entry_extra_user.get()
+        self.provisions_configs["vm_name"] = self.vagrant_box.get()
         self.destroy()
-        self.master.vagrant_provision = VagrantProvisionsView(self.master)
+        VagrantProvisionsView(self.master, self.provisions_configs)
 
     def get_vagrant_configs(self):
         return self.provisions_configs
