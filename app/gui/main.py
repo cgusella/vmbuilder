@@ -1,6 +1,6 @@
 import tkinter as tk
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-
+from gui.provs_confs import PROVISIONS_CONFIGS
 
 class MainView(tk.Frame):
 
@@ -41,14 +41,9 @@ class MainView(tk.Frame):
 
 
 if __name__ == "__main__":
-    provisions_configs = {
-        'packages_to_install': [],
-        'packages_to_uninstall': [],
-        'packages_to_config': [],
-    }
     root = tk.Tk()
     root.wm_geometry("400x200")
-    main = MainView(root, provisions_configs)
+    main = MainView(root, PROVISIONS_CONFIGS)
     main.master.title('HackTheMonkey')
     main.pack(side="top", fill="both", expand=True)
     root.mainloop()

@@ -28,23 +28,38 @@ class VagrantConfigsView(tk.Toplevel):
 
         startcolumn = 1
         self.entry_project_name = tk.Entry(self)
-        self.entry_project_name.insert(0, 'Project name')
+        self.entry_project_name.insert(
+            0,
+            self.provisions_configs["configurations"]["machine_name"]
+        )
         self.entry_project_name.grid(row=3, column=startcolumn)
 
         self.entry_vbox_name = tk.Entry(self)
-        self.entry_vbox_name.insert(0, 'Virtualbox name')
+        self.entry_vbox_name.insert(
+            0,
+            self.provisions_configs["configurations"]['vbox_name']
+        )
         self.entry_vbox_name.grid(row=4, column=startcolumn)
 
         self.entry_default_username = tk.Entry(self)
-        self.entry_default_username.insert(0, 'Default username')
+        self.entry_default_username.insert(
+            0,
+            self.provisions_configs["configurations"]['username']
+        )
         self.entry_default_username.grid(row=5, column=startcolumn)
 
         self.entry_default_password = tk.Entry(self)
-        self.entry_default_password.insert(0, 'Dafult password')
+        self.entry_default_password.insert(
+            0,
+            self.provisions_configs["configurations"]['password']
+        )
         self.entry_default_password.grid(row=5, column=startcolumn+1)
 
         self.entry_extra_user = tk.Entry(self)
-        self.entry_extra_user.insert(0, 'Extra username')
+        self.entry_extra_user.insert(
+            0,
+            self.provisions_configs["configurations"]['extra_user']
+        )
         self.entry_extra_user.grid(row=6, column=startcolumn)
 
         self.vagrant_box = tk.StringVar(self)
@@ -81,12 +96,12 @@ class VagrantConfigsView(tk.Toplevel):
         self.rowconfigure(8, weight=2)
 
     def go_to_provision_page(self):
-        self.provisions_configs["name"] = self.entry_project_name.get()
-        self.provisions_configs["vm_name"] = self.entry_vbox_name.get()
-        self.provisions_configs["username"] = self.entry_default_username.get()
-        self.provisions_configs["password"] = self.entry_default_password.get()
-        self.provisions_configs["user"] = self.entry_extra_user.get()
-        self.provisions_configs["vm_name"] = self.vagrant_box.get()
+        self.provisions_configs["configurations"]["machine_name"] = self.entry_project_name.get()
+        self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
+        self.provisions_configs["configurations"]["username"] = self.entry_default_username.get()
+        self.provisions_configs["configurations"]["password"] = self.entry_default_password.get()
+        self.provisions_configs["configurations"]["extra_user"] = self.entry_extra_user.get()
+        self.provisions_configs["configurations"]["vm_name"] = self.vagrant_box.get()
         self.destroy()
         VagrantProvisionsView(self.master, self.provisions_configs)
 
