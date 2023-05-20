@@ -19,9 +19,10 @@ class TextWindowView(tk.Toplevel):
             '400x400'
         )
         self.set_grid()
-        file_label = tk.Label(self, text=f'You are modifying: {operation}.sh')
-        file_label.grid(row=0, column=1)
-        file_label = tk.Label(self, text=f'from package: {package}')
+        file_label = tk.Label(
+            self,
+            text=f'You are modifying "{operation}.sh"\nfrom package "{package}"'
+        )
         file_label.grid(row=1, column=1)
         self.open_text_box = tk.Text(self, width=40, height=8, state='normal')
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
@@ -31,7 +32,7 @@ class TextWindowView(tk.Toplevel):
         save_button = tk.Button(
             self,
             text='Save',
-            command=lambda: self.save_file()
+            command=self.save_file
         )
         save_button.grid(row=3, column=1)
         remove_button = tk.Button(
@@ -57,7 +58,7 @@ class TextWindowView(tk.Toplevel):
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
             file.write(self.open_text_box.get("1.0", "end"))
         self.destroy()
-        VagrantProvisionsView(self.master)
+        VagrantProvisionsView(self.master, self.provisions_configs)
 
     def remove_from_operation(self):
         self.provisions_configs[f'packages_to_{self.operation}'].remove(self.package)
@@ -257,7 +258,7 @@ class VagrantProvisionsView(tk.Toplevel):
         for pack in self.packages_listbox.curselection():
             packages_to_delete += (self.packages_listbox.get(pack),)
         if packages_to_delete:
-            warning_text = 'You choose to delete:\n'
+            warning_text = 'This operation is irreversible.\nYou choose to delete:\n'
             for package in packages_to_delete:
                 warning_text += f'\t- {package}\n'
             warning_text += 'Confirm?'
@@ -266,7 +267,7 @@ class VagrantProvisionsView(tk.Toplevel):
                 for package in packages_to_delete:
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
             self.destroy()
-            VagrantProvisionsView(self.master)
+            VagrantProvisionsView(self.master, self.packages_listbox)
         else:
             mb.showerror('Error Delete', 'You have selected no packages')
 
@@ -301,4 +302,4 @@ class VagrantProvisionsView(tk.Toplevel):
     def go_to_configs(self):
         self.destroy()
         from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        VagrantConfigsView(self.master)
+        VagrantConfigsView(self.master, self.provisions_configs)
