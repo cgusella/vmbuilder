@@ -71,8 +71,8 @@ class VagrantProvisionsView(tk.Toplevel):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         tk.Toplevel.__init__(self, master)
-        self.wm_geometry(
-            f'{self.winfo_screenmmwidth()}x{self.winfo_screenheight()}'
+        self.geometry(
+            '600x800'
         )
         self.set_grid(rows=8, columns=5)
         self.startcolumn = 1
@@ -107,8 +107,10 @@ class VagrantProvisionsView(tk.Toplevel):
         for i in range(rows):
             self.rowconfigure(i, weight=1)
         number_of_package = [1]
-        for operation in ('packages_to_install', 'packages_to_uninstall', 'packages_to_config'):
-            number_of_package.append(len(self.provisions_configs["provisions"][operation]))
+        for operation in ('install', 'uninstall', 'config'):
+            number_of_package.append(
+                len(self.provisions_configs["provisions"][f'packages_to_{operation}'])
+            )
         for i in range(1, max(number_of_package)+4):
             self.rowconfigure(i+8, weight=1)
         self.number_of_rows = 8 + max(number_of_package) + 4
@@ -243,8 +245,8 @@ class VagrantProvisionsView(tk.Toplevel):
             if yes:
                 for package in packages_to_delete:
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
-            self.destroy()
-            VagrantProvisionsView(self.master, self.packages_listbox)
+                self.destroy()
+                VagrantProvisionsView(self.master, self.provisions_configs)
         else:
             mb.showerror('Error Delete', 'You have selected no packages')
 

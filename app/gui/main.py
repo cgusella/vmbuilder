@@ -26,9 +26,7 @@ class MainView(tk.Frame):
         exit_button.grid(row=2, column=1)
 
     def go_to_vagrant_page(self):
-        self.vagrant_view = VagrantConfigsView(self, self.provisions_configs)
-        self.provisions_configs = self.vagrant_view.get_vagrant_configs()
-        self.vagrant_view.geometry("400x300")
+        VagrantConfigsView(self, self.provisions_configs)
 
     def go_to_packer_page(self):
         pass
