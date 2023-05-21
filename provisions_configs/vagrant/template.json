@@ -12,8 +12,14 @@
     "clean_packages": false,
     "custom_scripts": []
   },
-  "virtual_machine_configs": {
+  "configurations": {
     "disk_size": "size_in_MB",
-    "provider": "virtualbox"
+    "provider": "virtualbox",
+    "machine_name": "Default",
+    "vbox_name": "Default",
+    "hostname": "Default",
+    "extra_user": "Extra User",
+    "image": "Default",
+    "connection": "key"
   }
 }

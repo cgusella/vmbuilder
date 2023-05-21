@@ -2,61 +2,79 @@ import constants
 import os
 import shutil
 import tkinter as tk
+from argparse import Namespace
+from builder.vagrant import Vagrant
 from gui.errors import NotValidOperation
 from cli.newpackage import make_package_folder
 from tkinter import ttk
+from tkinter import messagebox as mb
 from builder.helper import is_empty_script
 
 
 class TextWindowView(tk.Toplevel):
-    def __init__(self, master, package, operation):
+    def __init__(self, master, package, operation, provisions_configs):
         self.package = package
         self.operation = operation
+        self.provisions_configs = provisions_configs
         tk.Toplevel.__init__(self, master)
         self.geometry(
             '400x400'
         )
-        self.master.title = 'Qualcosa'
         self.set_grid()
-        file_label = tk.Label(self, text=f'{package}')
-        file_label.grid(row=0, column=0)
-        file_label = tk.Label(self, text=f'{operation}.sh')
-        file_label.grid(row=1, column=0)
+        file_label = tk.Label(
+            self,
+            text=f'You are modifying "{operation}.sh"\nfrom package "{package}"'
+        )
+        file_label.grid(row=1, column=1)
         self.open_text_box = tk.Text(self, width=40, height=8, state='normal')
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
             text = file.read()
         self.open_text_box.insert('end', text)
-        self.open_text_box.grid(row=2, column=0)
+        self.open_text_box.grid(row=2, column=1)
         save_button = tk.Button(
             self,
             text='Save',
-            command=lambda: self.save_file()
+            command=self.save_file
         )
-        save_button.grid(row=3, column=0)
+        save_button.grid(row=3, column=1)
+        remove_button = tk.Button(
+            self,
+            text=f'Remove from {operation}',
+            command=self.remove_from_operation
+        )
+        remove_button.grid(row=4, column=1)
 
     def set_grid(self):
         self.grid()
-        self.columnconfigure(0, weight=3)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=2)
+        self.columnconfigure(2, weight=1)
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
 
     def save_file(self):
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
             file.write(self.open_text_box.get("1.0", "end"))
         self.destroy()
-        VagrantProvisionsView(self.master)
+        VagrantProvisionsView(self.master, self.provisions_configs)
+
+    def remove_from_operation(self):
+        self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
+        self.destroy()
+        VagrantProvisionsView(self.master, self.provisions_configs)
 
 
 class VagrantProvisionsView(tk.Toplevel):
 
-    def __init__(self, *args, **kwargs):
-        self.error_msg_label = None
-        tk.Toplevel.__init__(self, *args, **kwargs)
-        self.wm_geometry(
-            f'{self.winfo_screenmmwidth()}x{self.winfo_screenheight()}'
+    def __init__(self, master, provisions_configs):
+        self.provisions_configs = provisions_configs
+        tk.Toplevel.__init__(self, master)
+        self.geometry(
+            '600x800'
         )
         self.set_grid(rows=8, columns=5)
         self.startcolumn = 1
@@ -66,7 +84,7 @@ class VagrantProvisionsView(tk.Toplevel):
         self.label.grid(row=1, column=0, columnspan=5)
 
         self.add_separator((2, 0), length=5)
-        self.add_label((2, self.startcolumn), text='Packages')
+        self.add_label((2, self.startcolumn+1), text='Packages')
 
         self.add_listbox()
         self.add_install_uninstal_conf_buttons()
@@ -91,13 +109,12 @@ class VagrantProvisionsView(tk.Toplevel):
         for i in range(rows):
             self.rowconfigure(i, weight=1)
         number_of_package = [1]
-        for operation in ('packages_to_install', 'packages_to_uninstall', 'packages_to_config'):
-            try:
-                number_of_package.append(len(self.master.provisions_configs[operation]))
-            except KeyError:
-                pass
+        for operation in ('install', 'uninstall', 'config'):
+            number_of_package.append(
+                len(self.provisions_configs["provisions"][f'packages_to_{operation}'])
+            )
         for i in range(1, max(number_of_package)+4):
-            self.rowconfigure(i+8, weight=1)  
+            self.rowconfigure(i+8, weight=1)
         self.number_of_rows = 8 + max(number_of_package) + 4
 
     def add_label(self, position: tuple, text: str,):
@@ -129,21 +146,18 @@ class VagrantProvisionsView(tk.Toplevel):
             column_position = self.startcolumn + 1
         elif operation == 'config':
             column_position = self.startcolumn + 2
-        try:
-            if self.master.provisions_configs[f'packages_to_{operation}']:
-                i = 1
-                for package in self.master.provisions_configs[f'packages_to_{operation}']:
-                    row = 8 + i
-                    color = 'black'
-                    package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
-                    if package_is_empty:
-                        color = 'red'
-                    package_button = tk.Button(self, text=f'{package}', fg=color,
-                                               command=lambda: self.open_text_window(package, operation))
-                    package_button.grid(row=row, column=column_position)
-                    i += 1
-        except KeyError:
-            pass
+        if self.provisions_configs["provisions"][f'packages_to_{operation}']:
+            i = 1
+            for package in self.provisions_configs["provisions"][f'packages_to_{operation}']:
+                row = 8 + i
+                color = 'black'
+                package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
+                if package_is_empty:
+                    color = 'red'
+                package_button = tk.Button(self, text=f'{package}', fg=color,
+                                           command=lambda: self.open_text_window(package, operation))
+                package_button.grid(row=row, column=column_position)
+                i += 1
 
     def add_selected_objects(self):
         self._add_packages_for_operation('install')
@@ -163,7 +177,7 @@ class VagrantProvisionsView(tk.Toplevel):
         ]
         for count, package in enumerate(packages):
             self.packages_listbox.insert(count+1, package)
-        self.packages_listbox.grid(row=3, column=self.startcolumn)
+        self.packages_listbox.grid(row=3, column=self.startcolumn+1)
 
     def save_script(self, package: str, operation: str, file_text: str):
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh', 'w') as file:
@@ -175,19 +189,19 @@ class VagrantProvisionsView(tk.Toplevel):
         install_button = tk.Button(
             self,
             text='Install',
-            command=self.save_install_packages
+            command=lambda: self.save_packages('install')
         )
         install_button.grid(row=4, column=self.startcolumn)
         uninstall_button = tk.Button(
             self,
             text='Uninstall',
-            command=self.save_uninstall_packages
+            command=lambda: self.save_packages('uninstall')
         )
         uninstall_button.grid(row=4, column=self.startcolumn+1)
         config_button = tk.Button(
             self,
             text='Config',
-            command=self.save_config_packages
+            command=lambda: self.save_packages('config')
         )
         config_button.grid(row=4, column=self.startcolumn+2)
 
@@ -206,46 +220,37 @@ class VagrantProvisionsView(tk.Toplevel):
         new_package_button = tk.Button(
             self,
             text='Add package',
-            command=self.refresh_page_for_packages
+            command=self.add_package
         )
         new_package_button.grid(row=7, column=self.startcolumn+1)
 
-    def save_install_packages(self):
-        packages_to_install = list()
+    def save_packages(self, operation: str):
+        packages = list()
         for pack in self.packages_listbox.curselection():
-            packages_to_install.append(
+            packages.append(
                 self.packages_listbox.get(pack)
             )
-        self.master.provisions_configs["packages_to_install"] = packages_to_install
+        self.provisions_configs["provisions"][f"packages_to_{operation}"] = packages
         self.destroy()
-        VagrantProvisionsView(self.master)
-
-    def save_uninstall_packages(self):
-        packages_to_uninstall = list()
-        for pack in self.packages_listbox.curselection():
-            packages_to_uninstall.append(
-                self.packages_listbox.get(pack)
-            )
-        self.master.provisions_configs["packages_to_uninstall"] = packages_to_uninstall
-        self.destroy()
-        VagrantProvisionsView(self.master)
-
-    def save_config_packages(self):
-        packages_to_config = list()
-        for pack in self.packages_listbox.curselection():
-            packages_to_config.append(
-                self.packages_listbox.get(pack)
-            )
-        self.master.provisions_configs["packages_to_config"] = packages_to_config
-        self.destroy()
-        VagrantProvisionsView(self.master)
+        VagrantProvisionsView(self.master, self.provisions_configs)
 
     def delete_packages(self):
+        packages_to_delete = ()
         for pack in self.packages_listbox.curselection():
-            packages = self.packages_listbox.get(pack)
-            shutil.rmtree(f'{constants.PACKAGES_PATH}/{packages}')
-        self.destroy()
-        VagrantProvisionsView(self.master)
+            packages_to_delete += (self.packages_listbox.get(pack),)
+        if packages_to_delete:
+            warning_text = 'This operation is irreversible.\nYou choose to delete:\n'
+            for package in packages_to_delete:
+                warning_text += f'\t- {package}\n'
+            warning_text += 'Confirm?'
+            yes = mb.askyesno('Confirm Delete', warning_text)
+            if yes:
+                for package in packages_to_delete:
+                    shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
+                self.destroy()
+                VagrantProvisionsView(self.master, self.provisions_configs)
+        else:
+            mb.showerror('Error Delete', 'You have selected no packages')
 
     def add_bottom_button(self):
         build_button = tk.Button(
@@ -257,34 +262,54 @@ class VagrantProvisionsView(tk.Toplevel):
         build_button = tk.Button(
             self,
             text='Build',
-            command=self.destroy
+            command=self.build
         )
         build_button.grid(row=self.number_of_rows-1, column=3)
 
-    def refresh_page_for_packages(self):
-        if not self.error_msg_label:
-            package_name = self.new_package_entry.get()
-            if package_name not in os.listdir(constants.PACKAGES_PATH):
-                make_package_folder(package_name)
-                self.destroy()
-                VagrantProvisionsView(self.master)
-            else:
-                self.error_msg_label = tk.Label(
-                    self,
-                    text='Package already exists',
-                    fg='red'
-                )
-                self.error_msg_label.grid(row=3, column=self.startcolumn+1, columnspan=2)
+    def add_package(self):
+        package_name = self.new_package_entry.get()
+        if package_name not in os.listdir(constants.PACKAGES_PATH):
+            make_package_folder(package_name)
+            self.destroy()
+            VagrantProvisionsView(self.master, self.provisions_configs)
         else:
-            self.error_msg_label.destroy()
-            self.error_msg_label = None
-            self.refresh_page_for_packages()
+            mb.showerror('New Package Error', 'Package already exists')
 
     def open_text_window(self, package, operation):
         self.destroy()
-        TextWindowView(self.master, package=package, operation=operation)
+        TextWindowView(self.master, package=package, operation=operation,
+                       provisions_configs=self.provisions_configs)
 
     def go_to_configs(self):
         self.destroy()
         from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        VagrantConfigsView(self.master)
+        VagrantConfigsView(self.master, back=True,
+                           machine_name=self.provisions_configs["configurations"]['machine_name'])
+
+    def build(self):
+        machine_name = self.provisions_configs["configurations"]["machine_name"]
+
+        # create a namespace
+        namespace = Namespace()
+        namespace.name = machine_name
+        namespace.vm_type = 'vagrant'
+        namespace.vm_name = self.provisions_configs["configurations"]["vbox_name"]
+        namespace.user = self.provisions_configs["configurations"]["username"]
+        namespace.hostname = self.provisions_configs["configurations"]["hostname"]
+        namespace.image = self.provisions_configs["configurations"]["image"]
+        namespace.connection = self.provisions_configs["configurations"]["connection"]
+        vagrant_builder = Vagrant(namespace, self.provisions_configs)
+        vagrant_builder.set_configs()
+        vagrant_builder.set_provisions()
+        vagrant_builder.set_credentials()
+        vagrant_builder.create_project_folder()
+        vagrant_builder.generate_main_file()
+        info = mb.showinfo(
+            title='Well done!',
+            message=(
+                f'Your new {machine_name} machine '
+                'was succesfully created'
+            )
+        )
+        if info == 'ok':
+            exit()

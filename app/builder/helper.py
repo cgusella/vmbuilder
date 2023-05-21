@@ -17,10 +17,10 @@ def is_empty_script(script: str):
     Return True the given script is empty
     """
     with open(script) as script_file:
-        lines = script_file.readlines()
+        lines = script_file.read().split("\n")
 
     for line in lines:
-        if line in ['#!/bin/bash', '#!/bin/bash\n']:
+        if line in ['#!/bin/bash', '']:
             lines.remove(line)
 
     return not any(lines)
@@ -34,7 +34,7 @@ def get_packages_upload_files(packages: list) -> dict:
     package_upload_files = dict()
     for package in packages:
         with open(
-            f'{constants.packages_path}/{package}/config.sh', 'r'
+            f'{constants.PACKAGES_PATH}/{package}/config.sh', 'r'
         ) as file:
             lines = file.readlines()
         package_upload_files[package] = list()
