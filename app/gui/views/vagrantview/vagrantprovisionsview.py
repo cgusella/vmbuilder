@@ -304,4 +304,12 @@ class VagrantProvisionsView(tk.Toplevel):
         vagrant_builder.set_credentials()
         vagrant_builder.create_project_folder()
         vagrant_builder.generate_main_file()
-        exit()
+        info = mb.showinfo(
+            title='Well done!',
+            message=(
+                f'Your new {machine_name} machine '
+                'was succesfully created'
+            )
+        )
+        if info == 'ok':
+            exit()
