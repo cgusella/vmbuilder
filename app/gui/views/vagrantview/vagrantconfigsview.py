@@ -77,7 +77,7 @@ class VagrantConfigsView(tk.Toplevel):
         self.entry_extra_user = tk.Entry(self)
         self.entry_extra_user.insert(
             0,
-            self.provisions_configs["configurations"]['extra_user']
+            self.provisions_configs["credentials"]['extra_user']
         )
         self.entry_extra_user.grid(row=10, column=startcolumn)
 

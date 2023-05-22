@@ -287,29 +287,21 @@ class VagrantProvisionsView(tk.Toplevel):
                            machine_name=self.provisions_configs["configurations"]['machine_name'])
 
     def build(self):
-        machine_name = self.provisions_configs["configurations"]["machine_name"]
-
-        # create a namespace
-        namespace = Namespace()
-        namespace.name = machine_name
-        namespace.vm_type = 'vagrant'
-        namespace.vm_name = self.provisions_configs["configurations"]["vbox_name"]
-        namespace.user = self.provisions_configs["configurations"]["username"]
-        namespace.hostname = self.provisions_configs["configurations"]["hostname"]
-        namespace.image = self.provisions_configs["configurations"]["image"]
-        namespace.connection = self.provisions_configs["configurations"]["connection"]
-        vagrant_builder = Vagrant(namespace, self.provisions_configs)
-        vagrant_builder.set_configs()
-        vagrant_builder.set_provisions()
-        vagrant_builder.set_credentials()
-        vagrant_builder.create_project_folder()
-        vagrant_builder.generate_main_file()
-        info = mb.showinfo(
-            title='Well done!',
-            message=(
-                f'Your new {machine_name} machine '
-                'was succesfully created'
+        try:
+            vagrant_builder = Vagrant(self.provisions_configs)
+            vagrant_builder.set_configs()
+            vagrant_builder.set_provisions()
+            vagrant_builder.set_credentials()
+            vagrant_builder.create_project_folder()
+            vagrant_builder.generate_main_file()
+            info = mb.showinfo(
+                title='Well done!',
+                message=(
+                    f'Your new {self.provisions_configs["configurations"]["machine_name"]} machine '
+                    'was succesfully created'
+                )
             )
-        )
+        except Exception as error:
+            mb.showerror(message=error)
         if info == 'ok':
             exit()

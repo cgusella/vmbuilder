@@ -1,7 +1,8 @@
 {
   "credentials": {
     "username": "default_user",
-    "password": "deafult_pass"
+    "password": "deafult_pass",
+    "extra_user": "Extra User"
   },
   "provisions": {
     "update_upgrade": false,
@@ -18,7 +19,6 @@
     "machine_name": "Default",
     "vbox_name": "Default",
     "hostname": "Default",
-    "extra_user": "Extra User",
     "image": "Default",
     "connection": "key"
   }

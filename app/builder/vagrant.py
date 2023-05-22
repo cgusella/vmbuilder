@@ -1,7 +1,6 @@
 import constants
 import os
 import shutil
-from argparse import Namespace
 from builder.builder import Builder
 from builder.error import (
     NoFileToUploadError,
@@ -15,11 +14,14 @@ from typing import List
 
 
 class Vagrant(Builder):
-    def __init__(self, namespace: Namespace, json_file: dict) -> None:
-        self.arguments: Namespace = namespace
-        self.machine_path: str = constants.VAGRANT_MACHINES_PATH
-        self.vagrantfile_path = f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
+    def __init__(self, json_file: dict) -> None:
         self.provisions_configs = json_file
+        self.machine_path: str = constants.VAGRANT_MACHINES_PATH
+        self.vagrantfile_path = (
+            f'{self.machine_path}/'
+            f'{self.provisions_configs["configurations"]["machine_name"]}/'
+            'Vagrantfile'
+        )
         self.configs: dict = dict()
         self.provisions: dict = dict()
         self.credentials: dict = dict()
@@ -43,7 +45,7 @@ class Vagrant(Builder):
             |
             - upload/
         """
-        project_folder = f'{self.machine_path}/{self.arguments.name}'
+        project_folder = f'{self.machine_path}/{self.configs["machine_name"]}'
         # create project folder
         os.mkdir(project_folder)
 
@@ -63,13 +65,13 @@ class Vagrant(Builder):
             lines = source_file.readlines()
 
         if "create_extra_user.sh" in src:
-            lines = [line.replace("extra_user", self.arguments.user) for line in lines]
+            lines = [line.replace("extra_user", self.credentials["extra_user"]) for line in lines]
 
         if title.lower() in ['config'] and is_empty_script(src):
             pass
         else:
             with open(
-                f'{self.machine_path}/{self.arguments.name}/Vagrantfile',
+                f'{self.machine_path}/{self.configs["machine_name"]}/Vagrantfile',
                 'a'
             ) as vagrantfile:
                 vagrantfile.write(f'\n\n\t\t{hash_number*"#"}\n')
@@ -97,15 +99,15 @@ class Vagrant(Builder):
                 try:
                     shutil.copyfile(
                         src=f'{constants.PACKAGES_PATH}/{package}/upload/{upload_file}',
-                        dst=f'{self.machine_path}/{self.arguments.name}/upload/{upload_file}'
+                        dst=f'{self.machine_path}/{self.configs["machine_name"]}/upload/{upload_file}'
                     )
                 except FileNotFoundError:
                     missing_upload_files += f'"{upload_file}" from "{package}"\n'
                 if upload_file == "motd":
                     replace_text_in_file(
                         search_phrase="extra_user",
-                        replace_with=self.arguments.user,
-                        file_path=f'{self.machine_path}/{self.arguments.name}/upload/{upload_file}'
+                        replace_with=self.credentials["extra_user"],
+                        file_path=f'{self.machine_path}/{self.configs["machine_name"]}/upload/{upload_file}'
                     )
         if missing_upload_files:
             raise NoFileToUploadError(
@@ -123,14 +125,14 @@ class Vagrant(Builder):
             )
             vagrantfile.write(
                 'Vagrant.configure("2") do |config|\n'
-                f'\tconfig.vm.box = "{self.arguments.image}"\n'
+                f'\tconfig.vm.box = "{self.configs["image"]}"\n'
                 f'\tconfig.ssh.username = "{self.credentials["username"]}"\n'
                 f'\tconfig.ssh.password = "{self.credentials["password"]}"\n'
-                f'\tconfig.ssh.insert_key = "{self.arguments.connection}"\n'
-                f'\tconfig.vm.hostname = "{self.arguments.hostname}"\n'
-                f'\tconfig.vm.define "{self.arguments.hostname}"\n'
+                f'\tconfig.ssh.insert_key = "{self.configs["connection"]}"\n'
+                f'\tconfig.vm.hostname = \"{self.configs["hostname"]}\"\n'
+                f'\tconfig.vm.define "{self.configs["hostname"]}"\n'
                 f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'
-                f'\t\tvb.name = "{self.arguments.vm_name}"\n'
+                f'\t\tvb.name = "{self.configs["vbox_name"]}"\n'
                 '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
                 '\tend\n'
             )
@@ -142,10 +144,10 @@ class Vagrant(Builder):
         self._initialize_vagrantfile()
         with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\tconfig.vm.provision "shell", inline: <<-SHELL\n')
-        if self.arguments.user:
+        if self.credentials["extra_user"]:
             self._generate_provision_section(
                     src=f'{constants.SETUP_SCRIPTS_PATH}/create_extra_user.sh',
-                    title=f"CREATE USER {self.arguments.user}",
+                    title=f'CREATE USER {self.credentials["extra_user"]}',
                     package=''
                 )
         if self.provisions['update_upgrade']:
@@ -195,12 +197,12 @@ class Vagrant(Builder):
         with open(self.vagrantfile_path, 'a') as vagrantfile:
             vagrantfile.write('\n\nSHELL\nend')
 
-        if self.arguments.user:
+        if self.credentials["extra_user"]:
             replace_text_in_file(
                 search_phrase='extra_user',
-                replace_with=self.arguments.user,
-                file_path=f'{self.machine_path}/{self.arguments.name}/Vagrantfile'
+                replace_with=self.credentials["extra_user"],
+                file_path=f'{self.machine_path}/{self.configs["machine_name"]}/Vagrantfile'
             )
 
     def delete_project(self):
-        shutil.rmtree(f'{self.machine_path}/{self.arguments.name}')
+        shutil.rmtree(f'{self.machine_path}/{self.configs["machine_name"]}')
