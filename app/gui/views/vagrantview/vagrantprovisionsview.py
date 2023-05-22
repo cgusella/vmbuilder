@@ -282,8 +282,7 @@ class VagrantProvisionsView(tk.Toplevel):
     def go_to_configs(self):
         self.destroy()
         from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        VagrantConfigsView(self.master, back=True,
-                           machine_name=self.provisions_configs["configurations"]['machine_name'])
+        VagrantConfigsView(self.master, self.provisions_configs)
 
     def build(self):
         try:

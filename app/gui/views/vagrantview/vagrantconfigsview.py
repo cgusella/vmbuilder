@@ -1,5 +1,4 @@
 import constants
-import json
 import os
 import tkinter as tk
 from argumentparser.helper import get_local_vagrant_boxes
@@ -9,13 +8,8 @@ from tkinter import messagebox as mb
 
 
 class VagrantConfigsView(tk.Toplevel):
-    def __init__(self, master, back=False, machine_name=''):
-        if back:
-            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{machine_name}.json') as template_json:
-                self.provisions_configs = json.loads(template_json.read())
-        else:
-            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
-                self.provisions_configs = json.loads(template_json.read())
+    def __init__(self, master, provisions_configs):
+        self.provisions_configs = provisions_configs
         tk.Toplevel.__init__(self, master)
         self.geometry("600x600")
         self.set_grid()
@@ -142,8 +136,6 @@ class VagrantConfigsView(tk.Toplevel):
             self.provisions_configs["credentials"]["password"] = self.entry_default_password.get()
             self.provisions_configs["credentials"]["extra_user"] = self.entry_extra_user.get()
             self.provisions_configs["configurations"]["image"] = self.vagrant_box.get()
-            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{machine_name}.json', 'w') as template_json:
-                template_json.write(json.dumps(self.provisions_configs, indent=2))
             self.destroy()
             VagrantProvisionsView(self.master, self.provisions_configs)
 

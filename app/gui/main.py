@@ -1,3 +1,5 @@
+import constants
+import json
 import tkinter as tk
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
 
@@ -25,7 +27,9 @@ class MainView(tk.Frame):
         exit_button.grid(row=2, column=1)
 
     def go_to_vagrant_page(self):
-        VagrantConfigsView(self)
+        with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
+            provisions_configs = json.loads(template_json.read())
+        VagrantConfigsView(self, provisions_configs)
 
     def go_to_packer_page(self):
         pass
