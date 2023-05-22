@@ -12,7 +12,6 @@ def get_project_class(namespace: Namespace, json_file: dict):
     project_type = namespace.vm_type
     if project_type == 'vagrant':
         return Vagrant(
-            namespace=namespace,
             json_file=json_file
         )
     if project_type == 'packer':
@@ -54,6 +53,7 @@ def main():
     provisions_configs_reader.check_custom_script_existence()
     provisions_configs_reader.check_update_upgrade_type()
     provisions_configs_reader.check_if_clean_is_selected()
+    provisions_configs_reader.add_namescpace_flags_to_json()
 
     # build new project
     builder = get_project_class(
