@@ -15,7 +15,7 @@ def new_vagrant_config_frame(master, provisions_configs):
         master=master,
         provisions_configs=provisions_configs
     )
-    vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
+    vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
 
 
 class TextWindowView(tk.Toplevel):
@@ -82,7 +82,7 @@ class VagrantProvisionsView(tk.Frame):
         self.startcolumn = 1
         self.provisions_configs = provisions_configs
         tk.Frame.__init__(self, master)
-        self.set_grid(rows=8, columns=5)
+        self.set_grid(rows=9, columns=5)
         self.startcolumn = 1
         title_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
         title_label.grid(row=0, column=0, columnspan=5)
@@ -99,9 +99,9 @@ class VagrantProvisionsView(tk.Frame):
 
         self.add_separator((8, 0), length=5)
 
-        self.add_label((8, self.startcolumn), text='Install')
-        self.add_label((8, self.startcolumn+1), text='Uninstall')
-        self.add_label((8, self.startcolumn+2), text='Config')
+        self.add_label((9, self.startcolumn), text='Install')
+        self.add_label((9, self.startcolumn+1), text='Uninstall')
+        self.add_label((9, self.startcolumn+2), text='Config')
         self.add_selected_objects()
 
         self.add_separator((self.number_of_rows-2, 0), length=5)
@@ -140,7 +140,7 @@ class VagrantProvisionsView(tk.Frame):
             row=initial_position[0],
             column=initial_position[1],
             columnspan=length,
-            sticky='EW'
+            sticky='wens'
         )
 
     def _add_packages_for_operation(self, operation: str):
@@ -155,7 +155,7 @@ class VagrantProvisionsView(tk.Frame):
         if self.provisions_configs["provisions"][f'packages_to_{operation}']:
             i = 1
             for package in self.provisions_configs["provisions"][f'packages_to_{operation}']:
-                row = 8 + i
+                row = 9 + i
                 color = 'black'
                 package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
                 if package_is_empty:
@@ -295,7 +295,7 @@ class VagrantProvisionsView(tk.Frame):
             master=self.master,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
+        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
 
     def build(self):
         try:

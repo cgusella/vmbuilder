@@ -52,14 +52,14 @@ class MainView(tk.Frame):
             master=self,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
+        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
 
     def add_vagrant_provisions(self):
         vagrant_provs_view = VagrantProvisionsView(
             master=self,
             provisions_configs=self.provisions_configs
         )
-        vagrant_provs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
+        vagrant_provs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
 
     def add_packer_configs(self):
         pass

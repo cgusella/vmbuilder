@@ -135,7 +135,7 @@ class VagrantConfigsView(tk.Frame):
             self.destroy()
             vagrant_provs_view = VagrantProvisionsView(self.master,
                                                        self.provisions_configs)
-            vagrant_provs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
+            vagrant_provs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
 
     def get_vagrant_configs(self):
         return self.provisions_configs
