@@ -7,12 +7,11 @@ from tkinter import ttk
 from tkinter import messagebox as mb
 
 
-class VagrantConfigsView(tk.Toplevel):
+class VagrantConfigsView(tk.Frame):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
-        # tk.Toplevel.__init__(self, master)
-        # self.geometry("600x600")
-        # self.set_grid()
+        tk.Frame.__init__(self, master)
+        self.set_grid()
         self.vagrant_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
         self.vagrant_label.grid(row=0, column=0, columnspan=4)
 
@@ -81,15 +80,12 @@ class VagrantConfigsView(tk.Toplevel):
                                      *get_local_vagrant_boxes().split("\n"))
         vagrant_drop.grid(row=11, column=startcolumn, sticky="ew")
 
-        exit_button = tk.Button(self, text='Back', command=self.destroy)
-        exit_button.grid(row=12, column=startcolumn)
-
         save_button = tk.Button(
             self,
-            text='Next',
+            text='Set Provisions',
             command=self.go_to_provision_page
         )
-        save_button.grid(row=12, column=startcolumn+1)
+        save_button.grid(row=12, column=startcolumn, columnspan=2)
 
     def set_grid(self):
         self.grid()
@@ -137,7 +133,9 @@ class VagrantConfigsView(tk.Toplevel):
             self.provisions_configs["credentials"]["extra_user"] = self.entry_extra_user.get()
             self.provisions_configs["configurations"]["image"] = self.vagrant_box.get()
             self.destroy()
-            VagrantProvisionsView(self.master, self.provisions_configs)
+            vagrant_provs_view = VagrantProvisionsView(self.master,
+                                                       self.provisions_configs)
+            vagrant_provs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
 
     def get_vagrant_configs(self):
         return self.provisions_configs

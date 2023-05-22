@@ -1,8 +1,8 @@
 import constants
 import json
 import tkinter as tk
-from tkinter import ttk
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
+from gui.views.vagrantview.vagrantprovisionsview import VagrantProvisionsView
 
 
 class MainView(tk.Frame):
@@ -10,91 +10,56 @@ class MainView(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.master = master
-        self.rows = 13
-        self.columns = 5
+        self.rows = 3
+        self.columns = 3
         self.set_grid(rows=self.rows, columns=self.columns)
-        self.add_main_buttons()
+        self.add_machines_types_button()
+        self.add_bottom_button()
 
-    def add_main_buttons(self):
-        self.vagrant_button = tk.Button(self, text='Vagrant',
-                                        command=self.add_vagrant_configs)
-        self.vagrant_button.grid(row=0, column=1)
+    def add_machines_types_button(self):
+        types_frame = tk.Frame(self)
+        types_frame.grid(row=0, column=0, columnspan=self.columns)
+        vagrant_button = tk.Button(types_frame, text='Vagrant',
+                                   command=self.add_vagrant_configs)
+        vagrant_button.pack(side='left')
 
-        self.packer_button = tk.Button(self, text='Packer',
-                                       command=self.add_packer_configs)
-        self.packer_button.grid(row=0, column=2)
+        packer_button = tk.Button(types_frame, text='Packer',
+                                  command=self.add_packer_configs)
+        packer_button.pack(side='right')
 
-        exit_button = tk.Button(self, text='exit', command=self.close_window)
-        exit_button.grid(row=self.rows-1, column=self.columns-1)
+    def add_bottom_button(self):
+        bottom_frame = tk.Frame(self)
+        bottom_frame.grid(row=2, column=0, columnspan=3)
+        exit_button = tk.Button(bottom_frame, text='exit',
+                                command=self.close_window)
+        exit_button.pack(side='bottom', anchor='n')
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
         for i in range(columns):
-            self.columnconfigure(i, weight=1)
+            weight = 1
+            if i in [1]:
+                weight = 2
+            self.columnconfigure(i, weight=weight)
 
         for i in range(rows):
             self.rowconfigure(i, weight=1)
 
     def add_vagrant_configs(self):
         with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
-            provisions_configs = json.loads(template_json.read())
-        # vagrant_configs = tk.Frame(self.master)
-        # vagrant_configs.pack(side='top', anchor='s')
-        separator = ttk.Separator(
+            self.provisions_configs = json.loads(template_json.read())
+        vagrant_configs_view = VagrantConfigsView(
             master=self,
-            orient='horizontal',
-            style='blue.TSeparator',
-            class_=ttk.Separator,
-            takefocus=1,
-            cursor='plus'
+            provisions_configs=self.provisions_configs
         )
-        separator.grid(row=1, column=1, columnspan=3, sticky='EW')
-        conf_label = tk.Label(self, text="Vagrant Configurations")
-        conf_label.grid(row=1, column=1)
-        machine_name_label = tk.Label(self, text="New machine name:")
-        machine_name_label.grid(row=2, column=1)
-        self.entry_project_name = tk.Entry(self)
-        self.entry_project_name.insert(
-            0,
-            provisions_configs["configurations"]["machine_name"]
-        )
-        self.entry_project_name.grid(row=3, column=1)
+        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
 
-        vbox_name_label = tk.Label(self, text="Virtual box name:")
-        vbox_name_label.grid(row=5, column=1)
-        self.entry_vbox_name = tk.Entry(self)
-        self.entry_vbox_name.insert(
-            0,
-            provisions_configs["configurations"]['vbox_name']
+    def add_vagrant_provisions(self):
+        vagrant_provs_view = VagrantProvisionsView(
+            master=self,
+            provisions_configs=self.provisions_configs
         )
-        self.entry_vbox_name.grid(row=6, column=1)
-
-        username_label = tk.Label(self, text="Username:")
-        username_label.grid(row=7, column=1)
-        self.entry_default_username = tk.Entry(self)
-        self.entry_default_username.insert(
-            0,
-            provisions_configs["credentials"]['username']
-        )
-        self.entry_default_username.grid(row=8, column=1)
-
-        machine_name_label = tk.Label(self, text="Password:")
-        machine_name_label.grid(row=7, column=2)
-        self.entry_default_password = tk.Entry(self)
-        self.entry_default_password.insert(
-            0,
-            provisions_configs["credentials"]['password']
-        )
-        self.entry_default_password.grid(row=8, column=2)
-
-        machine_name_label = tk.Label(self, text="Extra user:")
-        machine_name_label.grid(row=9, column=1)
-        self.entry_extra_user = tk.Entry(self)
-        self.entry_extra_user.insert(
-            0,
-            provisions_configs["credentials"]['extra_user']
-        )
-        self.entry_extra_user.grid(row=10, column=1)
+        vagrant_provs_view.grid(row=1, column=0, columnspan=5, sticky='ns')
 
     def add_packer_configs(self):
         pass
