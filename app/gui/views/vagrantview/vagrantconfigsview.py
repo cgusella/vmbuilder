@@ -10,9 +10,9 @@ from tkinter import messagebox as mb
 class VagrantConfigsView(tk.Toplevel):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
-        tk.Toplevel.__init__(self, master)
-        self.geometry("600x600")
-        self.set_grid()
+        # tk.Toplevel.__init__(self, master)
+        # self.geometry("600x600")
+        # self.set_grid()
         self.vagrant_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
         self.vagrant_label.grid(row=0, column=0, columnspan=4)
 
