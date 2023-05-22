@@ -9,7 +9,7 @@ from tkinter import messagebox as mb
 
 
 class VagrantConfigsView(tk.Toplevel):
-    def __init__(self, master, back = False, machine_name = ''):
+    def __init__(self, master, back=False, machine_name=''):
         if back:
             with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{machine_name}.json') as template_json:
                 self.provisions_configs = json.loads(template_json.read())
@@ -138,9 +138,9 @@ class VagrantConfigsView(tk.Toplevel):
         else:
             self.provisions_configs["configurations"]["machine_name"] = machine_name
             self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
-            self.provisions_configs["configurations"]["username"] = self.entry_default_username.get()
-            self.provisions_configs["configurations"]["password"] = self.entry_default_password.get()
-            self.provisions_configs["configurations"]["extra_user"] = self.entry_extra_user.get()
+            self.provisions_configs["credentials"]["username"] = self.entry_default_username.get()
+            self.provisions_configs["credentials"]["password"] = self.entry_default_password.get()
+            self.provisions_configs["credentials"]["extra_user"] = self.entry_extra_user.get()
             self.provisions_configs["configurations"]["image"] = self.vagrant_box.get()
             with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{machine_name}.json', 'w') as template_json:
                 template_json.write(json.dumps(self.provisions_configs, indent=2))

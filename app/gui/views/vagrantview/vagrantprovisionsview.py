@@ -2,7 +2,6 @@ import constants
 import os
 import shutil
 import tkinter as tk
-from argparse import Namespace
 from builder.vagrant import Vagrant
 from gui.errors import NotValidOperation
 from cli.newpackage import make_package_folder

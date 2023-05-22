@@ -1,6 +1,7 @@
 import tkinter as tk
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
 
+
 class MainView(tk.Frame):
 
     def __init__(self, master):
