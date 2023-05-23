@@ -44,7 +44,7 @@ class TextWindowView(tk.Toplevel):
         self.rowconfigure(4, weight=1)
 
     def save_file(self):
-        with open(f'{constants.PACKAGES_PATH}/{self.operation}.sh', 'w') as file:
+        with open(f'{constants.SETUP_SCRIPTS_PATH}/{self.operation}.sh', 'w') as file:
             file.write(self.open_text_box.get("1.0", "end"))
         self.master.add_vagrant_provisions_frame()
         self.destroy()
@@ -79,7 +79,15 @@ class VagrantProvisionsScriptView(tk.Frame):
         )
         packages_label = tk.Label(self, text="Additional scripts")
         packages_label.grid(row=2, column=0, columnspan=5)
+
         self.radio_var = StringVar(self, value=None)
+        if self.provisions_configs["provisions"]['update_upgrade']:
+            self.radio_var.set('update_upgrade')
+            self.add_edit_upgrade_button()
+        if self.provisions_configs["provisions"]['update_upgrade_full']:
+            self.radio_var.set('update_upgrade_full')
+            self.add_edit_upgrade_button()
+
         self.update_upgrade = tk.Radiobutton(
             self,
             text="Update upgrade",
@@ -124,13 +132,6 @@ class VagrantProvisionsScriptView(tk.Frame):
         for i in range(rows):
             self.rowconfigure(i, weight=1)
 
-    def add_edit_upgrade_button(self):
-        self.provisions_configs["provisions"]['update_upgrade'] = False
-        self.provisions_configs["provisions"]['update_upgrade_full'] = False
-        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
-        self.edit_upgrade_button = tk.Button(self, text='Edit', command=self.edit_update_script)
-        self.edit_upgrade_button.grid(row=3, column=3, rowspan=2)
-
     def add_edit_clean_button(self):
         self.edit_clean_button = tk.Button(self, text='Edit', command=self.edit_clean_script)
         self.edit_clean_button.grid(row=6, column=3)
@@ -157,3 +158,12 @@ class VagrantProvisionsScriptView(tk.Frame):
         else:
             self.provisions_configs["provisions"]["clean_packages"] = False
             self.edit_clean_button.destroy()
+
+    def add_edit_upgrade_button(self):
+        if self.radio_var.get() == 'update_upgrade':
+            self.provisions_configs["provisions"]['update_upgrade_full'] = False
+        elif self.radio_var.get() == 'update_upgrade_full':
+            self.provisions_configs["provisions"]['update_upgrade'] = False
+        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
+        self.edit_upgrade_button = tk.Button(self, text='Edit', command=self.edit_update_script)
+        self.edit_upgrade_button.grid(row=3, column=3, rowspan=2)

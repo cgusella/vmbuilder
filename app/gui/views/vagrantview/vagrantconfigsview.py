@@ -2,9 +2,9 @@ import constants
 import os
 import tkinter as tk
 from argumentparser.helper import get_local_vagrant_boxes
-from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesView
 from tkinter import ttk
 from tkinter import messagebox as mb
+from tkinter import StringVar
 
 
 class VagrantConfigsView(tk.Frame):
@@ -39,13 +39,22 @@ class VagrantConfigsView(tk.Frame):
         self.entry_project_name.grid(row=4, column=startcolumn)
 
         vbox_name_label = tk.Label(self, text="Virtual box name:")
-        vbox_name_label.grid(row=5, column=1)
+        vbox_name_label.grid(row=5, column=startcolumn)
         self.entry_vbox_name = tk.Entry(self)
         self.entry_vbox_name.insert(
             0,
             self.provisions_configs["configurations"]['vbox_name']
         )
         self.entry_vbox_name.grid(row=6, column=startcolumn)
+
+        hostname_label = tk.Label(self, text="Hostname:")
+        hostname_label.grid(row=5, column=startcolumn+1)
+        self.entry_hostname = tk.Entry(self)
+        self.entry_hostname.insert(
+            0,
+            self.provisions_configs["configurations"]['hostname']
+        )
+        self.entry_hostname.grid(row=6, column=startcolumn+1)
 
         username_label = tk.Label(self, text="Username:")
         username_label.grid(row=7, column=startcolumn)
@@ -80,12 +89,36 @@ class VagrantConfigsView(tk.Frame):
                                      *get_local_vagrant_boxes().split("\n"))
         vagrant_drop.grid(row=11, column=startcolumn, sticky="ew")
 
+        ssh_label = tk.Label(self, text='Connection mode')
+        ssh_label.grid(row=12, column=startcolumn, columnspan=2)
+
+        self.connection_mode_var = StringVar()
+        if self.provisions_configs["configurations"]["connection"] == 'key':
+            self.connection_mode_var.set('key')
+        elif self.provisions_configs["configurations"]["connection"] == 'password':
+            self.connection_mode_var.set('password')
+        ssh_key = tk.Radiobutton(
+            self,
+            text="key",
+            variable=self.connection_mode_var,
+            value='key'
+        )
+        ssh_key.grid(row=13, column=startcolumn)
+        password = tk.Radiobutton(
+            self,
+            text="password",
+            variable=self.connection_mode_var,
+            value='password',
+            command=self.set_connection_mode
+        )
+        password.grid(row=13, column=startcolumn+1)
+
         save_button = tk.Button(
             self,
             text='Set Provisions',
             command=self.go_to_provision_page
         )
-        save_button.grid(row=12, column=startcolumn, columnspan=2)
+        save_button.grid(row=14, column=startcolumn, columnspan=2)
 
     def set_grid(self):
         self.grid()
@@ -104,9 +137,9 @@ class VagrantConfigsView(tk.Frame):
         self.rowconfigure(3, weight=1)
         # entry name
         self.rowconfigure(4, weight=1)
-        # vbox label
+        # vbox label, hostname label
         self.rowconfigure(5, weight=1)
-        # vbox entry
+        # vbox entry, hostname entry
         self.rowconfigure(6, weight=1)
         # username label, password label
         self.rowconfigure(7, weight=1)
@@ -118,8 +151,12 @@ class VagrantConfigsView(tk.Frame):
         self.rowconfigure(10, weight=2)
         # select vagrant box
         self.rowconfigure(11, weight=2)
-        # back, next buttons
+        # select connection mode label
         self.rowconfigure(12, weight=2)
+        # radiobuttons connection mode
+        self.rowconfigure(13, weight=2)
+        # back, next buttons
+        self.rowconfigure(14, weight=2)
 
     def go_to_provision_page(self):
         machine_name = self.entry_project_name.get()
@@ -134,6 +171,7 @@ class VagrantConfigsView(tk.Frame):
         else:
             self.provisions_configs["configurations"]["machine_name"] = machine_name
             self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
+            self.provisions_configs["configurations"]["hostname"] = self.entry_hostname.get()
             self.provisions_configs["credentials"]["username"] = self.entry_default_username.get()
             self.provisions_configs["credentials"]["password"] = self.entry_default_password.get()
             self.provisions_configs["credentials"]["extra_user"] = self.entry_extra_user.get()
@@ -143,3 +181,6 @@ class VagrantConfigsView(tk.Frame):
 
     def get_vagrant_configs(self):
         return self.provisions_configs
+
+    def set_connection_mode(self):
+        self.provisions_configs["configurations"]["connection"] = self.connection_mode_var.get()
