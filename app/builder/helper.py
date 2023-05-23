@@ -39,7 +39,7 @@ def get_packages_upload_files(packages: list) -> dict:
             lines = file.readlines()
         package_upload_files[package] = list()
         for line in lines:
-            if line.startswith('cp '):
+            if line.startswith('cp /vagrant/upload/'):
                 upload_file_name = line.strip().split()[1].split('/')[-1]
                 package_upload_files[package].append(
                     upload_file_name

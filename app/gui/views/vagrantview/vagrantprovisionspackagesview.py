@@ -3,19 +3,18 @@ import os
 import shutil
 import tkinter as tk
 from builder.vagrant import Vagrant
-from gui.errors import NotValidOperation
+from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
 from tkinter import ttk
 from tkinter import messagebox as mb
+from tkinter import filedialog
 from builder.helper import is_empty_script
-
-
-def new_vagrant_config_frame(master, provisions_configs):
-    vagrant_configs_view = VagrantProvisionsView(
-        master=master,
-        provisions_configs=provisions_configs
-    )
-    vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
+from builder.error import (
+    NoFileToUploadError,
+    PackageNotFoundError,
+    EmptyScriptError,
+    UploadNameConflictError
+)
 
 
 class TextWindowView(tk.Toplevel):
@@ -39,12 +38,27 @@ class TextWindowView(tk.Toplevel):
             text = file.read()
         self.open_text_box.insert('end', text)
         self.open_text_box.grid(row=2, column=1)
-        save_button = tk.Button(
-            self,
-            text='Save',
-            command=self.save_file
-        )
-        save_button.grid(row=3, column=1)
+
+        if self.operation == 'config':
+            upload_button = tk.Button(
+                self,
+                text='Upload',
+                command=self.upload_file
+            )
+            upload_button.grid(row=3, column=0)
+            save_button = tk.Button(
+                self,
+                text='Save',
+                command=self.save_file
+            )
+            save_button.grid(row=3, column=2)
+        else:
+            save_button = tk.Button(
+                self,
+                text='Save',
+                command=self.save_file
+            )
+            save_button.grid(row=3, column=1)
         remove_button = tk.Button(
             self,
             text=f'Remove from {operation}',
@@ -67,27 +81,39 @@ class TextWindowView(tk.Toplevel):
     def save_file(self):
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
             file.write(self.open_text_box.get("1.0", "end"))
-        new_vagrant_config_frame(self.master, self.provisions_configs)
+        self.master.add_vagrant_provisions_frame()
         self.destroy()
 
     def remove_from_operation(self):
         self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        new_vagrant_config_frame(self.master, self.provisions_configs)
+        self.master.add_vagrant_provisions_frame()
+        self.destroy()
+
+    def upload_file(self):
+        filename = filedialog.askopenfilename(
+            initialdir=f"{constants.VMBUILDER_PATH}",
+            title="Select a File",
+            filetypes=(
+                ("Text files",
+                 "*.txt*"),
+                ("all files",
+                 "*.*")
+            )
+        )
+        shutil.copy(
+            src=filename,
+            dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
+        )
         self.destroy()
 
 
-class VagrantProvisionsView(tk.Frame):
+class VagrantProvisionsPackagesView(tk.Frame):
 
     def __init__(self, master, provisions_configs):
-        self.startcolumn = 1
         self.provisions_configs = provisions_configs
         tk.Frame.__init__(self, master)
-        self.set_grid(rows=9, columns=5)
+        self.set_grid(rows=7, columns=5)
         self.startcolumn = 1
-        title_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
-        title_label.grid(row=0, column=0, columnspan=5)
-        provisions_label = tk.Label(self, text="Provisions")
-        provisions_label.grid(row=1, column=0, columnspan=5)
         self.add_separator((2, 0), length=5)
         packages_label = tk.Label(self, text="Packages")
         packages_label.grid(row=2, column=0, columnspan=5)
@@ -99,9 +125,9 @@ class VagrantProvisionsView(tk.Frame):
 
         self.add_separator((8, 0), length=5)
 
-        self.add_label((9, self.startcolumn), text='Install')
-        self.add_label((9, self.startcolumn+1), text='Uninstall')
-        self.add_label((9, self.startcolumn+2), text='Config')
+        self.add_label((8, self.startcolumn), text='Install')
+        self.add_label((8, self.startcolumn+1), text='Uninstall')
+        self.add_label((8, self.startcolumn+2), text='Config')
         self.add_selected_objects()
 
         self.add_separator((self.number_of_rows-2, 0), length=5)
@@ -120,8 +146,8 @@ class VagrantProvisionsView(tk.Frame):
                 len(self.provisions_configs["provisions"][f'packages_to_{operation}'])
             )
         for i in range(1, max(number_of_package)+4):
-            self.rowconfigure(i+8, weight=1)
-        self.number_of_rows = 8 + max(number_of_package) + 4
+            self.rowconfigure(i+rows, weight=1)
+        self.number_of_rows = rows + max(number_of_package) + 4
 
     def add_label(self, position: tuple, text: str,):
         label = tk.Label(self, text=text)
@@ -140,7 +166,7 @@ class VagrantProvisionsView(tk.Frame):
             row=initial_position[0],
             column=initial_position[1],
             columnspan=length,
-            sticky='wens'
+            sticky='we'
         )
 
     def add_selected_objects(self):
@@ -153,7 +179,7 @@ class VagrantProvisionsView(tk.Frame):
                 column_position = self.startcolumn + 2
             if self.provisions_configs["provisions"][f'packages_to_{operation}']:
                 for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
-                    row = 9 + count + 1
+                    row = 8 + count + 1
                     color = 'black'
                     package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
                     if package_is_empty:
@@ -185,7 +211,7 @@ class VagrantProvisionsView(tk.Frame):
         for count, operation in enumerate(('install', 'uninstall', 'config')):
             operation_button = tk.Button(
                 self,
-                text=operation.title(),
+                text=f'Add to {operation.title()}',
                 command=lambda operation=operation: self.save_packages(operation)
             )
             operation_button.grid(row=4, column=self.startcolumn+count)
@@ -217,7 +243,7 @@ class VagrantProvisionsView(tk.Frame):
             )
         for package in packages:
             self.provisions_configs["provisions"][f"packages_to_{operation}"].add(package)
-        new_vagrant_config_frame(self.master, self.provisions_configs)
+        self.master.add_vagrant_provisions_frame()
 
     def delete_packages(self):
         packages_to_delete = ()
@@ -232,9 +258,7 @@ class VagrantProvisionsView(tk.Frame):
             if yes:
                 for package in packages_to_delete:
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
-                new_vagrant_config_frame(
-                    self.master, self.provisions_configs
-                )
+                self.master.add_vagrant_provisions_frame()
         else:
             mb.showerror('Error Delete', 'You have selected no packages')
 
@@ -275,21 +299,36 @@ class VagrantProvisionsView(tk.Frame):
             master=self.master,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
+        vagrant_configs_view.grid(row=1, column=0,
+                                  columnspan=5, rowspan=2,
+                                  sticky='wens')
 
     def build(self):
-        vagrant_builder = Vagrant(self.provisions_configs)
-        vagrant_builder.set_configs()
-        vagrant_builder.set_provisions()
-        vagrant_builder.set_credentials()
-        vagrant_builder.create_project_folder()
-        vagrant_builder.generate_main_file()
-        info = mb.showinfo(
-            title='Well done!',
-            message=(
-                f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
-                'was succesfully created'
+        try:
+            provisions_configs_reader = ProvisionConfigReader(
+                self.provisions_configs,
             )
-        )
-        if info == 'ok':
-            exit()
+            provisions_configs_reader.check_packages_existence_for()
+
+            provisions_configs_reader.check_package_upload_files_existence()
+            provisions_configs_reader.check_upload_file_name_duplicates()
+            provisions_configs_reader.check_custom_script_existence()
+            provisions_configs_reader.check_update_upgrade_type()
+            provisions_configs_reader.check_if_clean_is_selected()
+            vagrant_builder = Vagrant(self.provisions_configs)
+            vagrant_builder.set_configs()
+            vagrant_builder.set_provisions()
+            vagrant_builder.set_credentials()
+            vagrant_builder.create_project_folder()
+            vagrant_builder.generate_main_file()
+            info = mb.showinfo(
+                title='Well done!',
+                message=(
+                    f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
+                    'was succesfully created'
+                )
+            )
+            if info == 'ok':
+                exit()
+        except (NoFileToUploadError, PackageNotFoundError, EmptyScriptError, UploadNameConflictError) as error:
+            mb.showerror('Error', error.msg)

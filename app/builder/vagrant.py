@@ -156,6 +156,12 @@ class Vagrant(Builder):
                     title="UPDATE and UPGRADE",
                     package='apt'
                 )
+        if self.provisions['update_upgrade_full']:
+            self._generate_provision_section(
+                    src=f'{constants.SETUP_SCRIPTS_PATH}/update_upgrade_full.sh',
+                    title="UPDATE and UPGRADE FULL",
+                    package='apt'
+                )
         if self.provisions['packages_to_install']:
             for package in self.provisions['packages_to_install']:
                 self._generate_provision_section(

@@ -2,7 +2,7 @@
   "credentials": {
     "username": "default_user",
     "password": "deafult_pass",
-    "extra_user": "Extra User"
+    "extra_user": ""
   },
   "provisions": {
     "update_upgrade": false,

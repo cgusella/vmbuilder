@@ -1,6 +1,7 @@
 import abc
 import constants
 import logging
+import json
 import os
 import shutil
 import subprocess
@@ -38,6 +39,10 @@ class Controller(abc.ABC):
     def check_new_project_folder_existence(self):
         pass
 
+    @abc.abstractmethod
+    def get_json_with_flags_values(self):
+        pass
+
 
 class VagrantController(Controller):
 
@@ -70,6 +75,20 @@ class VagrantController(Controller):
         if self.namespace.name in os.listdir(constants.VAGRANT_MACHINES_PATH):
             raise ExistenceProjectError("Project already exists!")
 
+    def get_json_with_flags_values(self):
+        """Set variables in JSON with correspondant namespace values"""
+        with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json', 'w') as json_file:
+            self.json_file = json.loads(json_file.read())
+        self.json_file["configurations"]["machine_name"] = self.namespace.name
+        self.json_file["configurations"]["vbox_name"] = self.namespace.vm_name
+        self.json_file["configurations"]["username"] = self.namespace.user
+        self.json_file["configurations"]["hostname"] = self.namespace.hostname
+        self.json_file["configurations"]["image"] = self.namespace.image
+        self.json_file["configurations"]["connection"] = self.namespace.connection
+        with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{self.namespace.json}') as json_file:
+            json_file.write(json.dumps(self.json_file, indent=2))
+        return json_file
+
 
 class PackerController(Controller):
 
@@ -101,3 +120,8 @@ class PackerController(Controller):
     def check_new_project_folder_existence(self):
         if self.namespace.name in os.listdir(constants.PACKER_MACHINES_PATH):
             raise ExistenceProjectError("Project already exists!")
+
+    def get_json_with_flags_values(self):
+        """Set variables in JSON with correspondant namespace values"""
+        with open(f'{constants.PACKER_PROVS_CONFS_PATH}/template.json', 'w') as json_file:
+            self.json_file = json.loads(json_file.read())
