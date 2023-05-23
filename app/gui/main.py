@@ -48,6 +48,8 @@ class MainView(tk.Frame):
     def add_vagrant_configs(self):
         with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
             self.provisions_configs = json.loads(template_json.read())
+        for operation in ('install', 'uninstall', 'config'):
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
         vagrant_configs_view = VagrantConfigsView(
             master=self,
             provisions_configs=self.provisions_configs
