@@ -215,7 +215,8 @@ class VagrantProvisionsView(tk.Frame):
             packages.append(
                 self.packages_listbox.get(pack)
             )
-        self.provisions_configs["provisions"][f"packages_to_{operation}"] = packages
+        for package in packages:
+            self.provisions_configs["provisions"][f"packages_to_{operation}"].add(package)
         new_vagrant_config_frame(self.master, self.provisions_configs)
 
     def delete_packages(self):
