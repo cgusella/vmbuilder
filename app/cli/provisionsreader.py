@@ -3,7 +3,6 @@ import constants
 import json
 import logging
 import os
-from argparse import Namespace
 from builder.error import (
     PackageNotFoundError,
     EmptyScriptError,
@@ -17,16 +16,10 @@ from cli.newpackage import make_package_folder
 
 
 class ProvisionConfigReader:
-    def __init__(self, namespace: Namespace) -> None:
-        if namespace.vm_type == 'vagrant':
-            provision_config_file_path = constants.VAGRANT_PROVS_CONFS_PATH
-        elif namespace.vm_type == 'packer':
-            provision_config_file_path = constants.PACKER_PROVS_CONFS_PATH
-        with open(f'{provision_config_file_path}/{namespace.json}') as provs_confs_file:
-            self.json_file = json.loads(provs_confs_file.read())
+    def __init__(self, json_file: dict) -> None:
+        self.json_file = json_file
         self.provisions = self.json_file["provisions"]
         self.configs = self.json_file["configurations"]
-        self.namespace = namespace
 
     def check_upload_file_name_duplicates(self):
         """
@@ -191,14 +184,3 @@ class ProvisionConfigReader:
                 'Be aware that you selected "clean_packages" '
                 'in JSON file'
             )
-
-    def add_namescpace_flags_to_json(self):
-        """Set variables in JSON with correspondant namespace values"""
-        self.json_file["configurations"]["machine_name"] = self.namespace.name
-        self.json_file["configurations"]["vbox_name"] = self.namespace.vm_name
-        self.json_file["configurations"]["username"] = self.namespace.user
-        self.json_file["configurations"]["hostname"] = self.namespace.hostname
-        self.json_file["configurations"]["image"] = self.namespace.image
-        self.json_file["configurations"]["connection"] = self.namespace.connection
-        with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/{self.namespace.json}') as json_file:
-            json_file.write(json.dumps(self.json_file, indent=2))

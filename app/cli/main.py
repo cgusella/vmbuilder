@@ -41,10 +41,12 @@ def main():
     controller.check_virtualbox_existence()
     controller.check_json_existence()
     controller.check_new_project_folder_existence()
+    json_file = controller.get_json_with_flags_values()
 
     # read selected json
     provisions_configs_reader = ProvisionConfigReader(
-        namespace=namespace
+        json_file,
+        namespace.vm_type
     )
     provisions_configs_reader.check_packages_existence_for()
 
@@ -53,11 +55,9 @@ def main():
     provisions_configs_reader.check_custom_script_existence()
     provisions_configs_reader.check_update_upgrade_type()
     provisions_configs_reader.check_if_clean_is_selected()
-    provisions_configs_reader.add_namescpace_flags_to_json()
 
     # build new project
     builder = get_project_class(
-        namespace=namespace,
         json_file=provisions_configs_reader.json_file
     )
     builder.set_configs()

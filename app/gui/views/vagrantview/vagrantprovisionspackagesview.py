@@ -3,10 +3,18 @@ import os
 import shutil
 import tkinter as tk
 from builder.vagrant import Vagrant
+from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
 from tkinter import ttk
 from tkinter import messagebox as mb
+from tkinter import filedialog
 from builder.helper import is_empty_script
+from builder.error import (
+    NoFileToUploadError,
+    PackageNotFoundError,
+    EmptyScriptError,
+    UploadNameConflictError
+)
 
 
 class TextWindowView(tk.Toplevel):
@@ -30,12 +38,27 @@ class TextWindowView(tk.Toplevel):
             text = file.read()
         self.open_text_box.insert('end', text)
         self.open_text_box.grid(row=2, column=1)
-        save_button = tk.Button(
-            self,
-            text='Save',
-            command=self.save_file
-        )
-        save_button.grid(row=3, column=1)
+
+        if self.operation == 'config':
+            upload_button = tk.Button(
+                self,
+                text='Upload',
+                command=self.upload_file
+            )
+            upload_button.grid(row=3, column=0)
+            save_button = tk.Button(
+                self,
+                text='Save',
+                command=self.save_file
+            )
+            save_button.grid(row=3, column=2)
+        else:
+            save_button = tk.Button(
+                self,
+                text='Save',
+                command=self.save_file
+            )
+            save_button.grid(row=3, column=1)
         remove_button = tk.Button(
             self,
             text=f'Remove from {operation}',
@@ -64,6 +87,23 @@ class TextWindowView(tk.Toplevel):
     def remove_from_operation(self):
         self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
         self.master.add_vagrant_provisions_frame()
+        self.destroy()
+
+    def upload_file(self):
+        filename = filedialog.askopenfilename(
+            initialdir=f"{constants.VMBUILDER_PATH}",
+            title="Select a File",
+            filetypes=(
+                ("Text files",
+                 "*.txt*"),
+                ("all files",
+                 "*.*")
+            )
+        )
+        shutil.copy(
+            src=filename,
+            dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
+        )
         self.destroy()
 
 
@@ -264,18 +304,31 @@ class VagrantProvisionsPackagesView(tk.Frame):
                                   sticky='wens')
 
     def build(self):
-        vagrant_builder = Vagrant(self.provisions_configs)
-        vagrant_builder.set_configs()
-        vagrant_builder.set_provisions()
-        vagrant_builder.set_credentials()
-        vagrant_builder.create_project_folder()
-        vagrant_builder.generate_main_file()
-        info = mb.showinfo(
-            title='Well done!',
-            message=(
-                f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
-                'was succesfully created'
+        try:
+            provisions_configs_reader = ProvisionConfigReader(
+                self.provisions_configs,
             )
-        )
-        if info == 'ok':
-            exit()
+            provisions_configs_reader.check_packages_existence_for()
+
+            provisions_configs_reader.check_package_upload_files_existence()
+            provisions_configs_reader.check_upload_file_name_duplicates()
+            provisions_configs_reader.check_custom_script_existence()
+            provisions_configs_reader.check_update_upgrade_type()
+            provisions_configs_reader.check_if_clean_is_selected()
+            vagrant_builder = Vagrant(self.provisions_configs)
+            vagrant_builder.set_configs()
+            vagrant_builder.set_provisions()
+            vagrant_builder.set_credentials()
+            vagrant_builder.create_project_folder()
+            vagrant_builder.generate_main_file()
+            info = mb.showinfo(
+                title='Well done!',
+                message=(
+                    f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
+                    'was succesfully created'
+                )
+            )
+            if info == 'ok':
+                exit()
+        except (NoFileToUploadError, PackageNotFoundError, EmptyScriptError, UploadNameConflictError) as error:
+            mb.showerror('Error', error.msg)
