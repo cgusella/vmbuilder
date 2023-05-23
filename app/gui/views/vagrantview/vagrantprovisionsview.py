@@ -153,17 +153,19 @@ class VagrantProvisionsView(tk.Frame):
         elif operation == 'config':
             column_position = self.startcolumn + 2
         if self.provisions_configs["provisions"][f'packages_to_{operation}']:
-            i = 1
-            for package in self.provisions_configs["provisions"][f'packages_to_{operation}']:
-                row = 9 + i
+            for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
+                row = 9 + count + 1
                 color = 'black'
                 package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
                 if package_is_empty:
                     color = 'red'
-                package_button = tk.Button(self, text=f'{package}', fg=color,
-                                           command=lambda: self.open_text_window(package, operation))
+                package_button = tk.Button(
+                    self,
+                    text=f'{package}',
+                    fg=color,
+                    command=lambda args=(package, operation): self.open_text_window(*args)
+                )
                 package_button.grid(row=row, column=column_position)
-                i += 1
 
     def add_selected_objects(self):
         self._add_packages_for_operation('install')
@@ -184,12 +186,6 @@ class VagrantProvisionsView(tk.Frame):
         for count, package in enumerate(sorted(packages)):
             self.packages_listbox.insert(count+1, package)
         self.packages_listbox.grid(row=3, column=self.startcolumn+1)
-
-    def save_script(self, package: str, operation: str, file_text: str):
-        with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh', 'w') as file:
-            file.write(file_text)
-        self.destroy()
-        VagrantProvisionsView(self.master)
 
     def add_install_uninstal_conf_buttons(self):
         install_button = tk.Button(
@@ -298,21 +294,18 @@ class VagrantProvisionsView(tk.Frame):
         vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
 
     def build(self):
-        try:
-            vagrant_builder = Vagrant(self.provisions_configs)
-            vagrant_builder.set_configs()
-            vagrant_builder.set_provisions()
-            vagrant_builder.set_credentials()
-            vagrant_builder.create_project_folder()
-            vagrant_builder.generate_main_file()
-            info = mb.showinfo(
-                title='Well done!',
-                message=(
-                    f'Your new {self.provisions_configs["configurations"]["machine_name"]} machine '
-                    'was succesfully created'
-                )
+        vagrant_builder = Vagrant(self.provisions_configs)
+        vagrant_builder.set_configs()
+        vagrant_builder.set_provisions()
+        vagrant_builder.set_credentials()
+        vagrant_builder.create_project_folder()
+        vagrant_builder.generate_main_file()
+        info = mb.showinfo(
+            title='Well done!',
+            message=(
+                f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
+                'was succesfully created'
             )
-        except Exception as error:
-            mb.showerror(message=error)
+        )
         if info == 'ok':
             exit()
