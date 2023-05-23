@@ -143,34 +143,28 @@ class VagrantProvisionsView(tk.Frame):
             sticky='wens'
         )
 
-    def _add_packages_for_operation(self, operation: str):
-        if operation not in ('install', 'uninstall', 'config'):
-            raise NotValidOperation()
-        if operation == 'install':
-            column_position = self.startcolumn
-        elif operation == 'uninstall':
-            column_position = self.startcolumn + 1
-        elif operation == 'config':
-            column_position = self.startcolumn + 2
-        if self.provisions_configs["provisions"][f'packages_to_{operation}']:
-            for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
-                row = 9 + count + 1
-                color = 'black'
-                package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
-                if package_is_empty:
-                    color = 'red'
-                package_button = tk.Button(
-                    self,
-                    text=f'{package}',
-                    fg=color,
-                    command=lambda args=(package, operation): self.open_text_window(*args)
-                )
-                package_button.grid(row=row, column=column_position)
-
     def add_selected_objects(self):
-        self._add_packages_for_operation('install')
-        self._add_packages_for_operation('uninstall')
-        self._add_packages_for_operation('config')
+        for operation in ('install', 'uninstall', 'config'):
+            if operation == 'install':
+                column_position = self.startcolumn
+            elif operation == 'uninstall':
+                column_position = self.startcolumn + 1
+            elif operation == 'config':
+                column_position = self.startcolumn + 2
+            if self.provisions_configs["provisions"][f'packages_to_{operation}']:
+                for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
+                    row = 9 + count + 1
+                    color = 'black'
+                    package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
+                    if package_is_empty:
+                        color = 'red'
+                    package_button = tk.Button(
+                        self,
+                        text=f'{package}',
+                        fg=color,
+                        command=lambda args=(package, operation): self.open_text_window(*args)
+                    )
+                    package_button.grid(row=row, column=column_position)
 
     def add_listbox(self):
         self.packages_listbox = tk.Listbox(
@@ -188,24 +182,13 @@ class VagrantProvisionsView(tk.Frame):
         self.packages_listbox.grid(row=3, column=self.startcolumn+1)
 
     def add_install_uninstal_conf_buttons(self):
-        install_button = tk.Button(
-            self,
-            text='Install',
-            command=lambda: self.save_packages('install')
-        )
-        install_button.grid(row=4, column=self.startcolumn)
-        uninstall_button = tk.Button(
-            self,
-            text='Uninstall',
-            command=lambda: self.save_packages('uninstall')
-        )
-        uninstall_button.grid(row=4, column=self.startcolumn+1)
-        config_button = tk.Button(
-            self,
-            text='Config',
-            command=lambda: self.save_packages('config')
-        )
-        config_button.grid(row=4, column=self.startcolumn+2)
+        for count, operation in enumerate(('install', 'uninstall', 'config')):
+            operation_button = tk.Button(
+                self,
+                text=operation.title(),
+                command=lambda operation=operation: self.save_packages(operation)
+            )
+            operation_button.grid(row=4, column=self.startcolumn+count)
 
     def add_delete_button(self):
         delete_button = tk.Button(
