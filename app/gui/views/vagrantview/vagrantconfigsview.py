@@ -2,6 +2,7 @@ import constants
 import os
 import tkinter as tk
 from argumentparser.helper import get_local_vagrant_boxes
+from existencecontroller.controller import launch_vboxmanage_lst_command
 from tkinter import ttk
 from tkinter import messagebox as mb
 from tkinter import StringVar
@@ -162,12 +163,18 @@ class VagrantConfigsView(tk.Frame):
         machine_name = self.entry_project_name.get()
         if machine_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
             mb.showerror('Error', 'A machine with this name already exists')
-        if not self.entry_vbox_name.get():
+        elif not machine_name:
             mb.showerror('Error', 'You must choose a name for the virtual machine')
-        if not self.entry_default_username.get():
+        elif not self.entry_vbox_name.get():
+            mb.showerror('Error', 'You must choose a name for the virtual box machine')
+        elif self.entry_vbox_name.get() in launch_vboxmanage_lst_command():
+            mb.showerror('Error', 'A box with the same name already exists')
+        elif not self.entry_default_username.get():
             mb.showerror('Error', 'You must choose a main username')
-        if not self.entry_default_password.get():
+        elif not self.entry_default_password.get():
             mb.showerror('Error', 'You must choose a password')
+        elif self.vagrant_box.get() == 'Select Vagrant Box':
+            mb.showerror('Error', 'You must select a Vagrant box')
         else:
             self.provisions_configs["configurations"]["machine_name"] = machine_name
             self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
