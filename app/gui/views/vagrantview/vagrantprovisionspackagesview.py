@@ -337,7 +337,7 @@ class VagrantProvisionsPackagesView(ctk.CTkFrame):
             info = mb.showinfo(
                 title='Well done!',
                 message=(
-                    f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
+                    f'Your new "{self.provisions_configs["configurations"]["project_name"]}" machine '
                     'was succesfully created'
                 )
             )
