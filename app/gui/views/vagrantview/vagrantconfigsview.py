@@ -13,6 +13,8 @@ class VagrantConfigsView(tk.Frame):
         self.provisions_configs = provisions_configs
         tk.Frame.__init__(self, master)
         self.set_grid()
+
+        # Add titles
         self.vagrant_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
         self.vagrant_label.grid(row=0, column=0, columnspan=4)
 
@@ -29,6 +31,7 @@ class VagrantConfigsView(tk.Frame):
         )
         separator.grid(row=2, column=0, columnspan=4, sticky='EW')
 
+        # start form to get new machine configurations
         startcolumn = 1
         machine_name_label = tk.Label(self, text="New machine name:")
         machine_name_label.grid(row=3, column=startcolumn)
@@ -84,6 +87,9 @@ class VagrantConfigsView(tk.Frame):
         )
         self.entry_extra_user.grid(row=10, column=startcolumn)
 
+        # Select vagrant boxes.
+        # If there are no vagran boxes an entry is displayed,
+        # otherwise an optionmenu will appear
         if get_local_vagrant_boxes() == 'No Box':
             no_box_frame = tk.Frame(
                 self,
