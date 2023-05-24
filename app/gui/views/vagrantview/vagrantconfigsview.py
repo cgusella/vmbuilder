@@ -88,31 +88,41 @@ class VagrantConfigsView(tk.Frame):
         self.vagrant_box.set('Select Vagrant Box')
         vagrant_drop = tk.OptionMenu(self, self.vagrant_box,
                                      *get_local_vagrant_boxes().split("\n"))
-        vagrant_drop.grid(row=11, column=startcolumn, sticky="ew")
+        vagrant_drop.grid(row=11, column=startcolumn, sticky="ew", columnspan=2)
 
-        ssh_label = tk.Label(self, text='Connection mode')
-        ssh_label.grid(row=12, column=startcolumn, columnspan=2)
+        connection_mode_frame = tk.Frame(
+            self,
+            highlightbackground="black",
+            highlightthickness=2
+        )
+        connection_mode_frame.grid(row=12, column=startcolumn, columnspan=2, rowspan=2)
+        connection_mode_frame.columnconfigure(0, weight=1)
+        connection_mode_frame.columnconfigure(1, weight=1)
+        connection_mode_frame.rowconfigure(0, weight=1)
+        connection_mode_frame.rowconfigure(1, weight=1)
 
+        ssh_label = tk.Label(connection_mode_frame, text='Connection mode')
+        ssh_label.grid(row=0, column=0, columnspan=2)
         self.connection_mode_var = StringVar()
         if self.provisions_configs["configurations"]["connection"] == 'key':
             self.connection_mode_var.set('key')
         elif self.provisions_configs["configurations"]["connection"] == 'password':
             self.connection_mode_var.set('password')
         ssh_key = tk.Radiobutton(
-            self,
-            text="key",
+            connection_mode_frame,
+            text="ssh_key",
             variable=self.connection_mode_var,
             value='key'
         )
-        ssh_key.grid(row=13, column=startcolumn)
+        ssh_key.grid(row=1, column=0)
         password = tk.Radiobutton(
-            self,
+            connection_mode_frame,
             text="password",
             variable=self.connection_mode_var,
             value='password',
             command=self.set_connection_mode
         )
-        password.grid(row=13, column=startcolumn+1)
+        password.grid(row=1, column=1)
 
         save_button = tk.Button(
             self,
