@@ -98,12 +98,14 @@ class MainView(ctk.CTkFrame):
 
 def start(mainview=None, back=False):
     if back:
-        mainview.master.destroy()
-    root = ctk.CTk()
-    root.wm_geometry("800x1000")
-    main = MainView(root)
-    main.master.title('HackTheMonkey')
-    root.mainloop()
+        mainview.destroy()
+        mainview.__init__(master=mainview.master)
+    else:
+        root = ctk.CTk()
+        root.wm_geometry("800x1000")
+        main = MainView(root)
+        main.master.title('HackTheMonkey')
+        root.mainloop()
 
 
 if __name__ == "__main__":
