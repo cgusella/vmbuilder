@@ -13,6 +13,8 @@ class VagrantConfigsView(tk.Frame):
         self.provisions_configs = provisions_configs
         tk.Frame.__init__(self, master)
         self.set_grid()
+
+        # Add titles
         self.vagrant_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
         self.vagrant_label.grid(row=0, column=0, columnspan=4)
 
@@ -29,6 +31,7 @@ class VagrantConfigsView(tk.Frame):
         )
         separator.grid(row=2, column=0, columnspan=4, sticky='EW')
 
+        # start form to get new machine configurations
         startcolumn = 1
         machine_name_label = tk.Label(self, text="New machine name:")
         machine_name_label.grid(row=3, column=startcolumn)
@@ -84,42 +87,83 @@ class VagrantConfigsView(tk.Frame):
         )
         self.entry_extra_user.grid(row=10, column=startcolumn)
 
-        self.vagrant_box = tk.StringVar(self)
-        self.vagrant_box.set('Select Vagrant Box')
-        vagrant_drop = tk.OptionMenu(self, self.vagrant_box,
-                                     *get_local_vagrant_boxes().split("\n"))
-        vagrant_drop.grid(row=11, column=startcolumn, sticky="ew")
+        # Select vagrant boxes.
+        # If there are no vagran boxes an entry is displayed,
+        # otherwise an optionmenu will appear
+        if get_local_vagrant_boxes() == 'No Box':
+            no_box_frame = tk.Frame(
+                self,
+                highlightbackground="black",
+                highlightthickness=2
+            )
+            no_box_frame.grid(row=12, column=startcolumn, columnspan=2)
+            no_box_frame.columnconfigure(0, weight=1)
+            no_box_frame.rowconfigure(0, weight=1)
+            no_box_frame.rowconfigure(1, weight=1)
+            vagrant_box_name_label = tk.Label(
+                no_box_frame,
+                text=(
+                    'You do not have local Vagrant box.\n'
+                    'Insert cloud Vagrant box name:'
+                )
+            )
+            vagrant_box_name_label.grid(row=0, column=0)
+            self.vagrant_box = tk.Entry(no_box_frame)
+            self.vagrant_box.insert(
+                0,
+                self.provisions_configs["configurations"]["image"]
+            )
+            self.vagrant_box.grid(row=1, column=0)
+        else:
+            self.vagrant_box = tk.StringVar(self)
+            self.vagrant_box.set('Select Vagrant Box')
+            vagrant_drop = tk.OptionMenu(
+                self,
+                self.vagrant_box,
+                *get_local_vagrant_boxes().split("\n"),
+            )
+            vagrant_drop.grid(row=11, column=startcolumn, sticky="ew", columnspan=2)
 
-        ssh_label = tk.Label(self, text='Connection mode')
-        ssh_label.grid(row=12, column=startcolumn, columnspan=2)
+        connection_mode_frame = tk.Frame(
+            self,
+            highlightbackground="black",
+            highlightthickness=2
+        )
+        connection_mode_frame.grid(row=13, column=startcolumn, columnspan=2, rowspan=2)
+        connection_mode_frame.columnconfigure(0, weight=1)
+        connection_mode_frame.columnconfigure(1, weight=1)
+        connection_mode_frame.rowconfigure(0, weight=1)
+        connection_mode_frame.rowconfigure(1, weight=1)
 
+        ssh_label = tk.Label(connection_mode_frame, text='Connection mode')
+        ssh_label.grid(row=0, column=0, columnspan=2)
         self.connection_mode_var = StringVar()
         if self.provisions_configs["configurations"]["connection"] == 'key':
             self.connection_mode_var.set('key')
         elif self.provisions_configs["configurations"]["connection"] == 'password':
             self.connection_mode_var.set('password')
         ssh_key = tk.Radiobutton(
-            self,
-            text="key",
+            connection_mode_frame,
+            text="ssh_key",
             variable=self.connection_mode_var,
             value='key'
         )
-        ssh_key.grid(row=13, column=startcolumn)
+        ssh_key.grid(row=1, column=0)
         password = tk.Radiobutton(
-            self,
+            connection_mode_frame,
             text="password",
             variable=self.connection_mode_var,
             value='password',
             command=self.set_connection_mode
         )
-        password.grid(row=13, column=startcolumn+1)
+        password.grid(row=1, column=1)
 
         save_button = tk.Button(
             self,
             text='Set Provisions',
             command=self.go_to_provision_page
         )
-        save_button.grid(row=14, column=startcolumn, columnspan=2)
+        save_button.grid(row=15, column=startcolumn, columnspan=2)
 
     def set_grid(self):
         self.grid()
@@ -152,12 +196,14 @@ class VagrantConfigsView(tk.Frame):
         self.rowconfigure(10, weight=2)
         # select vagrant box
         self.rowconfigure(11, weight=2)
-        # select connection mode label
+        # optional entry name for vagrant box
         self.rowconfigure(12, weight=2)
-        # radiobuttons connection mode
+        # select connection mode label
         self.rowconfigure(13, weight=2)
-        # back, next buttons
+        # radiobuttons connection mode
         self.rowconfigure(14, weight=2)
+        # back, next buttons
+        self.rowconfigure(15, weight=2)
 
     def go_to_provision_page(self):
         machine_name = self.entry_project_name.get()

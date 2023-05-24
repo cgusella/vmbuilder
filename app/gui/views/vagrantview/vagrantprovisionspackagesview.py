@@ -112,7 +112,7 @@ class VagrantProvisionsPackagesView(tk.Frame):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         tk.Frame.__init__(self, master)
-        self.set_grid(rows=7, columns=5)
+        self.set_grid(rows=8, columns=5)
         self.startcolumn = 1
         self.add_separator((2, 0), length=5)
         packages_label = tk.Label(self, text="Packages")
@@ -205,7 +205,7 @@ class VagrantProvisionsPackagesView(tk.Frame):
         ]
         for count, package in enumerate(sorted(packages)):
             self.packages_listbox.insert(count+1, package)
-        self.packages_listbox.grid(row=3, column=self.startcolumn+1)
+        self.packages_listbox.grid(row=3, column=self.startcolumn+1, rowspan=2)
 
     def add_install_uninstal_conf_buttons(self):
         for count, operation in enumerate(('install', 'uninstall', 'config')):
@@ -214,7 +214,7 @@ class VagrantProvisionsPackagesView(tk.Frame):
                 text=f'Add to {operation.title()}',
                 command=lambda operation=operation: self.save_packages(operation)
             )
-            operation_button.grid(row=4, column=self.startcolumn+count)
+            operation_button.grid(row=5, column=self.startcolumn+count)
 
     def add_delete_button(self):
         delete_button = tk.Button(
@@ -222,18 +222,25 @@ class VagrantProvisionsPackagesView(tk.Frame):
             text='Delete Packages',
             command=self.delete_packages
         )
-        delete_button.grid(row=5, column=self.startcolumn+1)
+        delete_button.grid(row=3, column=self.startcolumn, rowspan=2)
 
     def add_new_package_button(self):
-        self.new_package_entry = tk.Entry(self)
+        new_package_frame = tk.Frame(
+            self
+        )
+        new_package_frame.grid(row=3, column=self.startcolumn+2, rowspan=2)
+        new_package_frame.columnconfigure(0, weight=1)
+        new_package_frame.rowconfigure(0, weight=1)
+        new_package_frame.rowconfigure(1, weight=1)
+        self.new_package_entry = tk.Entry(new_package_frame)
         self.new_package_entry.insert(0, 'New Package Name')
-        self.new_package_entry.grid(row=6, column=self.startcolumn+1)
+        self.new_package_entry.grid(row=0, column=0)
         new_package_button = tk.Button(
-            self,
+            new_package_frame,
             text='Add package',
             command=self.add_package
         )
-        new_package_button.grid(row=7, column=self.startcolumn+1)
+        new_package_button.grid(row=1, column=0)
 
     def save_packages(self, operation: str):
         packages = list()
