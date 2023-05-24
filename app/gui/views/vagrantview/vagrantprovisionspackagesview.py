@@ -16,6 +16,7 @@ from builder.error import (
     EmptyScriptError,
     UploadNameConflictError
 )
+from gui.views.errors.errorview import ErrorMessage
 
 
 class TextWindowView(ctk.CTkToplevel):
@@ -269,7 +270,7 @@ class VagrantProvisionsPackagesView(ctk.CTkFrame):
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
                 self.master.add_vagrant_provisions_frame()
         else:
-            mb.showerror('Error Delete', 'You have selected no packages')
+            ErrorMessage(self, 'You have selected no packages')
 
     def add_bottom_button(self):
         build_button = ctk.CTkButton(
@@ -299,7 +300,7 @@ class VagrantProvisionsPackagesView(ctk.CTkFrame):
                 make_package_folder(package_name)
                 self.add_listbox()
         else:
-            mb.showerror('New Package Error', 'Package already exists')
+            ErrorMessage(self, 'Package already exists')
 
     def open_text_window(self, package, operation):
         TextWindowView(self.master, package=package, operation=operation,
@@ -343,4 +344,4 @@ class VagrantProvisionsPackagesView(ctk.CTkFrame):
             if info == 'ok':
                 exit()
         except (NoFileToUploadError, PackageNotFoundError, EmptyScriptError, UploadNameConflictError) as error:
-            mb.showerror('Error', error.msg)
+            ErrorMessage(self, error.msg)
