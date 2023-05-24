@@ -84,18 +84,46 @@ class VagrantConfigsView(tk.Frame):
         )
         self.entry_extra_user.grid(row=10, column=startcolumn)
 
-        self.vagrant_box = tk.StringVar(self)
-        self.vagrant_box.set('Select Vagrant Box')
-        vagrant_drop = tk.OptionMenu(self, self.vagrant_box,
-                                     *get_local_vagrant_boxes().split("\n"))
-        vagrant_drop.grid(row=11, column=startcolumn, sticky="ew", columnspan=2)
+        if get_local_vagrant_boxes() == 'No Box':
+            no_box_frame = tk.Frame(
+                self,
+                highlightbackground="black",
+                highlightthickness=2
+            )
+            no_box_frame.grid(row=12, column=startcolumn, columnspan=2)
+            no_box_frame.columnconfigure(0, weight=1)
+            no_box_frame.rowconfigure(0, weight=1)
+            no_box_frame.rowconfigure(1, weight=1)
+            vagrant_box_name_label = tk.Label(
+                no_box_frame,
+                text=(
+                    'You do not have local Vagrant box.\n'
+                    'Insert cloud Vagrant box name:'
+                )
+            )
+            vagrant_box_name_label.grid(row=0, column=0)
+            vagrant_box_name_entry = tk.Entry(no_box_frame)
+            vagrant_box_name_entry.insert(
+                0,
+                self.provisions_configs["configurations"]["image"]
+            )
+            vagrant_box_name_entry.grid(row=1, column=0)
+        else:
+            self.vagrant_box = tk.StringVar(self)
+            self.vagrant_box.set('Select Vagrant Box')
+            vagrant_drop = tk.OptionMenu(
+                self,
+                self.vagrant_box,
+                *get_local_vagrant_boxes().split("\n"),
+            )
+            vagrant_drop.grid(row=11, column=startcolumn, sticky="ew", columnspan=2)
 
         connection_mode_frame = tk.Frame(
             self,
             highlightbackground="black",
             highlightthickness=2
         )
-        connection_mode_frame.grid(row=12, column=startcolumn, columnspan=2, rowspan=2)
+        connection_mode_frame.grid(row=13, column=startcolumn, columnspan=2, rowspan=2)
         connection_mode_frame.columnconfigure(0, weight=1)
         connection_mode_frame.columnconfigure(1, weight=1)
         connection_mode_frame.rowconfigure(0, weight=1)
@@ -129,7 +157,7 @@ class VagrantConfigsView(tk.Frame):
             text='Set Provisions',
             command=self.go_to_provision_page
         )
-        save_button.grid(row=14, column=startcolumn, columnspan=2)
+        save_button.grid(row=15, column=startcolumn, columnspan=2)
 
     def set_grid(self):
         self.grid()
@@ -162,12 +190,14 @@ class VagrantConfigsView(tk.Frame):
         self.rowconfigure(10, weight=2)
         # select vagrant box
         self.rowconfigure(11, weight=2)
-        # select connection mode label
+        # optional entry name for vagrant box
         self.rowconfigure(12, weight=2)
-        # radiobuttons connection mode
+        # select connection mode label
         self.rowconfigure(13, weight=2)
-        # back, next buttons
+        # radiobuttons connection mode
         self.rowconfigure(14, weight=2)
+        # back, next buttons
+        self.rowconfigure(15, weight=2)
 
     def go_to_provision_page(self):
         machine_name = self.entry_project_name.get()

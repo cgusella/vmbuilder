@@ -63,9 +63,8 @@ def get_local_vagrant_boxes():
     ).stdout.decode("ascii")
     boxes = list()
     if 'vagrant box add' in output:
-        pass
+        boxes.append('No Box')
     else:
         boxes = output.strip().split('\n')
         boxes = [box.split(' ')[0] for box in boxes]
-    boxes.append('Vagrant Cloud Box')
     return "\n".join(boxes)
