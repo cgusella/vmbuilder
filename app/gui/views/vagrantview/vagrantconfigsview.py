@@ -1,6 +1,6 @@
 import constants
 import os
-import tkinter as tk
+import customtkinter as ctk
 from argumentparser.helper import get_local_vagrant_boxes
 from existencecontroller.controller import launch_vboxmanage_lst_command
 from tkinter import ttk
@@ -8,17 +8,22 @@ from tkinter import messagebox as mb
 from tkinter import StringVar
 
 
-class VagrantConfigsView(tk.Frame):
+class VagrantConfigsView(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
-        tk.Frame.__init__(self, master)
+        ctk.CTkFrame.__init__(self, master)
         self.set_grid()
 
+        my_font = ctk.CTkFont(
+            family='DejaVu Sans',
+            size=16
+        )
+
         # Add titles
-        self.vagrant_label = tk.Label(self, text="Vagrant", font='sans 16 bold')
+        self.vagrant_label = ctk.CTkLabel(self, text="Vagrant", font=my_font)
         self.vagrant_label.grid(row=0, column=0, columnspan=4)
 
-        self.conf_label = tk.Label(self, text="Configurations", font='sans 15')
+        self.conf_label = ctk.CTkLabel(self, text="Configurations", font=my_font)
         self.conf_label.grid(row=1, column=0, columnspan=4)
 
         separator = ttk.Separator(
@@ -33,54 +38,54 @@ class VagrantConfigsView(tk.Frame):
 
         # start form to get new machine configurations
         startcolumn = 1
-        machine_name_label = tk.Label(self, text="New machine name:")
+        machine_name_label = ctk.CTkLabel(self, text="New machine name:")
         machine_name_label.grid(row=3, column=startcolumn)
-        self.entry_project_name = tk.Entry(self)
+        self.entry_project_name = ctk.CTkEntry(self)
         self.entry_project_name.insert(
             0,
             self.provisions_configs["configurations"]["machine_name"]
         )
         self.entry_project_name.grid(row=4, column=startcolumn)
 
-        vbox_name_label = tk.Label(self, text="Virtual box name:")
+        vbox_name_label = ctk.CTkLabel(self, text="Virtual box name:")
         vbox_name_label.grid(row=5, column=startcolumn)
-        self.entry_vbox_name = tk.Entry(self)
+        self.entry_vbox_name = ctk.CTkEntry(self)
         self.entry_vbox_name.insert(
             0,
             self.provisions_configs["configurations"]['vbox_name']
         )
         self.entry_vbox_name.grid(row=6, column=startcolumn)
 
-        hostname_label = tk.Label(self, text="Hostname:")
+        hostname_label = ctk.CTkLabel(self, text="Hostname:")
         hostname_label.grid(row=5, column=startcolumn+1)
-        self.entry_hostname = tk.Entry(self)
+        self.entry_hostname = ctk.CTkEntry(self)
         self.entry_hostname.insert(
             0,
             self.provisions_configs["configurations"]['hostname']
         )
         self.entry_hostname.grid(row=6, column=startcolumn+1)
 
-        username_label = tk.Label(self, text="Username:")
+        username_label = ctk.CTkLabel(self, text="Username:")
         username_label.grid(row=7, column=startcolumn)
-        self.entry_default_username = tk.Entry(self)
+        self.entry_default_username = ctk.CTkEntry(self)
         self.entry_default_username.insert(
             0,
             self.provisions_configs["credentials"]['username']
         )
         self.entry_default_username.grid(row=8, column=startcolumn)
 
-        machine_name_label = tk.Label(self, text="Password:")
+        machine_name_label = ctk.CTkLabel(self, text="Password:")
         machine_name_label.grid(row=7, column=startcolumn+1)
-        self.entry_default_password = tk.Entry(self)
+        self.entry_default_password = ctk.CTkEntry(self)
         self.entry_default_password.insert(
             0,
             self.provisions_configs["credentials"]['password']
         )
         self.entry_default_password.grid(row=8, column=startcolumn+1)
 
-        machine_name_label = tk.Label(self, text="Extra user:")
+        machine_name_label = ctk.CTkLabel(self, text="Extra user:")
         machine_name_label.grid(row=9, column=startcolumn)
-        self.entry_extra_user = tk.Entry(self)
+        self.entry_extra_user = ctk.CTkEntry(self)
         self.entry_extra_user.insert(
             0,
             self.provisions_configs["credentials"]['extra_user']
@@ -91,7 +96,7 @@ class VagrantConfigsView(tk.Frame):
         # If there are no vagran boxes an entry is displayed,
         # otherwise an optionmenu will appear
         if get_local_vagrant_boxes() == 'No Box':
-            no_box_frame = tk.Frame(
+            no_box_frame = ctk.CTkFrame(
                 self,
                 highlightbackground="black",
                 highlightthickness=2
@@ -100,7 +105,7 @@ class VagrantConfigsView(tk.Frame):
             no_box_frame.columnconfigure(0, weight=1)
             no_box_frame.rowconfigure(0, weight=1)
             no_box_frame.rowconfigure(1, weight=1)
-            vagrant_box_name_label = tk.Label(
+            vagrant_box_name_label = ctk.CTkLabel(
                 no_box_frame,
                 text=(
                     'You do not have local Vagrant box.\n'
@@ -108,48 +113,44 @@ class VagrantConfigsView(tk.Frame):
                 )
             )
             vagrant_box_name_label.grid(row=0, column=0)
-            self.vagrant_box = tk.Entry(no_box_frame)
+            self.vagrant_box = ctk.CTkEntry(no_box_frame)
             self.vagrant_box.insert(
                 0,
                 self.provisions_configs["configurations"]["image"]
             )
             self.vagrant_box.grid(row=1, column=0)
         else:
-            self.vagrant_box = tk.StringVar(self)
+            self.vagrant_box = ctk.StringVar(self)
             self.vagrant_box.set('Select Vagrant Box')
-            vagrant_drop = tk.OptionMenu(
-                self,
-                self.vagrant_box,
-                *get_local_vagrant_boxes().split("\n"),
+            vagrant_drop = ctk.CTkOptionMenu(
+                master=self,
+                variable=self.vagrant_box,
+                values=get_local_vagrant_boxes().split("\n"),
             )
             vagrant_drop.grid(row=11, column=startcolumn, sticky="ew", columnspan=2)
 
-        connection_mode_frame = tk.Frame(
-            self,
-            highlightbackground="black",
-            highlightthickness=2
-        )
+        connection_mode_frame = ctk.CTkFrame(self)
         connection_mode_frame.grid(row=13, column=startcolumn, columnspan=2, rowspan=2)
         connection_mode_frame.columnconfigure(0, weight=1)
         connection_mode_frame.columnconfigure(1, weight=1)
         connection_mode_frame.rowconfigure(0, weight=1)
         connection_mode_frame.rowconfigure(1, weight=1)
 
-        ssh_label = tk.Label(connection_mode_frame, text='Connection mode')
+        ssh_label = ctk.CTkLabel(connection_mode_frame, text='Connection mode')
         ssh_label.grid(row=0, column=0, columnspan=2)
         self.connection_mode_var = StringVar()
         if self.provisions_configs["configurations"]["connection"] == 'key':
             self.connection_mode_var.set('key')
         elif self.provisions_configs["configurations"]["connection"] == 'password':
             self.connection_mode_var.set('password')
-        ssh_key = tk.Radiobutton(
+        ssh_key = ctk.CTkRadioButton(
             connection_mode_frame,
             text="ssh_key",
             variable=self.connection_mode_var,
             value='key'
         )
         ssh_key.grid(row=1, column=0)
-        password = tk.Radiobutton(
+        password = ctk.CTkRadioButton(
             connection_mode_frame,
             text="password",
             variable=self.connection_mode_var,
@@ -158,7 +159,7 @@ class VagrantConfigsView(tk.Frame):
         )
         password.grid(row=1, column=1)
 
-        save_button = tk.Button(
+        save_button = ctk.CTkButton(
             self,
             text='Set Provisions',
             command=self.go_to_provision_page

@@ -1,15 +1,21 @@
 import constants
+import customtkinter as ctk
 import json
-import tkinter as tk
+import os
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesView
 from gui.views.vagrantview.vagrantprovisionsscriptview import VagrantProvisionsScriptView
 
 
-class MainView(tk.Frame):
+dir_path = os.path.dirname(os.path.realpath(__file__))
+# ctk.set_appearance_mode('dark')
+ctk.set_default_color_theme(f'{dir_path}/views/dark_blue.json')
+
+
+class MainView(ctk.CTkFrame):
 
     def __init__(self, master):
-        tk.Frame.__init__(self, master)
+        ctk.CTkFrame.__init__(self, master)
         self.master = master
         self.rows = 4
         self.columns = 3
@@ -18,21 +24,21 @@ class MainView(tk.Frame):
         self.add_bottom_button()
 
     def add_machines_types_button(self):
-        types_frame = tk.Frame(self)
+        types_frame = ctk.CTkFrame(self)
         types_frame.grid(row=0, column=0, columnspan=self.columns)
-        vagrant_button = tk.Button(types_frame, text='Vagrant',
-                                   command=self.add_vagrant_configs)
+        vagrant_button = ctk.CTkButton(types_frame, text='Vagrant',
+                                       command=self.add_vagrant_configs)
         vagrant_button.pack(side='left')
 
-        packer_button = tk.Button(types_frame, text='Packer',
-                                  command=self.add_packer_configs)
+        packer_button = ctk.CTkButton(types_frame, text='Packer',
+                                      command=self.add_packer_configs)
         packer_button.pack(side='right')
 
     def add_bottom_button(self):
-        bottom_frame = tk.Frame(self)
+        bottom_frame = ctk.CTkFrame(self)
         bottom_frame.grid(row=self.rows-1, column=0, columnspan=3)
-        exit_button = tk.Button(bottom_frame, text='exit',
-                                command=self.close_window)
+        exit_button = ctk.CTkButton(bottom_frame, text='exit',
+                                    command=self.close_window)
         exit_button.pack(side='bottom', anchor='n')
 
     def set_grid(self, rows: int, columns: int):
@@ -55,8 +61,7 @@ class MainView(tk.Frame):
             master=self,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0,
-                                  columnspan=5, rowspan=2,
+        vagrant_configs_view.grid(row=1, column=1, rowspan=2,
                                   sticky='wens')
 
     def add_vagrant_provisions_frame(self):
@@ -64,7 +69,7 @@ class MainView(tk.Frame):
             master=self,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0, columnspan=5, sticky='wens')
+        vagrant_configs_view.grid(row=1, column=0, columnspan=3, sticky='wens')
         vagrant_configs_view = VagrantProvisionsPackagesView(
             master=self,
             provisions_configs=self.provisions_configs
@@ -79,7 +84,7 @@ class MainView(tk.Frame):
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ctk.CTk()
     root.wm_geometry("800x1000")
     main = MainView(root)
     main.master.title('HackTheMonkey')

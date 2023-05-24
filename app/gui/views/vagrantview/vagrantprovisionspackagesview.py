@@ -1,6 +1,7 @@
 import constants
 import os
 import shutil
+import customtkinter as ctk
 import tkinter as tk
 from builder.vagrant import Vagrant
 from cli.provisionsreader import ProvisionConfigReader
@@ -17,49 +18,49 @@ from builder.error import (
 )
 
 
-class TextWindowView(tk.Toplevel):
+class TextWindowView(ctk.CTkToplevel):
     def __init__(self, master, package, operation, provisions_configs):
         self.master = master
         self.package = package
         self.operation = operation
         self.provisions_configs = provisions_configs
-        tk.Toplevel.__init__(self, master)
+        ctk.CTkToplevel.__init__(self, master)
         self.geometry(
             '400x400'
         )
         self.set_grid()
-        file_label = tk.Label(
+        file_label = ctk.CTkLabel(
             self,
             text=f'You are modifying "{operation}.sh"\nfrom package "{package}"'
         )
-        file_label.grid(row=1, column=1)
-        self.open_text_box = tk.Text(self, width=40, height=8, state='normal')
+        file_label.grid(row=1, column=0, columnspan=3)
+        self.open_text_box = ctk.CTkTextbox(self, width=600)
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
             text = file.read()
         self.open_text_box.insert('end', text)
-        self.open_text_box.grid(row=2, column=1)
+        self.open_text_box.grid(row=2, column=0, columnspan=3)
 
         if self.operation == 'config':
-            upload_button = tk.Button(
+            upload_button = ctk.CTkButton(
                 self,
                 text='Upload',
                 command=self.upload_file
             )
             upload_button.grid(row=3, column=0)
-            save_button = tk.Button(
+            save_button = ctk.CTkButton(
                 self,
                 text='Save',
                 command=self.save_file
             )
             save_button.grid(row=3, column=2)
         else:
-            save_button = tk.Button(
+            save_button = ctk.CTkButton(
                 self,
                 text='Save',
                 command=self.save_file
             )
             save_button.grid(row=3, column=1)
-        remove_button = tk.Button(
+        remove_button = ctk.CTkButton(
             self,
             text=f'Remove from {operation}',
             command=self.remove_from_operation
@@ -69,7 +70,7 @@ class TextWindowView(tk.Toplevel):
     def set_grid(self):
         self.grid()
         self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=2)
+        self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
 
         self.rowconfigure(0, weight=1)
@@ -77,6 +78,7 @@ class TextWindowView(tk.Toplevel):
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
         self.rowconfigure(4, weight=1)
+        self.rowconfigure(5, weight=1)
 
     def save_file(self):
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
@@ -107,15 +109,15 @@ class TextWindowView(tk.Toplevel):
         self.destroy()
 
 
-class VagrantProvisionsPackagesView(tk.Frame):
+class VagrantProvisionsPackagesView(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
-        tk.Frame.__init__(self, master)
+        ctk.CTkFrame.__init__(self, master)
         self.set_grid(rows=8, columns=5)
         self.startcolumn = 1
         self.add_separator((2, 0), length=5)
-        packages_label = tk.Label(self, text="Packages")
+        packages_label = ctk.CTkLabel(self, text="Packages")
         packages_label.grid(row=2, column=0, columnspan=5)
 
         self.add_listbox()
@@ -150,7 +152,7 @@ class VagrantProvisionsPackagesView(tk.Frame):
         self.number_of_rows = rows + max(number_of_package) + 4
 
     def add_label(self, position: tuple, text: str,):
-        label = tk.Label(self, text=text)
+        label = ctk.CTkLabel(self, text=text)
         label.grid(row=position[0], column=position[1])
 
     def add_separator(self, initial_position: tuple, length: int):
@@ -180,14 +182,14 @@ class VagrantProvisionsPackagesView(tk.Frame):
             if self.provisions_configs["provisions"][f'packages_to_{operation}']:
                 for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
                     row = 8 + count + 1
-                    color = 'black'
+                    color = '#3996D5'
                     package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
                     if package_is_empty:
                         color = 'red'
-                    package_button = tk.Button(
-                        self,
+                    package_button = ctk.CTkButton(
+                        master=self,
                         text=f'{package}',
-                        fg=color,
+                        fg_color=color,
                         command=lambda args=(package, operation): self.open_text_window(*args)
                     )
                     package_button.grid(row=row, column=column_position)
@@ -209,7 +211,7 @@ class VagrantProvisionsPackagesView(tk.Frame):
 
     def add_install_uninstal_conf_buttons(self):
         for count, operation in enumerate(('install', 'uninstall', 'config')):
-            operation_button = tk.Button(
+            operation_button = ctk.CTkButton(
                 self,
                 text=f'Add to {operation.title()}',
                 command=lambda operation=operation: self.save_packages(operation)
@@ -217,7 +219,7 @@ class VagrantProvisionsPackagesView(tk.Frame):
             operation_button.grid(row=5, column=self.startcolumn+count)
 
     def add_delete_button(self):
-        delete_button = tk.Button(
+        delete_button = ctk.CTkButton(
             self,
             text='Delete Packages',
             command=self.delete_packages
@@ -225,17 +227,17 @@ class VagrantProvisionsPackagesView(tk.Frame):
         delete_button.grid(row=3, column=self.startcolumn, rowspan=2)
 
     def add_new_package_button(self):
-        new_package_frame = tk.Frame(
+        new_package_frame = ctk.CTkFrame(
             self
         )
         new_package_frame.grid(row=3, column=self.startcolumn+2, rowspan=2)
         new_package_frame.columnconfigure(0, weight=1)
         new_package_frame.rowconfigure(0, weight=1)
         new_package_frame.rowconfigure(1, weight=1)
-        self.new_package_entry = tk.Entry(new_package_frame)
+        self.new_package_entry = ctk.CTkEntry(new_package_frame)
         self.new_package_entry.insert(0, 'New Package Name')
         self.new_package_entry.grid(row=0, column=0)
-        new_package_button = tk.Button(
+        new_package_button = ctk.CTkButton(
             new_package_frame,
             text='Add package',
             command=self.add_package
@@ -270,17 +272,20 @@ class VagrantProvisionsPackagesView(tk.Frame):
             mb.showerror('Error Delete', 'You have selected no packages')
 
     def add_bottom_button(self):
-        build_button = tk.Button(
+        build_button = ctk.CTkButton(
             self,
             text='Set Configs',
             command=self.set_configs,
             width=7
         )
         build_button.grid(row=self.number_of_rows-1, column=self.startcolumn)
-        build_button = tk.Button(
+        build_button = ctk.CTkButton(
             self,
             text='Build',
-            command=self.build
+            text_color='black',
+            fg_color='#248a55',
+            command=self.build,
+            hover_color='#39d584'
         )
         build_button.grid(row=self.number_of_rows-1, column=3)
 
