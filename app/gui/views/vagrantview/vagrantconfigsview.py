@@ -102,12 +102,12 @@ class VagrantConfigsView(tk.Frame):
                 )
             )
             vagrant_box_name_label.grid(row=0, column=0)
-            vagrant_box_name_entry = tk.Entry(no_box_frame)
-            vagrant_box_name_entry.insert(
+            self.vagrant_box = tk.Entry(no_box_frame)
+            self.vagrant_box.insert(
                 0,
                 self.provisions_configs["configurations"]["image"]
             )
-            vagrant_box_name_entry.grid(row=1, column=0)
+            self.vagrant_box.grid(row=1, column=0)
         else:
             self.vagrant_box = tk.StringVar(self)
             self.vagrant_box.set('Select Vagrant Box')
