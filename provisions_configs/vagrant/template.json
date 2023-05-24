@@ -1,7 +1,7 @@
 {
   "credentials": {
-    "username": "default_user",
-    "password": "deafult_pass",
+    "username": "Username",
+    "password": "Password",
     "extra_user": ""
   },
   "provisions": {
@@ -16,9 +16,9 @@
   "configurations": {
     "disk_size": "size_in_MB",
     "provider": "virtualbox",
-    "machine_name": "Default",
-    "vbox_name": "Default",
-    "hostname": "Default",
+    "project_name": "Project Name",
+    "vbox_name": "Virtualbox Name",
+    "hostname": "Hostname",
     "image": "Default",
     "connection": "key"
   }

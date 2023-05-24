@@ -22,32 +22,43 @@ class MainView(ctk.CTkFrame):
         self.set_grid(rows=self.rows, columns=self.columns)
         self.add_machines_types_button()
         self.add_bottom_button()
+        self.pack(side="top", fill="both", expand=True)
 
     def add_machines_types_button(self):
-        types_frame = ctk.CTkFrame(self)
-        types_frame.grid(row=0, column=0, columnspan=self.columns)
-        vagrant_button = ctk.CTkButton(types_frame, text='Vagrant',
+        self.types_frame = ctk.CTkFrame(self)
+        self.types_frame.grid(row=0, column=0, columnspan=self.columns)
+        vagrant_button = ctk.CTkButton(self.types_frame, text='Vagrant',
                                        command=self.add_vagrant_configs)
-        vagrant_button.pack(side='left')
+        vagrant_button.pack(side='left', padx=(10, 100), pady=10)
 
-        packer_button = ctk.CTkButton(types_frame, text='Packer',
+        packer_button = ctk.CTkButton(self.types_frame, text='Packer',
                                       command=self.add_packer_configs)
-        packer_button.pack(side='right')
+        packer_button.pack(side='right', padx=(100, 10), pady=10)
 
-    def add_bottom_button(self):
-        bottom_frame = ctk.CTkFrame(self)
-        bottom_frame.grid(row=self.rows-1, column=0, columnspan=3)
-        exit_button = ctk.CTkButton(bottom_frame, text='exit',
-                                    command=self.close_window)
-        exit_button.pack(side='bottom', anchor='n')
+    def add_bottom_button(self, back: bool = False):
+        self.bottom_frame = ctk.CTkFrame(self)
+        self.bottom_frame.grid(row=self.rows-1, column=0, columnspan=3)
+        self.bottom_frame.columnconfigure(0, weight=1)
+        self.bottom_frame.columnconfigure(1, weight=1)
+        self.bottom_frame.columnconfigure(2, weight=1)
+        self.bottom_frame.columnconfigure(3, weight=1)
+        self.bottom_frame.rowconfigure(0, weight=1)
+        if not back:
+            exit_button = ctk.CTkButton(self.bottom_frame, text='exit',
+                                        command=self.close_window)
+            exit_button.grid(row=0, column=1, columnspan=2)
+        else:
+            exit_button = ctk.CTkButton(self.bottom_frame, text='exit',
+                                        command=self.close_window)
+            exit_button.grid(row=0, column=2)
+            back_button = ctk.CTkButton(self.bottom_frame, text='Back',
+                                        command=lambda args=(self, back): start(*args))
+            back_button.grid(row=0, column=1)
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
         for i in range(columns):
-            weight = 1
-            if i in [1]:
-                weight = 2
-            self.columnconfigure(i, weight=weight)
+            self.columnconfigure(i, weight=1)
 
         for i in range(rows):
             self.rowconfigure(i, weight=1)
@@ -63,6 +74,8 @@ class MainView(ctk.CTkFrame):
         )
         vagrant_configs_view.grid(row=1, column=1, rowspan=2,
                                   sticky='wens')
+        self.add_bottom_button(back=True)
+        self.types_frame.destroy()
 
     def add_vagrant_provisions_frame(self):
         vagrant_configs_view = VagrantProvisionsScriptView(
@@ -83,10 +96,15 @@ class MainView(ctk.CTkFrame):
         self.master.destroy()
 
 
-if __name__ == "__main__":
+def start(mainview=None, back=False):
+    if back:
+        mainview.master.destroy()
     root = ctk.CTk()
     root.wm_geometry("800x1000")
     main = MainView(root)
     main.master.title('HackTheMonkey')
-    main.pack(side="top", fill="both", expand=True)
     root.mainloop()
+
+
+if __name__ == "__main__":
+    start()
