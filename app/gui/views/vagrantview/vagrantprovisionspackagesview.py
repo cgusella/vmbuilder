@@ -8,7 +8,7 @@ from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
 from tkinter import ttk
 from tkinter import messagebox as mb
-from tkinter import filedialog
+from tkinter import filedialog, StringVar
 from builder.helper import is_empty_script
 from builder.error import (
     NoFileToUploadError,
@@ -110,31 +110,31 @@ class TextWindowView(ctk.CTkToplevel):
         self.destroy()
 
 
-class VagrantProvisionsPackagesView(ctk.CTkFrame):
+class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
-        self.set_grid(rows=8, columns=5)
-        self.startcolumn = 1
-        self.add_separator((2, 0), length=5)
-        packages_label = ctk.CTkLabel(self, text="Packages")
-        packages_label.grid(row=2, column=0, columnspan=5)
+        self.family = 'Sans'
+        self.title_std = ctk.CTkFont(family=self.master.family, size=30,
+                                     weight='bold')
+        self.font_std = ctk.CTkFont(family=self.master.family, size=20)
+        self.set_std_dimensions()
+        self.set_grid(rows=6, columns=2)
+        self.add_titles()
+        self.add_additional_scripts()
+        self.add_selected_packages_frame()
 
-        self.add_listbox()
-        self.add_install_uninstal_conf_buttons()
-        self.add_delete_button()
-        self.add_new_package_button()
-
-        self.add_separator((8, 0), length=5)
-
-        self.add_label((8, self.startcolumn), text='Install')
-        self.add_label((8, self.startcolumn+1), text='Uninstall')
-        self.add_label((8, self.startcolumn+2), text='Config')
-        self.add_selected_objects()
-
-        self.add_separator((self.number_of_rows-2, 0), length=5)
-        self.add_bottom_button()
+    def set_std_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
+        self.pady_title = (10, 2)
+        self.pady_entry = (2, 10)
+        self.ipadx_std = 10
+        self.ipady_std = 10
+        self.entry_height_std = 50
+        self.entry_width_std = 400
+        self.width_button_std = 100
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -143,34 +143,125 @@ class VagrantProvisionsPackagesView(ctk.CTkFrame):
 
         for i in range(rows):
             self.rowconfigure(i, weight=1)
-        number_of_package = [1]
-        for operation in ('install', 'uninstall', 'config'):
-            number_of_package.append(
-                len(self.provisions_configs["provisions"][f'packages_to_{operation}'])
-            )
-        for i in range(1, max(number_of_package)+4):
-            self.rowconfigure(i+rows, weight=1)
-        self.number_of_rows = rows + max(number_of_package) + 4
 
-    def add_label(self, position: tuple, text: str,):
-        label = ctk.CTkLabel(self, text=text)
-        label.grid(row=position[0], column=position[1])
+    def add_titles(self):
+        title_frame = ctk.CTkFrame(self, fg_color='transparent')
+        title_frame.grid(row=0, column=0, columnspan=2,
+                         sticky='wn', padx=self.padx_std, pady=self.pady_std)
+        title_frame.columnconfigure(0, weight=1)
+        title_frame.rowconfigure(0, weight=1)
+        title_frame.rowconfigure(1, weight=1)
+        self.vagrant_label = ctk.CTkLabel(
+            title_frame,
+            text="Vagrant",
+            font=self.title_std
+        )
+        self.vagrant_label.grid(row=0, column=0, sticky='w')
 
-    def add_separator(self, initial_position: tuple, length: int):
-        separator = ttk.Separator(
-            master=self,
-            orient='horizontal',
-            style='blue.TSeparator',
-            class_=ttk.Separator,
-            takefocus=1,
-            cursor='plus'
+        self.conf_label = ctk.CTkLabel(
+            title_frame,
+            text="Provisions",
+            font=self.font_std
         )
-        separator.grid(
-            row=initial_position[0],
-            column=initial_position[1],
-            columnspan=length,
-            sticky='we'
+        self.conf_label.grid(row=1, column=0, sticky='w')
+
+    def add_additional_scripts(self):
+        self.additional_scripts_frame = ctk.CTkFrame(self)
+        self.additional_scripts_frame.grid(row=1, column=0, rowspan=2, sticky='wens',
+                                           padx=self.padx_std, pady=self.pady_std,
+                                           ipadx=self.ipadx_std,
+                                           ipady=self.ipady_std)
+        self.additional_scripts_frame.columnconfigure(0, weight=1)
+        self.additional_scripts_frame.columnconfigure(1, weight=1)
+        self.additional_scripts_frame.rowconfigure(0, weight=1)
+        self.additional_scripts_frame.rowconfigure(1, weight=1)
+        self.additional_scripts_frame.rowconfigure(2, weight=1)
+        self.additional_scripts_frame.rowconfigure(3, weight=1)
+        self.additional_scripts_frame.rowconfigure(4, weight=1)
+        additional_scripts_label = ctk.CTkLabel(
+            self.additional_scripts_frame,
+            text='Additional Scripts',
+            font=self.font_std
         )
+        additional_scripts_label.grid(row=0, column=0, sticky='w',
+                                      padx=self.padx_std, pady=self.pady_title)
+
+        # add radiobuttons
+        self.radio_var = StringVar(self, value=None)
+        if self.provisions_configs["provisions"]['update_upgrade']:
+            self.radio_var.set('update_upgrade')
+            self._add_edit_button()
+        if self.provisions_configs["provisions"]['update_upgrade_full']:
+            self.radio_var.set('update_upgrade_full')
+            self._add_edit_button()
+
+        self.update_upgrade = ctk.CTkRadioButton(
+            self.additional_scripts_frame,
+            text="Update upgrade",
+            variable=self.radio_var,
+            value='update_upgrade',
+            command=self._add_edit_button,
+            font=self.font_std
+        )
+        self.update_upgrade.grid(row=1, column=0, sticky='w',
+                                 padx=self.padx_std)
+
+        self.update_upgrade_full = ctk.CTkRadioButton(
+            self.additional_scripts_frame,
+            text="Update upgrade full",
+            variable=self.radio_var,
+            value='update_upgrade_full',
+            command=self._add_edit_button,
+            font=self.font_std
+        )
+        self.update_upgrade_full.grid(row=2, column=0, sticky='w',
+                                      padx=self.padx_std)
+        self.update_upgrade_full = ctk.CTkRadioButton(
+            self.additional_scripts_frame,
+            text="None",
+            variable=self.radio_var,
+            value=None,
+            font=self.font_std,
+            command=self._remove_edit_button
+        )
+        self.update_upgrade_full.grid(row=3, column=0, sticky='w',
+                                      padx=self.padx_std)
+
+    def _add_edit_button(self):
+        if self.radio_var.get() == 'update_upgrade':
+            self._remove_edit_button()
+            row = 1
+            self.provisions_configs["provisions"]['update_upgrade_full'] = False
+        elif self.radio_var.get() == 'update_upgrade_full':
+            self._remove_edit_button()
+            row = 2
+            self.provisions_configs["provisions"]['update_upgrade'] = False
+        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
+        self.edit_upgrade_button = ctk.CTkButton(
+            self.additional_scripts_frame,
+            text='Edit',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._edit_update_script
+        )
+        self.edit_upgrade_button.grid(row=row, column=1)
+
+    def _remove_edit_button(self):
+        try:
+            self.edit_upgrade_button.destroy()
+        except (AttributeError, ValueError):
+            pass
+
+    def _edit_update_script(self):
+        TextWindowView(self.master, operation=self.radio_var.get(),
+                       provisions_configs=self.provisions_configs)
+
+    def add_selected_packages_frame(self):
+        selected_packages_frame = ctk.CTkFrame(self)
+        selected_packages_frame.grid(row=3, column=0, rowspan=3, sticky='wens',
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_std,
+                                     ipady=self.ipady_std)
 
     def add_selected_objects(self):
         for operation in ('install', 'uninstall', 'config'):

@@ -3,7 +3,7 @@ import customtkinter as ctk
 import json
 import os
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
-from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesView
+from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
 from gui.views.vagrantview.vagrantprovisionsscriptview import VagrantProvisionsScriptView
 
 
@@ -270,16 +270,13 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
                                    rowspan=self.rows, sticky='wens')
 
     def add_vagrant_provisions_frame(self):
-        vagrant_configs_view = VagrantProvisionsScriptView(
+        self.initial_message_frame.destroy()
+        vagrant_configs_view = VagrantProvisionsPackagesFrame(
             master=self,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0, columnspan=3, sticky='wens')
-        vagrant_configs_view = VagrantProvisionsPackagesView(
-            master=self,
-            provisions_configs=self.provisions_configs
-        )
-        vagrant_configs_view.grid(row=2, column=0, columnspan=5, sticky='wens')
+        vagrant_configs_view.grid(row=0, column=1, columnspan=self.columns-1,
+                                  rowspan=self.rows, sticky='wens')
 
     def add_packer_configs(self):
         pass
