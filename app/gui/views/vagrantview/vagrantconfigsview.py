@@ -10,8 +10,8 @@ from tkinter import StringVar
 
 class VagrantConfigsView(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
-        self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
+        self.provisions_configs = provisions_configs
         self.set_grid()
 
         title_font = ctk.CTkFont(
