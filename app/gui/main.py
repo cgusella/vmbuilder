@@ -14,13 +14,22 @@ ctk.set_appearance_mode('light')
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
     def __init__(self, master, title, values):
-        super().__init__(master, label_text=title)
+        super().__init__(
+            master,
+            label_text=title,
+            label_font=master.master.master.font_std,
+            width=300
+        )
         self.grid_columnconfigure(0, weight=1)
         self.values = values
         self.checkboxes = []
 
         for count, value in enumerate(self.values):
-            checkbox = ctk.CTkCheckBox(self, text=value)
+            checkbox = ctk.CTkCheckBox(
+                self,
+                text=value,
+                font=master.master.master.font_std
+            )
             checkbox.grid(row=count, column=0, padx=10, pady=(10, 0), sticky="w")
             self.checkboxes.append(checkbox)
 
@@ -39,11 +48,10 @@ class MainFrame(ctk.CTkFrame):
         self.master = master
         self.rows = 4
         self.columns = 3
-        self.padx_std = (10, 10)
-        self.pady_std = (10, 10)
         self.family = 'Sans'
-        self.title_std = ctk.CTkFont(family=self.family, size=20)
-        self.font_std = ctk.CTkFont(family=self.family, size=16)
+        self.title_std = ctk.CTkFont(family=self.family, size=24)
+        self.font_std = ctk.CTkFont(family=self.family, size=20)
+        self.set_dimensions()
         self.set_grid(rows=self.rows, columns=self.columns)
 
         # we separate the main frame into 2 parts:
@@ -51,14 +59,17 @@ class MainFrame(ctk.CTkFrame):
 
         # add menu frame
         self.menu_frame = ctk.CTkFrame(self)
-        self.menu_frame.grid(row=0, column=0, rowspan=self.rows,
-                             sticky='wens', padx=(0, 0))
+        self.menu_frame.grid(row=0, column=0, rowspan=self.rows, sticky='wens')
         self.add_lateral_menu()
 
         self.add_initial_message()
-        # self.add_machines_types_button()
-        # self.add_bottom_button()
         self.pack(side="top", fill="both", expand=True)
+
+    def set_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
+        self.ipadx = 5
+        self.ipady = 5
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -82,14 +93,18 @@ class MainFrame(ctk.CTkFrame):
         self.menu_frame.rowconfigure(3, weight=1)
 
         # add menu title
-        project_title = ctk.CTkLabel(self.menu_frame, text='Projects',
-                                     font=self.title_std)
+        project_title = ctk.CTkLabel(
+            self.menu_frame,
+            text='Projects',
+            font=self.title_std
+        )
         project_title.grid(row=0, column=0, padx=self.padx_std,
                            pady=self.pady_std)
 
         # add packer frame to menu
         packer_menu_frame = ctk.CTkFrame(self.menu_frame)
-        packer_menu_frame.grid(row=1, column=0)
+        packer_menu_frame.grid(row=1, column=0, padx=self.padx_std,
+                               pady=self.pady_std, ipady=self.ipady)
         packer_menu_frame.columnconfigure(0, weight=1)
         packer_menu_frame.columnconfigure(1, weight=1)
         packer_menu_frame.rowconfigure(0, weight=1)
