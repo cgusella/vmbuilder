@@ -8,8 +8,8 @@ from gui.views.vagrantview.vagrantprovisionsscriptview import VagrantProvisionsS
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-# ctk.set_appearance_mode('dark')
-ctk.set_default_color_theme(f'{dir_path}/views/dark_blue.json')
+ctk.set_appearance_mode('light')
+# ctk.set_default_color_theme(f'{dir_path}/views/dark_blue.json')
 
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
@@ -47,7 +47,7 @@ class MainFrame(ctk.CTkFrame):
         self.set_grid(rows=self.rows, columns=self.columns)
 
         # we separate the main frame into 2 parts:
-        # the menu frame and the vuew frame.
+        # the menu frame and the view frame.
 
         # add menu frame
         self.menu_frame = ctk.CTkFrame(self)
@@ -71,6 +71,7 @@ class MainFrame(ctk.CTkFrame):
         self.menu_frame.rowconfigure(0, weight=1)
         self.menu_frame.rowconfigure(1, weight=1)
         self.menu_frame.rowconfigure(2, weight=1)
+        self.menu_frame.rowconfigure(3, weight=1)
 
         # add menu title
         project_title = ctk.CTkLabel(self.menu_frame, text='Projects',
@@ -129,7 +130,7 @@ class MainFrame(ctk.CTkFrame):
         vagrant_menu_frame.rowconfigure(2, weight=1)
         add_vagrant_button = ctk.CTkButton(
             vagrant_menu_frame,
-            text='Add vagrant Project',
+            text='Add Vagrant Project',
             command=self.add_vagrant_configs,
             font=self.font_std
         )
@@ -137,7 +138,7 @@ class MainFrame(ctk.CTkFrame):
                                 padx=self.padx_std, pady=self.pady_std)
         vagrant_projects = ScrollableCheckboxFrame(
             master=vagrant_menu_frame,
-            title='vagrant Projects',
+            title='Vagrant Projects',
             values=[
                 folder for folder in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}')
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
@@ -159,6 +160,24 @@ class MainFrame(ctk.CTkFrame):
         )
         vagrant_load_button.grid(row=3, column=1, padx=self.padx_std,
                                  pady=self.pady_std)
+
+        # add switch light/dark mode
+        self.switch_var = ctk.StringVar(value="on")
+        swith_light_dark_mode = ctk.CTkSwitch(
+            self.menu_frame,
+            text='Switch theme',
+            variable=self.switch_var,
+            onvalue='on',
+            offvalue='off',
+            command=self._swith_light_dark_mode
+        )
+        swith_light_dark_mode.grid(row=3, column=0, columnspan=2)
+
+    def _swith_light_dark_mode(self):
+        if self.switch_var.get() == 'on':
+            ctk.set_appearance_mode('light')
+        elif self.switch_var.get() == 'off':
+            ctk.set_appearance_mode('dark')
 
     def add_initial_message(self):
         initial_message_frame = ctk.CTkScrollableFrame(
