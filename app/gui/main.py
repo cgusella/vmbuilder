@@ -2,7 +2,7 @@ import constants
 import customtkinter as ctk
 import json
 import os
-from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
+from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesView
 from gui.views.vagrantview.vagrantprovisionsscriptview import VagrantProvisionsScriptView
 
@@ -54,16 +54,24 @@ class MainFrame(ctk.CTkFrame):
         self.menu_frame.grid(row=0, column=0, rowspan=self.rows,
                              sticky='wens', padx=(0, 0))
         self.add_lateral_menu()
-        # add view frame
-        self.view_frame = ctk.CTkFrame(self)
-        self.view_frame.grid(row=0, column=1, rowspan=self.rows,
-                             columnspan=self.columns-1,
-                             sticky='wens', padx=(0, 0))
 
         self.add_initial_message()
         # self.add_machines_types_button()
         # self.add_bottom_button()
         self.pack(side="top", fill="both", expand=True)
+
+    def set_grid(self, rows: int, columns: int):
+        self.grid()
+        for i in range(columns):
+            weight = 1
+            if i > 1:
+                # this weight set the menu width respect to the
+                # view frame. Larger the weight, smaller the menu
+                weight = 15
+            self.columnconfigure(i, weight=weight)
+
+        for i in range(rows):
+            self.rowconfigure(i, weight=1)
 
     def add_lateral_menu(self):
         # configure menu frame
@@ -180,16 +188,17 @@ class MainFrame(ctk.CTkFrame):
             ctk.set_appearance_mode('dark')
 
     def add_initial_message(self):
-        initial_message_frame = ctk.CTkScrollableFrame(
+        self.initial_message_frame = ctk.CTkScrollableFrame(
             self,
             label_text='Welcome!',
         )
-        initial_message_frame.grid(row=0, column=1, rowspan=self.rows,
-                                   columnspan=self.columns-1, sticky='wnes')
-        initial_message_frame.columnconfigure(0, weight=1)
-        initial_message_frame.rowconfigure(0, weight=1)
+        self.initial_message_frame.grid(row=0, column=1, rowspan=self.rows,
+                                        columnspan=self.columns-1,
+                                        sticky='wnes')
+        self.initial_message_frame.columnconfigure(0, weight=1)
+        self.initial_message_frame.rowconfigure(0, weight=1)
         message_label = ctk.CTkLabel(
-            initial_message_frame,
+            self.initial_message_frame,
             text="""
 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
 laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi
@@ -214,60 +223,15 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         )
         message_label.pack(padx=(0, 0))
 
-    def add_machines_types_button(self):
-        self.types_frame = ctk.CTkFrame(self)
-        self.types_frame.grid(row=0, column=0, columnspan=self.columns)
-        vagrant_button = ctk.CTkButton(self.types_frame, text='Vagrant',
-                                       command=self.add_vagrant_configs)
-        vagrant_button.pack(side='left', padx=(10, 100), pady=10)
-
-    def add_bottom_button(self, back: bool = False):
-        self.bottom_frame = ctk.CTkFrame(self)
-        self.bottom_frame.grid(row=self.rows-1, column=0, columnspan=3)
-        self.bottom_frame.columnconfigure(0, weight=1)
-        self.bottom_frame.columnconfigure(1, weight=1)
-        self.bottom_frame.columnconfigure(2, weight=1)
-        self.bottom_frame.columnconfigure(3, weight=1)
-        self.bottom_frame.rowconfigure(0, weight=1)
-        if not back:
-            exit_button = ctk.CTkButton(self.bottom_frame, text='exit',
-                                        command=self.close_window)
-            exit_button.grid(row=0, column=1, columnspan=2)
-        else:
-            exit_button = ctk.CTkButton(self.bottom_frame, text='exit',
-                                        command=self.close_window)
-            exit_button.grid(row=0, column=2)
-            back_button = ctk.CTkButton(self.bottom_frame, text='Back',
-                                        command=lambda args=(self, back): start(*args))
-            back_button.grid(row=0, column=1)
-
-    def set_grid(self, rows: int, columns: int):
-        self.grid()
-        for i in range(columns):
-            weight = 1
-            if i > 1:
-                # this weight set the menu width respect to the
-                # view frame. Larger the weight, smaller the menu
-                weight = 15
-            self.columnconfigure(i, weight=weight)
-
-        for i in range(rows):
-            self.rowconfigure(i, weight=1)
-
     def add_vagrant_configs(self):
         with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
             self.provisions_configs = json.loads(template_json.read())
         for operation in ('install', 'uninstall', 'config'):
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
-        vagrant_configs_view = VagrantConfigsView(
-            master=self,
-            provisions_configs=self.provisions_configs
-        )
-        vagrant_configs_view.grid(row=0, column=1, rowspan=self.rows,
-                                  columnspan=self.columns-1,
-                                  sticky='wens')
-        self.add_bottom_button(back=True)
-        self.types_frame.destroy()
+        self.initial_message_frame.destroy()
+        vagrant_configs_frame = VagrantConfigsFrame(self, self.provisions_configs)
+        vagrant_configs_frame.grid(row=0, column=1, columnspan=self.columns-1,
+                                   rowspan=self.rows, sticky='wens')
 
     def add_vagrant_provisions_frame(self):
         vagrant_configs_view = VagrantProvisionsScriptView(
@@ -288,17 +252,9 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         self.master.destroy()
 
 
-def start(mainview=None, back=False):
-    if back:
-        mainview.destroy()
-        mainview.__init__(master=mainview.master)
-    else:
-        root = ctk.CTk()
-        root.wm_geometry("1400x900")
-        main = MainFrame(root)
-        main.master.title('HackTheMonkey')
-        root.mainloop()
-
-
 if __name__ == "__main__":
-    start()
+    root = ctk.CTk()
+    root.wm_geometry("1400x900")
+    main = MainFrame(root)
+    main.master.title('HackTheMonkey')
+    root.mainloop()
