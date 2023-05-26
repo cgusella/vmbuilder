@@ -342,14 +342,15 @@ class VagrantConfigsFrame(ctk.CTkFrame):
 
     def _go_to_provision_page(self):
         project_name = self.entry_project_name.get()
+        vbox_name = self.entry_vbox_name.get()
         if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
             mb.showerror('Error', 'A machine with this name already exists')
         elif not project_name:
             mb.showerror('Error', 'You must choose a name for the virtual machine')
         elif not self.entry_vbox_name.get():
             mb.showerror('Error', 'You must choose a name for the virtual box machine')
-        elif self.entry_vbox_name.get() in launch_vboxmanage_lst_command():
-            mb.showerror('Error', 'A box with the same name already exists')
+        elif vbox_name in launch_vboxmanage_lst_command():
+            mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
         elif not self.entry_default_username.get():
             mb.showerror('Error', 'You must choose a main username')
         elif not self.entry_default_password.get():
