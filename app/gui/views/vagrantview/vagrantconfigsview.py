@@ -16,9 +16,9 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.font_std = ctk.CTkFont(family=self.master.family, size=20)
         self.set_grid()
         self.set_std_dimensions()
+        self.add_select_vagrant_box()
         self.add_titles()
         self.add_project_name()
-        self.add_select_vagrant_box()
         self.add_vbox_hostname()
         self.add_connection_mode_frame()
         self.add_credentials_frame()
@@ -110,7 +110,8 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                                ipadx=self.ipadx_std, ipady=self.ipady_std)
         vagrant_box_frame.columnconfigure(0, weight=1)
         vagrant_box_frame.rowconfigure(0, weight=1)
-        if get_local_vagrant_boxes() == 'No Box':
+        local_vagrant_boxes = get_local_vagrant_boxes()
+        if local_vagrant_boxes == 'No Box':
             # add column since we have two objects in this frame
             vagrant_box_frame.columnconfigure(1, weight=1)
             vagrant_box_name_label = ctk.CTkLabel(
@@ -142,7 +143,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             vagrant_drop = ctk.CTkOptionMenu(
                 master=vagrant_box_frame,
                 variable=self.vagrant_box,
-                values=get_local_vagrant_boxes().split("\n"),
+                values=local_vagrant_boxes.split("\n"),
                 font=self.font_std,
                 width=self.entry_width_std,
                 height=self.entry_height_std,
