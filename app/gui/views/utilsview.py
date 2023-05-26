@@ -6,9 +6,9 @@ from tkinter import filedialog
 
 
 class SetUpScriptEdit(ctk.CTkToplevel):
-    def __init__(self, master, operation, provisions_configs):
+    def __init__(self, master, variable, provisions_configs):
         self.master = master
-        self.operation = operation
+        self.operation = variable.get()
         self.provisions_configs = provisions_configs
         ctk.CTkToplevel.__init__(self, master)
         self.geometry(
@@ -17,7 +17,7 @@ class SetUpScriptEdit(ctk.CTkToplevel):
         self.set_grid()
         file_label = ctk.CTkLabel(
             self,
-            text=f'You are modifying "{operation}.sh"',
+            text=f'You are modifying "{self.operation}.sh"',
             font=self.master.font_std
         )
         file_label.grid(row=1, column=1)
@@ -26,7 +26,7 @@ class SetUpScriptEdit(ctk.CTkToplevel):
             width=600,
             font=master.font_std
         )
-        with open(f'{constants.SETUP_SCRIPTS_PATH}/{operation}.sh') as file:
+        with open(f'{constants.SETUP_SCRIPTS_PATH}/{self.operation}.sh') as file:
             text = file.read()
         self.open_text_box.insert('end', text)
         self.open_text_box.grid(row=2, column=1)

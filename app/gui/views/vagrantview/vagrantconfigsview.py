@@ -31,6 +31,8 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.pady_entry = (2, 10)
         self.ipadx_std = 10
         self.ipady_std = 10
+        self.ipadx_button = 5
+        self.ipady_button = 5
         self.entry_height_std = 50
         self.entry_width_std = 400
 
@@ -334,7 +336,9 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             font=self.font_std
         )
         set_provision_button.grid(row=0, column=0, sticky='se',
-                                  padx=self.padx_std, pady=self.pady_std)
+                                  padx=self.padx_std, pady=self.pady_std,
+                                  ipadx=self.ipadx_button,
+                                  ipady=self.ipady_button)
 
     def _go_to_provision_page(self):
         project_name = self.entry_project_name.get()
