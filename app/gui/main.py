@@ -152,10 +152,10 @@ class MainFrame(ctk.CTkFrame):
         self.vagrant_projects = ScrollableCheckboxFrame(
             master=vagrant_menu_frame,
             title='Vagrant Projects',
-            values=[
+            values=sorted([
                 folder for folder in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}')
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
-            ]
+            ])
         )
         self.vagrant_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
                               pady=self.pady_equal)
