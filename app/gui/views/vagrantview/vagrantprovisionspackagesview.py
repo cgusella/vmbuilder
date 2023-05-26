@@ -2,11 +2,10 @@ import constants
 import os
 import shutil
 import customtkinter as ctk
+import json
 from builder.vagrant import Vagrant
 from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
-from tkinter import messagebox as mb
-from tkinter import StringVar
 from builder.error import (
     NoFileToUploadError,
     PackageNotFoundError,
@@ -19,6 +18,9 @@ from gui.views.utilsview import (
     ScrollableCheckboxFrame,
     SetUpScriptEdit
 )
+from tkinter import filedialog
+from tkinter import messagebox as mb
+from tkinter import StringVar
 
 
 class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
@@ -350,6 +352,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                  ipady=self.ipady_std)
         bottom_button_frame.columnconfigure(0, weight=1)
         bottom_button_frame.columnconfigure(1, weight=1)
+        bottom_button_frame.columnconfigure(2, weight=1)
         bottom_button_frame.rowconfigure(0, weight=1)
         set_configs_button = ctk.CTkButton(
             bottom_button_frame,
@@ -362,6 +365,19 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                 padx=self.padx_std, pady=self.pady_std,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
+
+        save_button = ctk.CTkButton(
+            bottom_button_frame,
+            text='Save',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._save,
+        )
+        save_button.grid(row=0, column=1,
+                         padx=self.padx_std, pady=self.pady_std,
+                         ipadx=self.ipadx_button,
+                         ipady=self.ipady_button)
+
         build_button = ctk.CTkButton(
             bottom_button_frame,
             text='Build',
@@ -369,7 +385,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=self.build
         )
-        build_button.grid(row=0, column=1,
+        build_button.grid(row=0, column=2,
                           padx=self.padx_std, pady=self.pady_std,
                           ipadx=self.ipadx_button,
                           ipady=self.ipady_button)
@@ -416,6 +432,20 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                   columnspan=self.master.columns-1,
                                   rowspan=self.master.rows,
                                   sticky='wens')
+
+    def _save(self):
+        project_name = self.provisions_configs["configurations"]["project_name"]
+        for operation in ('install', 'uninstall', 'config'):
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = list(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            )
+        dst = filedialog.asksaveasfile(
+            initialdir=constants.VAGRANT_PROVS_CONFS_PATH,
+            initialfile=f'{project_name}.json',
+            defaultextension='.json'
+        )
+        dst.write(json.dumps(self.provisions_configs, indent=2))
+        dst.close()
 
     def build(self):
         try:

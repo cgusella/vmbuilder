@@ -5,6 +5,7 @@ import os
 from gui.views.utilsview import ScrollableCheckboxFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
+from tkinter import filedialog
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -120,7 +121,7 @@ class MainFrame(ctk.CTkFrame):
             packer_menu_frame,
             text='Load',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
         )
         packer_load_button.grid(row=3, column=1,
                                 padx=self.padx_std, pady=self.pady_down,
@@ -169,7 +170,8 @@ class MainFrame(ctk.CTkFrame):
             vagrant_menu_frame,
             text='Load',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
+            command=self._load_vagrant
         )
         vagrant_load_button.grid(row=3, column=1,
                                  padx=self.padx_std, pady=self.pady_down,
@@ -236,11 +238,14 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         )
         message_label.grid(row=1, column=0, sticky='wens')
 
-    def add_vagrant_configs(self):
-        with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
-            self.provisions_configs = json.loads(template_json.read())
+    def add_vagrant_configs(self, load=False):
+        if not load:
+            with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
+                self.provisions_configs = json.loads(template_json.read())
         for operation in ('install', 'uninstall', 'config'):
-            self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            )
         self.initial_message_frame.destroy()
         self.vagrant_configs_frame = VagrantConfigsFrame(
             self,
@@ -258,6 +263,13 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         )
         vagrant_configs_view.grid(row=0, column=1, columnspan=self.columns-1,
                                   rowspan=self.rows, sticky='wens')
+
+    def _load_vagrant(self):
+        file_to_load = filedialog.askopenfile(
+            initialdir=constants.VAGRANT_PROVS_CONFS_PATH
+        )
+        self.provisions_configs = json.loads(file_to_load.read())
+        self.add_vagrant_configs(load=True)
 
     def add_packer_configs(self):
         pass

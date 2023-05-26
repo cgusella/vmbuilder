@@ -139,7 +139,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                                   padx=self.padx_std, pady=self.pady_std)
         else:
             self.vagrant_box = ctk.StringVar(self)
-            self.vagrant_box.set('Select Vagrant Box')
+            self.vagrant_box.set(self.provisions_configs["configurations"]["image"])
             vagrant_drop = ctk.CTkOptionMenu(
                 master=vagrant_box_frame,
                 variable=self.vagrant_box,

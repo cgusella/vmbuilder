@@ -19,7 +19,7 @@
     "project_name": "Project Name",
     "vbox_name": "Virtualbox Name",
     "hostname": "Hostname",
-    "image": "Default",
+    "image": "Select Vagrant Box",
     "connection": "key"
   }
 }
