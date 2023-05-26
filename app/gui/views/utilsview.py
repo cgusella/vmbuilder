@@ -51,7 +51,7 @@ class TextWindowView(ctk.CTkToplevel):
 
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values):
+    def __init__(self, master, title, values, select_all=False):
         super().__init__(
             master,
             label_text=title,
@@ -66,11 +66,14 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
             checkbox = ctk.CTkCheckBox(
                 self,
                 text=value,
-                font=master.master.master.font_std
+                font=master.master.master.font_std,
             )
             checkbox.grid(row=count, column=0, padx=10, pady=(10, 0),
                           sticky="w")
             self.checkboxes.append(checkbox)
+        if select_all:
+            for checkbox in self.checkboxes:
+                checkbox.select()
 
     def get(self):
         checked_checkboxes = []

@@ -314,7 +314,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                     )
                     package_button.grid(row=row, column=column_position)
 
-    def add_packages_frame(self):
+    def add_packages_frame(self, select_all=False):
         packages_frame = ctk.CTkFrame(self)
         packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens',
                             padx=self.padx_std, pady=self.pady_std,
@@ -322,22 +322,25 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                             ipady=self.ipady_std)
         packages_frame.columnconfigure(0, weight=1)
         packages_frame.columnconfigure(1, weight=1)
+        packages_frame.columnconfigure(2, weight=1)
         packages_frame.rowconfigure(0, weight=5)
         packages_frame.rowconfigure(1, weight=1)
         packages_frame.rowconfigure(2, weight=1)
         packages_frame.rowconfigure(3, weight=1)
 
         # add scrollable checkbox
-        packages_scrollable = ScrollableCheckboxFrame(
+        self.packages_scrollable = ScrollableCheckboxFrame(
             master=packages_frame,
             title='Packages',
             values=sorted([
                 package for package in os.listdir(f'{constants.PACKAGES_PATH}')
                 if package not in ('program-example', 'setup_scripts')
-            ])
+            ]),
+            select_all=select_all
         )
-        packages_scrollable.grid(row=0, column=0, columnspan=2, sticky='wens',
-                                 padx=self.padx_std, pady=self.pady_std)
+        self.packages_scrollable.grid(row=0, column=0, columnspan=3,
+                                      sticky='wens',
+                                      padx=self.padx_std, pady=self.pady_std)
 
         # add new package
         new_package_label = ctk.CTkLabel(
@@ -354,8 +357,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             width=self.entry_width_std,
             height=self.entry_height_std
         )
-        self.new_package_entry.grid(row=2, column=0, columnspan=2, sticky='wne',
-                               padx=self.padx_std, pady=self.pady_std)
+        self.new_package_entry.grid(row=2, column=0, columnspan=3, sticky='wne',
+                                    padx=self.padx_std, pady=self.pady_std)
 
         add_package_button = ctk.CTkButton(
             packages_frame,
@@ -368,13 +371,39 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                 padx=self.padx_std, pady=self.pady_std,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
+
+        if self.packages_scrollable.get():
+            deselect_all_button = ctk.CTkButton(
+                packages_frame,
+                text='Deselect All',
+                font=self.font_std,
+                width=self.width_button_std,
+                command=self.add_packages_frame
+            )
+            deselect_all_button.grid(row=3, column=1,
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_button,
+                                     ipady=self.ipady_button)
+        else:
+            select_all_button = ctk.CTkButton(
+                packages_frame,
+                text='Select All',
+                font=self.font_std,
+                width=self.width_button_std,
+                command=lambda: self.add_packages_frame(select_all=True)
+            )
+            select_all_button.grid(row=3, column=1,
+                                   padx=self.padx_std, pady=self.pady_std,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
         delete_package_button = ctk.CTkButton(
             packages_frame,
             text='Delete',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
+            command=self._delete_packages
         )
-        delete_package_button.grid(row=3, column=1,
+        delete_package_button.grid(row=3, column=2,
                                    padx=self.padx_std, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
@@ -403,7 +432,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             bottom_button_frame,
             text='Build',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
+            command=self.build
         )
         build_button.grid(row=0, column=1,
                           padx=self.padx_std, pady=self.pady_std,
@@ -421,19 +451,18 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.master.add_vagrant_provisions_frame()
 
     def _delete_packages(self):
-        packages_to_delete = ()
-        for pack in self.packages_listbox.curselection():
-            packages_to_delete += (self.packages_listbox.get(pack),)
-        if packages_to_delete:
+        if self.packages_scrollable.get():
+            print(self.packages_scrollable.get())
             warning_text = 'This operation is irreversible.\nYou choose to delete:\n'
-            for package in packages_to_delete:
+            for package in self.packages_scrollable.get():
                 warning_text += f'\t- {package}\n'
             warning_text += 'Confirm?'
             yes = mb.askyesno('Confirm Delete', warning_text)
             if yes:
-                for package in packages_to_delete:
+                for package in self.packages_scrollable.get():
+                    print(f'{constants.PACKAGES_PATH}/{package}')
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
-                self.master.add_vagrant_provisions_frame()
+                self.add_packages_frame()
         else:
             mb.showerror('Error', 'You have selected no packages')
 
