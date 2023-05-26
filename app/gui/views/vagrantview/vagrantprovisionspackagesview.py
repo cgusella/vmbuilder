@@ -14,6 +14,7 @@ from builder.error import (
     EmptyScriptError,
     UploadNameConflictError
 )
+from gui.views.utilsview import ScrollableCheckboxFrame
 
 
 class TextWindowView(ctk.CTkToplevel):
@@ -61,7 +62,7 @@ class TextWindowView(ctk.CTkToplevel):
         remove_button = ctk.CTkButton(
             self,
             text=f'Remove from {operation}',
-            command=self.remove_from_operation
+            command=self.remove_from_opemainration
         )
         remove_button.grid(row=4, column=1)
 
@@ -122,6 +123,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.add_additional_scripts()
         self.add_selected_packages_frame()
         self.add_packages_frame()
+        self.add_build_button()
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -130,6 +132,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.pady_entry = (2, 10)
         self.ipadx_std = 10
         self.ipady_std = 10
+        self.ipadx_button = 5
+        self.ipady_button = 5
         self.entry_height_std = 50
         self.entry_width_std = 400
         self.width_button_std = 100
@@ -312,21 +316,79 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def add_packages_frame(self):
         packages_frame = ctk.CTkFrame(self)
-        packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens')
+        packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens',
+                            padx=self.padx_std, pady=self.pady_std,
+                            ipadx=self.ipadx_std,
+                            ipady=self.ipady_std)
+        packages_frame.columnconfigure(0, weight=1)
+        packages_frame.columnconfigure(1, weight=1)
+        packages_frame.rowconfigure(0, weight=5)
+        packages_frame.rowconfigure(1, weight=1)
+        packages_frame.rowconfigure(2, weight=1)
+        packages_frame.rowconfigure(3, weight=1)
 
-        # self.packages_listbox = tk.Listbox(
-        #     self,
-        #     selectmode='multiple',
-        #     width=20,
-        #     height=5,
-        # )
-        # packages = [
-        #     package for package in os.listdir(constants.PACKAGES_PATH)
-        #     if package not in ('program-example', 'setup_scripts')
-        # ]
-        # for count, package in enumerate(sorted(packages)):
-        #     self.packages_listbox.insert(count+1, package)
-        # self.packages_listbox.grid(row=3, column=self.startcolumn+1, rowspan=2)
+        # add scrollable checkbox
+        packages_scrollable = ScrollableCheckboxFrame(
+            master=packages_frame,
+            title='Packages',
+            values=sorted([
+                package for package in os.listdir(f'{constants.PACKAGES_PATH}')
+                if package not in ('program-example', 'setup_scripts')
+            ])
+        )
+        packages_scrollable.grid(row=0, column=0, columnspan=2, sticky='wens',
+                                 padx=self.padx_std, pady=self.pady_std)
+
+        # add new package
+        new_package_label = ctk.CTkLabel(
+            packages_frame,
+            text='New package:',
+            font=self.font_std
+        )
+        new_package_label.grid(row=1, column=0, sticky='w',
+                               padx=self.padx_std, pady=self.pady_std,
+                               ipadx=self.ipadx_std)
+        new_package_entry = ctk.CTkEntry(
+            packages_frame,
+            font=self.font_std,
+            width=self.entry_width_std,
+            height=self.entry_height_std
+        )
+        new_package_entry.grid(row=2, column=0, columnspan=2, sticky='wne',
+                               padx=self.padx_std, pady=self.pady_std)
+
+        add_package_button = ctk.CTkButton(
+            packages_frame,
+            text='Add',
+            font=self.font_std,
+            width=self.width_button_std
+        )
+        add_package_button.grid(row=3, column=0,
+                                padx=self.padx_std, pady=self.pady_std,
+                                ipadx=self.ipadx_button,
+                                ipady=self.ipady_button)
+        delete_package_button = ctk.CTkButton(
+            packages_frame,
+            text='Delete',
+            font=self.font_std,
+            width=self.width_button_std
+        )
+        delete_package_button.grid(row=3, column=1,
+                                   padx=self.padx_std, pady=self.pady_std,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
+
+    def add_build_button(self):
+        build_button = ctk.CTkButton(
+            self,
+            text='Build',
+            font=self.font_std,
+            width=self.width_button_std
+        )
+        build_button.grid(row=5, column=1,
+                          padx=self.padx_std, pady=self.pady_std,
+                          ipadx=self.ipadx_button,
+                          ipady=self.ipady_button)
 
     def add_install_uninstal_conf_buttons(self):
         for count, operation in enumerate(('install', 'uninstall', 'config')):

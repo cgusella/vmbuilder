@@ -2,6 +2,7 @@ import constants
 import customtkinter as ctk
 import json
 import os
+from gui.views.utilsview import ScrollableCheckboxFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
 
@@ -9,35 +10,6 @@ from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvision
 dir_path = os.path.dirname(os.path.realpath(__file__))
 ctk.set_appearance_mode('light')
 # ctk.set_default_color_theme(f'{dir_path}/views/dark_blue.json')
-
-
-class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values):
-        super().__init__(
-            master,
-            label_text=title,
-            label_font=master.master.master.font_std,
-            width=300
-        )
-        self.grid_columnconfigure(0, weight=1)
-        self.values = values
-        self.checkboxes = []
-
-        for count, value in enumerate(self.values):
-            checkbox = ctk.CTkCheckBox(
-                self,
-                text=value,
-                font=master.master.master.font_std
-            )
-            checkbox.grid(row=count, column=0, padx=10, pady=(10, 0), sticky="w")
-            self.checkboxes.append(checkbox)
-
-    def get(self):
-        checked_checkboxes = []
-        for checkbox in self.checkboxes:
-            if checkbox.get() == 1:
-                checked_checkboxes.append(checkbox.cget("text"))
-        return checked_checkboxes
 
 
 class MainFrame(ctk.CTkFrame):
@@ -127,10 +99,10 @@ class MainFrame(ctk.CTkFrame):
         packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
             title='Packer Projects',
-            values=[
+            values=sorted([
                 folder for folder in os.listdir(f'{constants.PACKER_MACHINES_PATH}')
                 if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
-            ]
+            ])
         )
         packer_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
                              pady=self.pady_equal)
@@ -140,7 +112,7 @@ class MainFrame(ctk.CTkFrame):
             font=self.font_std,
             width=self.width_button_std
         )
-        packer_delete_button.grid(row=3, column=0, 
+        packer_delete_button.grid(row=3, column=0,
                                   padx=self.padx_std, pady=self.pady_down,
                                   ipadx=self.ipadx_button,
                                   ipady=self.ipady_button)
