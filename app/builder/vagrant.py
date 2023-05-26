@@ -19,7 +19,7 @@ class Vagrant(Builder):
         self.machine_path: str = constants.VAGRANT_MACHINES_PATH
         self.vagrantfile_path = (
             f'{self.machine_path}/'
-            f'{self.provisions_configs["configurations"]["machine_name"]}/'
+            f'{self.provisions_configs["configurations"]["project_name"]}/'
             'Vagrantfile'
         )
         self.configs: dict = dict()
@@ -45,7 +45,7 @@ class Vagrant(Builder):
             |
             - upload/
         """
-        project_folder = f'{self.machine_path}/{self.configs["machine_name"]}'
+        project_folder = f'{self.machine_path}/{self.configs["project_name"]}'
         # create project folder
         os.mkdir(project_folder)
 
@@ -71,7 +71,7 @@ class Vagrant(Builder):
             pass
         else:
             with open(
-                f'{self.machine_path}/{self.configs["machine_name"]}/Vagrantfile',
+                f'{self.machine_path}/{self.configs["project_name"]}/Vagrantfile',
                 'a'
             ) as vagrantfile:
                 vagrantfile.write(f'\n\n\t\t{hash_number*"#"}\n')
@@ -99,7 +99,7 @@ class Vagrant(Builder):
                 try:
                     shutil.copyfile(
                         src=f'{constants.PACKAGES_PATH}/{package}/upload/{upload_file}',
-                        dst=f'{self.machine_path}/{self.configs["machine_name"]}/upload/{upload_file}'
+                        dst=f'{self.machine_path}/{self.configs["project_name"]}/upload/{upload_file}'
                     )
                 except FileNotFoundError:
                     missing_upload_files += f'"{upload_file}" from "{package}"\n'
@@ -107,7 +107,7 @@ class Vagrant(Builder):
                     replace_text_in_file(
                         search_phrase="extra_user",
                         replace_with=self.credentials["extra_user"],
-                        file_path=f'{self.machine_path}/{self.configs["machine_name"]}/upload/{upload_file}'
+                        file_path=f'{self.machine_path}/{self.configs["project_name"]}/upload/{upload_file}'
                     )
         if missing_upload_files:
             raise NoFileToUploadError(
@@ -207,8 +207,8 @@ class Vagrant(Builder):
             replace_text_in_file(
                 search_phrase='extra_user',
                 replace_with=self.credentials["extra_user"],
-                file_path=f'{self.machine_path}/{self.configs["machine_name"]}/Vagrantfile'
+                file_path=f'{self.machine_path}/{self.configs["project_name"]}/Vagrantfile'
             )
 
     def delete_project(self):
-        shutil.rmtree(f'{self.machine_path}/{self.configs["machine_name"]}')
+        shutil.rmtree(f'{self.machine_path}/{self.configs["project_name"]}')

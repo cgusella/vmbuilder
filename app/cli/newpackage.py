@@ -24,7 +24,11 @@ def make_package_folder(packages: str | list = ''):
         os.mkdir(new_package_path)
         # create config file in configs
         with open(f'{new_package_path}/config.sh', 'w') as config_file:
-            config_file.write("#!/bin/bash")
+            config_file.write("#!/bin/bash\n")
+            config_file.write(
+                "#The folder /vagrant/upload/ is used to share "
+                "files with virtual machine\n")
+            config_file.write("# cp /vagrant/upload/example.cfg")
         # create upload folder
         os.mkdir(f'{new_package_path}/upload')
         # create prepare to upload file

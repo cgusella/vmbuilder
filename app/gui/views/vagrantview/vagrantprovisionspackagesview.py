@@ -1,137 +1,60 @@
 import constants
 import os
 import shutil
-import tkinter as tk
+import customtkinter as ctk
+import json
 from builder.vagrant import Vagrant
 from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
-from tkinter import ttk
-from tkinter import messagebox as mb
-from tkinter import filedialog
-from builder.helper import is_empty_script
 from builder.error import (
     NoFileToUploadError,
     PackageNotFoundError,
     EmptyScriptError,
     UploadNameConflictError
 )
+from gui.views.utilsview import (
+    EditFileWindow,
+    ScrollableButtonFrame,
+    ScrollableCheckboxFrame,
+    SetUpScriptEdit
+)
+from tkinter import filedialog
+from tkinter import messagebox as mb
+from tkinter import StringVar
 
 
-class TextWindowView(tk.Toplevel):
-    def __init__(self, master, package, operation, provisions_configs):
-        self.master = master
-        self.package = package
-        self.operation = operation
-        self.provisions_configs = provisions_configs
-        tk.Toplevel.__init__(self, master)
-        self.geometry(
-            '400x400'
-        )
-        self.set_grid()
-        file_label = tk.Label(
-            self,
-            text=f'You are modifying "{operation}.sh"\nfrom package "{package}"'
-        )
-        file_label.grid(row=1, column=1)
-        self.open_text_box = tk.Text(self, width=40, height=8, state='normal')
-        with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
-            text = file.read()
-        self.open_text_box.insert('end', text)
-        self.open_text_box.grid(row=2, column=1)
-
-        if self.operation == 'config':
-            upload_button = tk.Button(
-                self,
-                text='Upload',
-                command=self.upload_file
-            )
-            upload_button.grid(row=3, column=0)
-            save_button = tk.Button(
-                self,
-                text='Save',
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=2)
-        else:
-            save_button = tk.Button(
-                self,
-                text='Save',
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=1)
-        remove_button = tk.Button(
-            self,
-            text=f'Remove from {operation}',
-            command=self.remove_from_operation
-        )
-        remove_button.grid(row=4, column=1)
-
-    def set_grid(self):
-        self.grid()
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=2)
-        self.columnconfigure(2, weight=1)
-
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
-
-    def save_file(self):
-        with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
-            file.write(self.open_text_box.get("1.0", "end"))
-        self.master.add_vagrant_provisions_frame()
-        self.destroy()
-
-    def remove_from_operation(self):
-        self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        self.master.add_vagrant_provisions_frame()
-        self.destroy()
-
-    def upload_file(self):
-        filename = filedialog.askopenfilename(
-            initialdir=f"{constants.VMBUILDER_PATH}",
-            title="Select a File",
-            filetypes=(
-                ("Text files",
-                 "*.txt*"),
-                ("all files",
-                 "*.*")
-            )
-        )
-        shutil.copy(
-            src=filename,
-            dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
-        )
-        self.destroy()
-
-
-class VagrantProvisionsPackagesView(tk.Frame):
+class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
-        tk.Frame.__init__(self, master)
-        self.set_grid(rows=8, columns=5)
-        self.startcolumn = 1
-        self.add_separator((2, 0), length=5)
-        packages_label = tk.Label(self, text="Packages")
-        packages_label.grid(row=2, column=0, columnspan=5)
+        ctk.CTkFrame.__init__(self, master)
+        self.family = 'Sans'
+        self.title_std = ctk.CTkFont(family=self.master.family, size=30,
+                                     weight='bold')
+        self.little_title = ctk.CTkFont(family=self.master.family, size=20,
+                                        weight='bold')
+        self.font_std = ctk.CTkFont(family=self.master.family, size=20)
+        self.set_std_dimensions()
+        self.set_grid(rows=6, columns=2)
+        self.add_titles()
+        self.add_additional_scripts()
+        self.add_selected_packages_frame()
+        self.add_packages_frame()
+        self.add_bottom_button_frame()
 
-        self.add_listbox()
-        self.add_install_uninstal_conf_buttons()
-        self.add_delete_button()
-        self.add_new_package_button()
-
-        self.add_separator((8, 0), length=5)
-
-        self.add_label((8, self.startcolumn), text='Install')
-        self.add_label((8, self.startcolumn+1), text='Uninstall')
-        self.add_label((8, self.startcolumn+2), text='Config')
-        self.add_selected_objects()
-
-        self.add_separator((self.number_of_rows-2, 0), length=5)
-        self.add_bottom_button()
+    def set_std_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
+        self.pady_title = (10, 2)
+        self.pady_entry = (2, 10)
+        self.pad_equal = (1, 1)
+        self.ipadx_std = 10
+        self.ipady_std = 10
+        self.ipadx_button = 5
+        self.ipady_button = 5
+        self.entry_height_std = 50
+        self.entry_width_std = 300
+        self.width_button_std = 100
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -140,151 +63,408 @@ class VagrantProvisionsPackagesView(tk.Frame):
 
         for i in range(rows):
             self.rowconfigure(i, weight=1)
-        number_of_package = [1]
-        for operation in ('install', 'uninstall', 'config'):
-            number_of_package.append(
-                len(self.provisions_configs["provisions"][f'packages_to_{operation}'])
-            )
-        for i in range(1, max(number_of_package)+4):
-            self.rowconfigure(i+rows, weight=1)
-        self.number_of_rows = rows + max(number_of_package) + 4
 
-    def add_label(self, position: tuple, text: str,):
-        label = tk.Label(self, text=text)
-        label.grid(row=position[0], column=position[1])
-
-    def add_separator(self, initial_position: tuple, length: int):
-        separator = ttk.Separator(
-            master=self,
-            orient='horizontal',
-            style='blue.TSeparator',
-            class_=ttk.Separator,
-            takefocus=1,
-            cursor='plus'
+    def add_titles(self):
+        title_frame = ctk.CTkFrame(self, fg_color='transparent')
+        title_frame.grid(row=0, column=0, columnspan=2,
+                         sticky='wn', padx=self.padx_std, pady=self.pady_std)
+        title_frame.columnconfigure(0, weight=1)
+        title_frame.rowconfigure(0, weight=1)
+        title_frame.rowconfigure(1, weight=1)
+        self.vagrant_label = ctk.CTkLabel(
+            title_frame,
+            text="Vagrant",
+            font=self.title_std
         )
-        separator.grid(
-            row=initial_position[0],
-            column=initial_position[1],
-            columnspan=length,
-            sticky='we'
+        self.vagrant_label.grid(row=0, column=0, sticky='w')
+
+        self.conf_label = ctk.CTkLabel(
+            title_frame,
+            text="Provisions",
+            font=self.font_std
         )
+        self.conf_label.grid(row=1, column=0, sticky='w')
 
-    def add_selected_objects(self):
-        for operation in ('install', 'uninstall', 'config'):
-            if operation == 'install':
-                column_position = self.startcolumn
-            elif operation == 'uninstall':
-                column_position = self.startcolumn + 1
-            elif operation == 'config':
-                column_position = self.startcolumn + 2
-            if self.provisions_configs["provisions"][f'packages_to_{operation}']:
-                for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
-                    row = 8 + count + 1
-                    color = 'black'
-                    package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
-                    if package_is_empty:
-                        color = 'red'
-                    package_button = tk.Button(
-                        self,
-                        text=f'{package}',
-                        fg=color,
-                        command=lambda args=(package, operation): self.open_text_window(*args)
-                    )
-                    package_button.grid(row=row, column=column_position)
+    def add_additional_scripts(self):
+        self.additional_scripts_frame = ctk.CTkFrame(self)
+        self.additional_scripts_frame.grid(row=1, column=0, rowspan=2, sticky='wens',
+                                           padx=self.padx_std, pady=self.pady_std,
+                                           ipadx=self.ipadx_std,
+                                           ipady=self.ipady_std)
+        self.additional_scripts_frame.columnconfigure(0, weight=1)
+        self.additional_scripts_frame.columnconfigure(1, weight=1)
+        self.additional_scripts_frame.rowconfigure(0, weight=1)
+        self.additional_scripts_frame.rowconfigure(1, weight=1)
+        self.additional_scripts_frame.rowconfigure(2, weight=1)
+        self.additional_scripts_frame.rowconfigure(3, weight=1)
+        self.additional_scripts_frame.rowconfigure(4, weight=1)
 
-    def add_listbox(self):
-        self.packages_listbox = tk.Listbox(
-            self,
-            selectmode='multiple',
-            width=20,
-            height=5,
+        additional_scripts_label = ctk.CTkLabel(
+            self.additional_scripts_frame,
+            text='Additional Scripts',
+            font=self.little_title
         )
-        packages = [
-            package for package in os.listdir(constants.PACKAGES_PATH)
-            if package not in ('program-example', 'setup_scripts')
-        ]
-        for count, package in enumerate(sorted(packages)):
-            self.packages_listbox.insert(count+1, package)
-        self.packages_listbox.grid(row=3, column=self.startcolumn+1, rowspan=2)
+        additional_scripts_label.grid(row=0, column=0, sticky='w',
+                                      padx=self.padx_std, pady=self.pady_title)
 
-    def add_install_uninstal_conf_buttons(self):
+        # add radiobuttons
+        self.radio_var = StringVar(self, value=None)
+        if self.provisions_configs["provisions"]['update_upgrade']:
+            self.radio_var.set('update_upgrade')
+            self._add_edit_button()
+        if self.provisions_configs["provisions"]['update_upgrade_full']:
+            self.radio_var.set('update_upgrade_full')
+            self._add_edit_button()
+
+        self.update_upgrade = ctk.CTkRadioButton(
+            self.additional_scripts_frame,
+            text="Update upgrade",
+            variable=self.radio_var,
+            value='update_upgrade',
+            command=self._add_edit_button,
+            font=self.font_std
+        )
+        self.update_upgrade.grid(row=1, column=0, sticky='w',
+                                 padx=self.padx_std)
+
+        self.update_upgrade_full = ctk.CTkRadioButton(
+            self.additional_scripts_frame,
+            text="Update upgrade full",
+            variable=self.radio_var,
+            value='update_upgrade_full',
+            command=self._add_edit_button,
+            font=self.font_std
+        )
+        self.update_upgrade_full.grid(row=2, column=0, sticky='w',
+                                      padx=self.padx_std)
+        self.update_upgrade_full = ctk.CTkRadioButton(
+            self.additional_scripts_frame,
+            text="None",
+            variable=self.radio_var,
+            value=None,
+            font=self.font_std,
+            command=self._remove_edit_button
+        )
+        self.update_upgrade_full.grid(row=3, column=0, sticky='w',
+                                      padx=self.padx_std)
+
+        self.clean_var = StringVar()
+        provisions = self.provisions_configs["provisions"]
+        default_clean_var = 'clean_packages' if provisions["clean_packages"] else ''
+        self.clean_var.set(default_clean_var)
+        clean_button = ctk.CTkCheckBox(
+            self.additional_scripts_frame,
+            text="Clean packages",
+            variable=self.clean_var,
+            onvalue='clean_packages',
+            offvalue='',
+            height=1,
+            width=15,
+            font=self.font_std,
+            command=self._check_checkbox_status
+        )
+        clean_button.grid(row=4, column=0, sticky='w',
+                          padx=self.padx_std, pady=self.pady_std)
+        if self.clean_var.get():
+            self.add_edit_clean_button()
+
+    def _add_edit_button(self):
+        if self.radio_var.get() == 'update_upgrade':
+            self._remove_edit_button()
+            row = 1
+            self.provisions_configs["provisions"]['update_upgrade_full'] = False
+        elif self.radio_var.get() == 'update_upgrade_full':
+            self._remove_edit_button()
+            row = 2
+            self.provisions_configs["provisions"]['update_upgrade'] = False
+        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
+        self.edit_upgrade_button = ctk.CTkButton(
+            self.additional_scripts_frame,
+            text='Edit',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._edit_additional_script(self.radio_var)
+        )
+        self.edit_upgrade_button.grid(row=row, column=1)
+
+    def _remove_edit_button(self):
+        try:
+            self.edit_upgrade_button.destroy()
+        except (AttributeError, ValueError):
+            pass
+
+    def _check_checkbox_status(self):
+        if self.clean_var.get():
+            self.provisions_configs["provisions"]["clean_packages"] = True
+            self.add_edit_clean_button()
+        else:
+            self.provisions_configs["provisions"]["clean_packages"] = False
+            self.edit_clean_button.destroy()
+
+    def add_edit_clean_button(self):
+        self.edit_clean_button = ctk.CTkButton(
+            self.additional_scripts_frame,
+            text='Edit',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._edit_additional_script(self.clean_var)
+        )
+        self.edit_clean_button.grid(row=4, column=1)
+
+    def _edit_additional_script(self, variable):
+        SetUpScriptEdit(self, variable=variable,
+                        provisions_configs=self.provisions_configs)
+
+    def add_selected_packages_frame(self):
+        selected_packages_frame = ctk.CTkFrame(self)
+        selected_packages_frame.grid(row=3, column=0, rowspan=3, sticky='wnes',
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_std,
+                                     ipady=self.ipady_std)
+        selected_packages_frame.columnconfigure(0, weight=1)
+        selected_packages_frame.columnconfigure(1, weight=1)
+        selected_packages_frame.columnconfigure(2, weight=1)
+        selected_packages_frame.rowconfigure(0, weight=1)
+        selected_packages_frame.rowconfigure(1, weight=10)
+        selected_packages_frame.rowconfigure(2, weight=1)
+
+        selected_packages_label = ctk.CTkLabel(
+            selected_packages_frame,
+            text='Selected Packages',
+            font=self.little_title
+        )
+        selected_packages_label.grid(row=0, column=0, sticky='w',
+                                     padx=self.padx_std, pady=self.pady_std)
+
         for count, operation in enumerate(('install', 'uninstall', 'config')):
-            operation_button = tk.Button(
-                self,
-                text=f'Add to {operation.title()}',
-                command=lambda operation=operation: self.save_packages(operation)
+            self.selected_packages_scrollable = ScrollableButtonFrame(
+                master=selected_packages_frame,
+                title=f'{operation.title()}',
+                values=sorted(
+                    self.provisions_configs["provisions"][f"packages_to_{operation}"]
+                ),
             )
-            operation_button.grid(row=5, column=self.startcolumn+count)
-
-    def add_delete_button(self):
-        delete_button = tk.Button(
-            self,
-            text='Delete Packages',
-            command=self.delete_packages
-        )
-        delete_button.grid(row=3, column=self.startcolumn, rowspan=2)
-
-    def add_new_package_button(self):
-        new_package_frame = tk.Frame(
-            self
-        )
-        new_package_frame.grid(row=3, column=self.startcolumn+2, rowspan=2)
-        new_package_frame.columnconfigure(0, weight=1)
-        new_package_frame.rowconfigure(0, weight=1)
-        new_package_frame.rowconfigure(1, weight=1)
-        self.new_package_entry = tk.Entry(new_package_frame)
-        self.new_package_entry.insert(0, 'New Package Name')
-        self.new_package_entry.grid(row=0, column=0)
-        new_package_button = tk.Button(
-            new_package_frame,
-            text='Add package',
-            command=self.add_package
-        )
-        new_package_button.grid(row=1, column=0)
-
-    def save_packages(self, operation: str):
-        packages = list()
-        for pack in self.packages_listbox.curselection():
-            packages.append(
-                self.packages_listbox.get(pack)
+            self.selected_packages_scrollable.grid(
+                row=1,
+                column=count,
+                sticky='wens',
+                padx=self.padx_std, pady=self.pady_std
             )
-        for package in packages:
-            self.provisions_configs["provisions"][f"packages_to_{operation}"].add(package)
-        self.master.add_vagrant_provisions_frame()
+            # add clean button
+            clean_button = ctk.CTkButton(
+                master=selected_packages_frame,
+                font=self.font_std,
+                text='Clean',
+                command=lambda operation=(operation,): self._clean_packages(*operation)
+            )
+            clean_button.grid(row=2, column=count)
 
-    def delete_packages(self):
-        packages_to_delete = ()
-        for pack in self.packages_listbox.curselection():
-            packages_to_delete += (self.packages_listbox.get(pack),)
-        if packages_to_delete:
+    def _clean_packages(self, operation: str):
+        self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
+        self.add_selected_packages_frame()
+
+    def add_packages_frame(self, select_all=False):
+        packages_frame = ctk.CTkFrame(self)
+        packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens',
+                            padx=self.padx_std, pady=self.pady_std,
+                            ipadx=self.ipadx_std,
+                            ipady=self.ipady_std)
+        packages_frame.columnconfigure(0, weight=1)
+        packages_frame.columnconfigure(1, weight=1)
+        packages_frame.columnconfigure(2, weight=1)
+        packages_frame.rowconfigure(0, weight=1)
+        packages_frame.rowconfigure(1, weight=1)
+        packages_frame.rowconfigure(2, weight=10)
+        packages_frame.rowconfigure(3, weight=1)
+        packages_frame.rowconfigure(4, weight=1)
+        packages_frame.rowconfigure(5, weight=1)
+
+        # add frame title
+        packages_label = ctk.CTkLabel(
+            packages_frame,
+            text='Packages Manager',
+            font=self.little_title
+        )
+        packages_label.grid(row=0, column=0, columnspan=3, sticky='w',
+                            padx=self.padx_std, pady=self.pady_title)
+        # add install, uninstall, config
+        add_to_install_button = ctk.CTkButton(
+            packages_frame,
+            text='Install',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._add_to_operation('install')
+        )
+        add_to_install_button.grid(row=1, column=0,
+                                   padx=self.padx_std, pady=self.pady_std,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
+        add_to_uninstall_button = ctk.CTkButton(
+            packages_frame,
+            text='Uninstall',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._add_to_operation('uninstall')
+        )
+        add_to_uninstall_button.grid(row=1, column=1,
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_button,
+                                     ipady=self.ipady_button)
+        add_to_config_button = ctk.CTkButton(
+            packages_frame,
+            text='Configure',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._add_to_operation('config')
+        )
+        add_to_config_button.grid(row=1, column=2,
+                                  padx=self.padx_std, pady=self.pady_std,
+                                  ipadx=self.ipadx_button,
+                                  ipady=self.ipady_button)
+
+        # add scrollable checkbox
+        self.packages_scrollable = ScrollableCheckboxFrame(
+            master=packages_frame,
+            title='Packages',
+            values=sorted([
+                package for package in os.listdir(f'{constants.PACKAGES_PATH}')
+                if package not in ('program-example', 'setup_scripts')
+            ]),
+            select_all=select_all
+        )
+        self.packages_scrollable.grid(row=2, column=0, columnspan=3,
+                                      sticky='wens',
+                                      padx=self.padx_std, pady=self.pady_std)
+
+        # add new package
+        new_package_label = ctk.CTkLabel(
+            packages_frame,
+            text='New package:',
+            font=self.font_std
+        )
+        new_package_label.grid(row=3, column=0, columnspan=3, sticky='w',
+                               padx=self.padx_std, pady=self.pady_title,
+                               ipadx=self.ipadx_std)
+        self.new_package_entry = ctk.CTkEntry(
+            packages_frame,
+            font=self.font_std,
+            width=self.entry_width_std,
+            height=self.entry_height_std
+        )
+        self.new_package_entry.grid(row=4, column=0, columnspan=3, sticky='wne',
+                                    padx=self.padx_std, pady=self.pady_entry)
+
+        add_package_button = ctk.CTkButton(
+            packages_frame,
+            text='Add',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._add_package
+        )
+        add_package_button.grid(row=5, column=0,
+                                padx=self.padx_std, pady=self.pady_std,
+                                ipadx=self.ipadx_button,
+                                ipady=self.ipady_button)
+
+        if self.packages_scrollable.get():
+            deselect_all_button = ctk.CTkButton(
+                packages_frame,
+                text='Deselect All',
+                font=self.font_std,
+                width=self.width_button_std,
+                command=self.add_packages_frame
+            )
+            deselect_all_button.grid(row=5, column=1,
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_button,
+                                     ipady=self.ipady_button)
+        else:
+            select_all_button = ctk.CTkButton(
+                packages_frame,
+                text='Select All',
+                font=self.font_std,
+                width=self.width_button_std,
+                command=lambda: self.add_packages_frame(select_all=True)
+            )
+            select_all_button.grid(row=5, column=1,
+                                   padx=self.padx_std, pady=self.pady_std,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
+        delete_package_button = ctk.CTkButton(
+            packages_frame,
+            text='Delete',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._delete_packages
+        )
+        delete_package_button.grid(row=5, column=2,
+                                   padx=self.padx_std, pady=self.pady_std,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
+
+    def add_bottom_button_frame(self):
+        bottom_button_frame = ctk.CTkFrame(self)
+        bottom_button_frame.grid(row=5, column=1, sticky='wens',
+                                 padx=self.padx_std, pady=self.pady_std,
+                                 ipadx=self.ipadx_std,
+                                 ipady=self.ipady_std)
+        bottom_button_frame.columnconfigure(0, weight=1)
+        bottom_button_frame.columnconfigure(1, weight=1)
+        bottom_button_frame.columnconfigure(2, weight=1)
+        bottom_button_frame.rowconfigure(0, weight=1)
+        set_configs_button = ctk.CTkButton(
+            bottom_button_frame,
+            text='Set Configs',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self.set_configs,
+        )
+        set_configs_button.grid(row=0, column=0,
+                                padx=self.padx_std, pady=self.pady_std,
+                                ipadx=self.ipadx_button,
+                                ipady=self.ipady_button)
+
+        save_button = ctk.CTkButton(
+            bottom_button_frame,
+            text='Save',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._save,
+        )
+        save_button.grid(row=0, column=1,
+                         padx=self.padx_std, pady=self.pady_std,
+                         ipadx=self.ipadx_button,
+                         ipady=self.ipady_button)
+
+        build_button = ctk.CTkButton(
+            bottom_button_frame,
+            text='Build',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self.build
+        )
+        build_button.grid(row=0, column=2,
+                          padx=self.padx_std, pady=self.pady_std,
+                          ipadx=self.ipadx_button,
+                          ipady=self.ipady_button)
+
+    def _delete_packages(self):
+        if self.packages_scrollable.get():
+            print(self.packages_scrollable.get())
             warning_text = 'This operation is irreversible.\nYou choose to delete:\n'
-            for package in packages_to_delete:
+            for package in self.packages_scrollable.get():
                 warning_text += f'\t- {package}\n'
             warning_text += 'Confirm?'
             yes = mb.askyesno('Confirm Delete', warning_text)
             if yes:
-                for package in packages_to_delete:
+                for package in self.packages_scrollable.get():
+                    print(f'{constants.PACKAGES_PATH}/{package}')
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
-                self.master.add_vagrant_provisions_frame()
+                self.add_packages_frame()
         else:
-            mb.showerror('Error Delete', 'You have selected no packages')
+            mb.showerror('Error', 'You have selected no packages')
 
-    def add_bottom_button(self):
-        build_button = tk.Button(
-            self,
-            text='Set Configs',
-            command=self.set_configs,
-            width=7
-        )
-        build_button.grid(row=self.number_of_rows-1, column=self.startcolumn)
-        build_button = tk.Button(
-            self,
-            text='Build',
-            command=self.build
-        )
-        build_button.grid(row=self.number_of_rows-1, column=3)
-
-    def add_package(self):
+    def _add_package(self):
         package_name = self.new_package_entry.get()
         if package_name not in os.listdir(constants.PACKAGES_PATH):
             confirm = mb.askyesnocancel("Add package",
@@ -292,23 +472,38 @@ class VagrantProvisionsPackagesView(tk.Frame):
                                         'as package?')
             if confirm:
                 make_package_folder(package_name)
-                self.add_listbox()
+                self.add_packages_frame()
         else:
-            mb.showerror('New Package Error', 'Package already exists')
+            mb.showerror('Error', 'Package already exists')
 
-    def open_text_window(self, package, operation):
-        TextWindowView(self.master, package=package, operation=operation,
+    def _open_text_window(self, package, operation):
+        EditFileWindow(self, package=package, operation=operation,
                        provisions_configs=self.provisions_configs)
 
     def set_configs(self):
-        from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        vagrant_configs_view = VagrantConfigsView(
+        from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
+        vagrant_configs_view = VagrantConfigsFrame(
             master=self.master,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0,
-                                  columnspan=5, rowspan=2,
+        vagrant_configs_view.grid(row=0, column=1,
+                                  columnspan=self.master.columns-1,
+                                  rowspan=self.master.rows,
                                   sticky='wens')
+
+    def _save(self):
+        project_name = self.provisions_configs["configurations"]["project_name"]
+        for operation in ('install', 'uninstall', 'config'):
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = list(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            )
+        dst = filedialog.asksaveasfile(
+            initialdir=constants.VAGRANT_PROVS_CONFS_PATH,
+            initialfile=f'{project_name}.json',
+            defaultextension='.json'
+        )
+        dst.write(json.dumps(self.provisions_configs, indent=2))
+        dst.close()
 
     def build(self):
         try:
@@ -328,14 +523,23 @@ class VagrantProvisionsPackagesView(tk.Frame):
             vagrant_builder.set_credentials()
             vagrant_builder.create_project_folder()
             vagrant_builder.generate_main_file()
-            info = mb.showinfo(
+            mb.showinfo(
                 title='Well done!',
                 message=(
-                    f'Your new "{self.provisions_configs["configurations"]["machine_name"]}" machine '
+                    f'Your new "{self.provisions_configs["configurations"]["project_name"]}" machine '
                     'was succesfully created'
                 )
             )
-            if info == 'ok':
-                exit()
-        except (NoFileToUploadError, PackageNotFoundError, EmptyScriptError, UploadNameConflictError) as error:
+            self.master.add_lateral_menu()
+        except (
+            NoFileToUploadError,
+            PackageNotFoundError,
+            EmptyScriptError,
+            UploadNameConflictError
+        ) as error:
             mb.showerror('Error', error.msg)
+
+    def _add_to_operation(self, opearation: str):
+        for package in self.packages_scrollable.get():
+            self.provisions_configs["provisions"][f"packages_to_{opearation}"].add(package)
+        self.add_selected_packages_frame()
