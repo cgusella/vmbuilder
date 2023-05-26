@@ -17,11 +17,13 @@ def launch_vboxmanage_lst_command():
     """
     Return the virtual machine names list as string.
     """
-    vmbox_list = subprocess.run(
+    result = subprocess.run(
         "VBoxManage list vms",
         shell=True,
         capture_output=True
     ).stdout.decode("ascii")
+    lines_list = result.split('\n')
+    vmbox_list = [vmbox.split('"')[1] for vmbox in lines_list if vmbox]
     return vmbox_list
 
 
