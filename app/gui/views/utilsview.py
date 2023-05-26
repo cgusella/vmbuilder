@@ -1,6 +1,7 @@
 import constants
 import customtkinter as ctk
 import shutil
+from builder.helper import is_empty_script
 from tkinter import filedialog
 
 
@@ -89,6 +90,36 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
             if checkbox.get() == 1:
                 checked_checkboxes.append(checkbox.cget("text"))
         return checked_checkboxes
+
+
+class ScrollableButtonFrame(ctk.CTkScrollableFrame):
+    def __init__(self, master, title, values):
+        super().__init__(
+            master,
+            label_text=title,
+            label_font=master.master.master.font_std,
+            width=150
+        )
+        self.grid_columnconfigure(0, weight=1)
+        self.values = values
+        self.checkboxes = []
+        self.operation = title.lower()
+
+        for count, value in enumerate(self.values):
+            color = '#3996D5'
+            package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{value}/{self.operation}.sh')
+            if package_is_empty:
+                color = 'red'
+            checkbox = ctk.CTkButton(
+                self,
+                text=value,
+                font=master.master.master.font_std,
+                command=lambda args=(value, self.operation): master.master._open_text_window(*args),
+                fg_color=color
+            )
+            checkbox.grid(row=count, column=0, padx=10, pady=(10, 0),
+                          sticky="w")
+            self.checkboxes.append(checkbox)
 
 
 class EditFileWindow(ctk.CTkToplevel):

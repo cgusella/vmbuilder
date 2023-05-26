@@ -7,7 +7,6 @@ from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
 from tkinter import messagebox as mb
 from tkinter import StringVar
-from builder.helper import is_empty_script
 from builder.error import (
     NoFileToUploadError,
     PackageNotFoundError,
@@ -16,6 +15,7 @@ from builder.error import (
 )
 from gui.views.utilsview import (
     EditFileWindow,
+    ScrollableButtonFrame,
     ScrollableCheckboxFrame,
     SetUpScriptEdit
 )
@@ -182,61 +182,35 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         selected_packages_frame.columnconfigure(1, weight=1)
         selected_packages_frame.columnconfigure(2, weight=1)
         selected_packages_frame.rowconfigure(0, weight=1)
-        max_rows = max(
-            len(self.provisions_configs["provisions"]['packages_to_install']),
-            len(self.provisions_configs["provisions"]['packages_to_uninstall']),
-            len(self.provisions_configs["provisions"]['packages_to_config']),
-        )
-        for i in range(max_rows):
-            selected_packages_frame.rowconfigure(i+1, weight=1)
+        selected_packages_frame.rowconfigure(1, weight=10)
+        selected_packages_frame.rowconfigure(2, weight=1)
 
-        install_label = ctk.CTkLabel(
-            selected_packages_frame,
-            text='Install',
-            font=self.font_std
-        )
-        install_label.grid(row=0, column=0, sticky='wen',
-                           padx=self.padx_std, pady=self.pady_std)
-        uninstall_label = ctk.CTkLabel(
-            selected_packages_frame,
-            text='Uninstall',
-            font=self.font_std
-        )
-        uninstall_label.grid(row=0, column=1, sticky='wen',
-                             padx=self.padx_std, pady=self.pady_std)
-        config_label = ctk.CTkLabel(
-            selected_packages_frame,
-            text='Config',
-            font=self.font_std
-        )
-        config_label.grid(row=0, column=2, sticky='wen',
-                          padx=self.padx_std, pady=self.pady_std)
+        for count, operation in enumerate(('install', 'uninstall', 'config')):
+            self.selected_packages_scrollable = ScrollableButtonFrame(
+                master=selected_packages_frame,
+                title=f'{operation.title()}',
+                values=sorted(
+                    self.provisions_configs["provisions"][f"packages_to_{operation}"]
+                ),
+            )
+            self.selected_packages_scrollable.grid(
+                row=1,
+                column=count,
+                sticky='wens',
+                padx=self.padx_std, pady=self.pady_std
+            )
+            # add clean button
+            clean_button = ctk.CTkButton(
+                master=selected_packages_frame,
+                font=self.font_std,
+                text='Clean',
+                command=lambda operation=(operation,): self._clean_packages(*operation)
+            )
+            clean_button.grid(row=2, column=count)
 
-        # add rows dinamically
-        for operation in ('install', 'uninstall', 'config'):
-            if operation == 'install':
-                column_position = 0
-            elif operation == 'uninstall':
-                column_position = 1
-            elif operation == 'config':
-                column_position = 2
-            if self.provisions_configs["provisions"][f'packages_to_{operation}']:
-                for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
-                    row = count + 1
-                    color = '#3996D5'
-                    package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
-                    if package_is_empty:
-                        color = 'red'
-                    package_button = ctk.CTkButton(
-                        master=selected_packages_frame,
-                        font=self.font_std,
-                        text=f'{package}',
-                        fg_color=color,
-                        command=lambda args=(package, operation): self.open_text_window(*args)
-                    )
-                    package_button.grid(row=row, column=column_position,
-                                        padx=self.pad_equal,
-                                        pady=self.pad_equal)
+    def _clean_packages(self, operation: str):
+        self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
+        self.add_selected_packages_frame()
 
     def add_packages_frame(self, select_all=False):
         packages_frame = ctk.CTkFrame(self)
@@ -247,8 +221,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         packages_frame.columnconfigure(0, weight=1)
         packages_frame.columnconfigure(1, weight=1)
         packages_frame.columnconfigure(2, weight=1)
-        packages_frame.rowconfigure(0, weight=5)
-        packages_frame.rowconfigure(1, weight=1)
+        packages_frame.rowconfigure(0, weight=1)
+        packages_frame.rowconfigure(1, weight=10)
         packages_frame.rowconfigure(2, weight=1)
         packages_frame.rowconfigure(3, weight=1)
         packages_frame.rowconfigure(4, weight=1)
@@ -309,7 +283,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             font=self.font_std
         )
         new_package_label.grid(row=2, column=0, sticky='w',
-                               padx=self.padx_std, pady=self.pady_std,
+                               padx=self.padx_std, pady=self.pady_title,
                                ipadx=self.ipadx_std)
         self.new_package_entry = ctk.CTkEntry(
             packages_frame,
@@ -318,7 +292,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             height=self.entry_height_std
         )
         self.new_package_entry.grid(row=3, column=0, columnspan=3, sticky='wne',
-                                    padx=self.padx_std, pady=self.pady_std)
+                                    padx=self.padx_std, pady=self.pady_entry)
 
         add_package_button = ctk.CTkButton(
             packages_frame,
@@ -428,7 +402,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         else:
             mb.showerror('Error', 'Package already exists')
 
-    def open_text_window(self, package, operation):
+    def _open_text_window(self, package, operation):
         EditFileWindow(self, package=package, operation=operation,
                        provisions_configs=self.provisions_configs)
 

@@ -268,7 +268,7 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
 
 if __name__ == "__main__":
     root = ctk.CTk()
-    root.wm_geometry("1400x900")
+    root.wm_geometry("1800x1100")
     main = MainFrame(root)
     main.master.title('HackTheMonkey')
     root.mainloop()
