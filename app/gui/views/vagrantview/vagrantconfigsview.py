@@ -330,13 +330,13 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         set_provision_button = ctk.CTkButton(
             set_provision_button_frame,
             text='Set Provisions',
-            command=self.go_to_provision_page,
+            command=self._go_to_provision_page,
             font=self.font_std
         )
         set_provision_button.grid(row=0, column=0, sticky='se',
                                   padx=self.padx_std, pady=self.pady_std)
 
-    def go_to_provision_page(self):
+    def _go_to_provision_page(self):
         project_name = self.entry_project_name.get()
         if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
             mb.showerror('Error', 'A machine with this name already exists')

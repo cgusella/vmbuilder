@@ -6,7 +6,7 @@ from builder.vagrant import Vagrant
 from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
 from tkinter import messagebox as mb
-from tkinter import filedialog, StringVar
+from tkinter import StringVar
 from builder.helper import is_empty_script
 from builder.error import (
     NoFileToUploadError,
@@ -14,108 +14,11 @@ from builder.error import (
     EmptyScriptError,
     UploadNameConflictError
 )
-from gui.views.utilsview import ScrollableCheckboxFrame
-
-
-class TextWindowView(ctk.CTkToplevel):
-    def __init__(self, master, package, operation, provisions_configs):
-        self.master = master
-        self.package = package
-        self.operation = operation
-        self.provisions_configs = provisions_configs
-        ctk.CTkToplevel.__init__(self, master)
-        self.geometry(
-            '400x400'
-        )
-        self.title('Edit File')
-        self.set_grid()
-        file_label = ctk.CTkLabel(
-            self,
-            text=f'You are modifying "{operation}.sh"\nfrom package "{package}"',
-            font=self.master.font_std
-        )
-        file_label.grid(row=1, column=0, columnspan=3)
-        self.open_text_box = ctk.CTkTextbox(
-            self,
-            width=600,
-            font=self.master.font_std
-        )
-        with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
-            text = file.read()
-        self.open_text_box.insert('end', text)
-        self.open_text_box.grid(row=2, column=0, columnspan=3)
-
-        if self.operation == 'config':
-            upload_button = ctk.CTkButton(
-                self,
-                text='Upload',
-                font=self.master.font_std,
-                command=self.upload_file
-            )
-            upload_button.grid(row=3, column=0)
-            save_button = ctk.CTkButton(
-                self,
-                text='Save',
-                font=self.master.font_std,
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=2)
-        else:
-            save_button = ctk.CTkButton(
-                self,
-                text='Save',
-                font=self.master.font_std,
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=1)
-        remove_button = ctk.CTkButton(
-            self,
-            text=f'Remove from {operation}',
-            font=self.master.font_std,
-            command=self.remove_from_operation
-        )
-        remove_button.grid(row=4, column=1)
-
-    def set_grid(self):
-        self.grid()
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
-
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
-        self.rowconfigure(5, weight=1)
-
-    def save_file(self):
-        with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
-            file.write(self.open_text_box.get("1.0", "end"))
-        self.master.add_selected_packages_frame()
-        self.destroy()
-
-    def remove_from_operation(self):
-        self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        self.master.add_selected_packages_frame()
-        self.destroy()
-
-    def upload_file(self):
-        filename = filedialog.askopenfilename(
-            initialdir=f"{constants.VMBUILDER_PATH}",
-            title="Select a File",
-            filetypes=(
-                ("Text files",
-                 "*.txt*"),
-                ("all files",
-                 "*.*")
-            )
-        )
-        shutil.copy(
-            src=filename,
-            dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
-        )
-        self.destroy()
+from gui.views.utilsview import (
+    EditFileWindow,
+    ScrollableCheckboxFrame,
+    SetUpScriptEdit
+)
 
 
 class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
@@ -266,8 +169,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             pass
 
     def _edit_update_script(self):
-        TextWindowView(self.master, operation=self.radio_var.get(),
-                       provisions_configs=self.provisions_configs)
+        SetUpScriptEdit(self, operation=self.radio_var.get(),
+                        provisions_configs=self.provisions_configs)
 
     def add_selected_packages_frame(self):
         selected_packages_frame = ctk.CTkFrame(self)
@@ -526,7 +429,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             mb.showerror('Error', 'Package already exists')
 
     def open_text_window(self, package, operation):
-        TextWindowView(self, package=package, operation=operation,
+        EditFileWindow(self, package=package, operation=operation,
                        provisions_configs=self.provisions_configs)
 
     def set_configs(self):
