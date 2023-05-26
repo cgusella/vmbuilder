@@ -4,7 +4,6 @@ import json
 import os
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
-from gui.views.vagrantview.vagrantprovisionsscriptview import VagrantProvisionsScriptView
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

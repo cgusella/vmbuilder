@@ -2,11 +2,9 @@ import constants
 import os
 import shutil
 import customtkinter as ctk
-import tkinter as tk
 from builder.vagrant import Vagrant
 from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
-from tkinter import ttk
 from tkinter import messagebox as mb
 from tkinter import filedialog, StringVar
 from builder.helper import is_empty_script
@@ -16,7 +14,6 @@ from builder.error import (
     EmptyScriptError,
     UploadNameConflictError
 )
-from gui.views.errors.errorview import ErrorMessage
 
 
 class TextWindowView(ctk.CTkToplevel):
@@ -124,6 +121,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.add_titles()
         self.add_additional_scripts()
         self.add_selected_packages_frame()
+        self.add_packages_frame()
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -258,19 +256,45 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def add_selected_packages_frame(self):
         selected_packages_frame = ctk.CTkFrame(self)
-        selected_packages_frame.grid(row=3, column=0, rowspan=3, sticky='wens',
+        selected_packages_frame.grid(row=3, column=0, rowspan=3, sticky='wnes',
                                      padx=self.padx_std, pady=self.pady_std,
                                      ipadx=self.ipadx_std,
                                      ipady=self.ipady_std)
+        selected_packages_frame.columnconfigure(0, weight=1)
+        selected_packages_frame.columnconfigure(1, weight=1)
+        selected_packages_frame.columnconfigure(2, weight=1)
+        selected_packages_frame.rowconfigure(0, weight=1)
 
-    def add_selected_objects(self):
+        install_label = ctk.CTkLabel(
+            selected_packages_frame,
+            text='Install',
+            font=self.font_std
+        )
+        install_label.grid(row=0, column=0, sticky='wn',
+                           padx=self.padx_std, pady=self.pady_entry)
+        uninstall_label = ctk.CTkLabel(
+            selected_packages_frame,
+            text='Uninstall',
+            font=self.font_std
+        )
+        uninstall_label.grid(row=0, column=1, sticky='wn',
+                             padx=self.padx_std, pady=self.pady_entry)
+        config_label = ctk.CTkLabel(
+            selected_packages_frame,
+            text='Config',
+            font=self.font_std
+        )
+        config_label.grid(row=0, column=2, sticky='wn',
+                          padx=self.padx_std, pady=self.pady_entry)
+
+        # add rows dinamically
         for operation in ('install', 'uninstall', 'config'):
             if operation == 'install':
-                column_position = self.startcolumn
+                column_position = 0
             elif operation == 'uninstall':
-                column_position = self.startcolumn + 1
+                column_position = 1
             elif operation == 'config':
-                column_position = self.startcolumn + 2
+                column_position = 2
             if self.provisions_configs["provisions"][f'packages_to_{operation}']:
                 for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
                     row = 8 + count + 1
@@ -286,20 +310,23 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                     )
                     package_button.grid(row=row, column=column_position)
 
-    def add_listbox(self):
-        self.packages_listbox = tk.Listbox(
-            self,
-            selectmode='multiple',
-            width=20,
-            height=5,
-        )
-        packages = [
-            package for package in os.listdir(constants.PACKAGES_PATH)
-            if package not in ('program-example', 'setup_scripts')
-        ]
-        for count, package in enumerate(sorted(packages)):
-            self.packages_listbox.insert(count+1, package)
-        self.packages_listbox.grid(row=3, column=self.startcolumn+1, rowspan=2)
+    def add_packages_frame(self):
+        packages_frame = ctk.CTkFrame(self)
+        packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens')
+
+        # self.packages_listbox = tk.Listbox(
+        #     self,
+        #     selectmode='multiple',
+        #     width=20,
+        #     height=5,
+        # )
+        # packages = [
+        #     package for package in os.listdir(constants.PACKAGES_PATH)
+        #     if package not in ('program-example', 'setup_scripts')
+        # ]
+        # for count, package in enumerate(sorted(packages)):
+        #     self.packages_listbox.insert(count+1, package)
+        # self.packages_listbox.grid(row=3, column=self.startcolumn+1, rowspan=2)
 
     def add_install_uninstal_conf_buttons(self):
         for count, operation in enumerate(('install', 'uninstall', 'config')):
@@ -361,7 +388,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
                 self.master.add_vagrant_provisions_frame()
         else:
-            ErrorMessage(self, 'You have selected no packages')
+            mb.showerror('Error', 'You have selected no packages')
 
     def add_bottom_button(self):
         build_button = ctk.CTkButton(
@@ -391,7 +418,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 make_package_folder(package_name)
                 self.add_listbox()
         else:
-            ErrorMessage(self, 'Package already exists')
+            mb.showerror('Error', 'Package already exists')
 
     def open_text_window(self, package, operation):
         TextWindowView(self.master, package=package, operation=operation,
@@ -434,5 +461,10 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             )
             if info == 'ok':
                 exit()
-        except (NoFileToUploadError, PackageNotFoundError, EmptyScriptError, UploadNameConflictError) as error:
-            ErrorMessage(self, error.msg)
+        except (
+            NoFileToUploadError,
+            PackageNotFoundError,
+            EmptyScriptError,
+            UploadNameConflictError
+        ) as error:
+            mb.showerror('Error', error.msg)
