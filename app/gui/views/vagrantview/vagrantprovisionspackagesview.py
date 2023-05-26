@@ -130,6 +130,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.pady_std = (10, 10)
         self.pady_title = (10, 2)
         self.pady_entry = (2, 10)
+        self.pad_equal = (1, 1)
         self.ipadx_std = 10
         self.ipady_std = 10
         self.ipadx_button = 5
@@ -268,28 +269,35 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         selected_packages_frame.columnconfigure(1, weight=1)
         selected_packages_frame.columnconfigure(2, weight=1)
         selected_packages_frame.rowconfigure(0, weight=1)
+        max_rows = max(
+            len(self.provisions_configs["provisions"]['packages_to_install']),
+            len(self.provisions_configs["provisions"]['packages_to_uninstall']),
+            len(self.provisions_configs["provisions"]['packages_to_config']),
+        )
+        for i in range(max_rows):
+            selected_packages_frame.rowconfigure(i+1, weight=1)
 
         install_label = ctk.CTkLabel(
             selected_packages_frame,
             text='Install',
             font=self.font_std
         )
-        install_label.grid(row=0, column=0, sticky='wn',
-                           padx=self.padx_std, pady=self.pady_entry)
+        install_label.grid(row=0, column=0, sticky='wen',
+                           padx=self.padx_std, pady=self.pady_std)
         uninstall_label = ctk.CTkLabel(
             selected_packages_frame,
             text='Uninstall',
             font=self.font_std
         )
-        uninstall_label.grid(row=0, column=1, sticky='wn',
-                             padx=self.padx_std, pady=self.pady_entry)
+        uninstall_label.grid(row=0, column=1, sticky='wen',
+                             padx=self.padx_std, pady=self.pady_std)
         config_label = ctk.CTkLabel(
             selected_packages_frame,
             text='Config',
             font=self.font_std
         )
-        config_label.grid(row=0, column=2, sticky='wn',
-                          padx=self.padx_std, pady=self.pady_entry)
+        config_label.grid(row=0, column=2, sticky='wen',
+                          padx=self.padx_std, pady=self.pady_std)
 
         # add rows dinamically
         for operation in ('install', 'uninstall', 'config'):
@@ -301,18 +309,21 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 column_position = 2
             if self.provisions_configs["provisions"][f'packages_to_{operation}']:
                 for count, package in enumerate(self.provisions_configs["provisions"][f'packages_to_{operation}']):
-                    row = 8 + count + 1
+                    row = count + 1
                     color = '#3996D5'
                     package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh')
                     if package_is_empty:
                         color = 'red'
                     package_button = ctk.CTkButton(
-                        master=self,
+                        master=selected_packages_frame,
+                        font=self.font_std,
                         text=f'{package}',
                         fg_color=color,
                         command=lambda args=(package, operation): self.open_text_window(*args)
                     )
-                    package_button.grid(row=row, column=column_position)
+                    package_button.grid(row=row, column=column_position,
+                                        padx=self.pad_equal,
+                                        pady=self.pad_equal)
 
     def add_packages_frame(self, select_all=False):
         packages_frame = ctk.CTkFrame(self)
@@ -327,6 +338,42 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         packages_frame.rowconfigure(1, weight=1)
         packages_frame.rowconfigure(2, weight=1)
         packages_frame.rowconfigure(3, weight=1)
+        packages_frame.rowconfigure(4, weight=1)
+
+        # add install, uninstall, config
+        add_to_install_button = ctk.CTkButton(
+            packages_frame,
+            text='Install',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._add_to_operation('install')
+        )
+        add_to_install_button.grid(row=0, column=0,
+                                   padx=self.padx_std, pady=self.pady_std,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
+        add_to_uninstall_button = ctk.CTkButton(
+            packages_frame,
+            text='Uninstall',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._add_to_operation('uninstall')
+        )
+        add_to_uninstall_button.grid(row=0, column=1,
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_button,
+                                     ipady=self.ipady_button)
+        add_to_config_button = ctk.CTkButton(
+            packages_frame,
+            text='Configure',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._add_to_operation('config')
+        )
+        add_to_config_button.grid(row=0, column=2,
+                                  padx=self.padx_std, pady=self.pady_std,
+                                  ipadx=self.ipadx_button,
+                                  ipady=self.ipady_button)
 
         # add scrollable checkbox
         self.packages_scrollable = ScrollableCheckboxFrame(
@@ -338,7 +385,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             ]),
             select_all=select_all
         )
-        self.packages_scrollable.grid(row=0, column=0, columnspan=3,
+        self.packages_scrollable.grid(row=1, column=0, columnspan=3,
                                       sticky='wens',
                                       padx=self.padx_std, pady=self.pady_std)
 
@@ -348,7 +395,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             text='New package:',
             font=self.font_std
         )
-        new_package_label.grid(row=1, column=0, sticky='w',
+        new_package_label.grid(row=2, column=0, sticky='w',
                                padx=self.padx_std, pady=self.pady_std,
                                ipadx=self.ipadx_std)
         self.new_package_entry = ctk.CTkEntry(
@@ -357,7 +404,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             width=self.entry_width_std,
             height=self.entry_height_std
         )
-        self.new_package_entry.grid(row=2, column=0, columnspan=3, sticky='wne',
+        self.new_package_entry.grid(row=3, column=0, columnspan=3, sticky='wne',
                                     padx=self.padx_std, pady=self.pady_std)
 
         add_package_button = ctk.CTkButton(
@@ -367,7 +414,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=self._add_package
         )
-        add_package_button.grid(row=3, column=0,
+        add_package_button.grid(row=4, column=0,
                                 padx=self.padx_std, pady=self.pady_std,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
@@ -380,7 +427,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 width=self.width_button_std,
                 command=self.add_packages_frame
             )
-            deselect_all_button.grid(row=3, column=1,
+            deselect_all_button.grid(row=4, column=1,
                                      padx=self.padx_std, pady=self.pady_std,
                                      ipadx=self.ipadx_button,
                                      ipady=self.ipady_button)
@@ -392,7 +439,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 width=self.width_button_std,
                 command=lambda: self.add_packages_frame(select_all=True)
             )
-            select_all_button.grid(row=3, column=1,
+            select_all_button.grid(row=4, column=1,
                                    padx=self.padx_std, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
@@ -403,7 +450,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=self._delete_packages
         )
-        delete_package_button.grid(row=3, column=2,
+        delete_package_button.grid(row=4, column=2,
                                    padx=self.padx_std, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
@@ -439,16 +486,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                           padx=self.padx_std, pady=self.pady_std,
                           ipadx=self.ipadx_button,
                           ipady=self.ipady_button)
-
-    def _save_packages(self, operation: str):
-        packages = list()
-        for pack in self.packages_listbox.curselection():
-            packages.append(
-                self.packages_listbox.get(pack)
-            )
-        for package in packages:
-            self.provisions_configs["provisions"][f"packages_to_{operation}"].add(package)
-        self.master.add_vagrant_provisions_frame()
 
     def _delete_packages(self):
         if self.packages_scrollable.get():
@@ -527,3 +564,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             UploadNameConflictError
         ) as error:
             mb.showerror('Error', error.msg)
+
+    def _add_to_operation(self, opearation: str):
+        for package in self.packages_scrollable.get():
+            self.provisions_configs["provisions"][f"packages_to_{opearation}"].add(package)
+        self.add_selected_packages_frame()
