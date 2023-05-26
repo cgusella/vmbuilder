@@ -2,10 +2,12 @@ import constants
 import customtkinter as ctk
 import json
 import os
+import shutil
 from gui.views.utilsview import ScrollableCheckboxFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
 from tkinter import filedialog
+from tkinter import messagebox as mb
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -97,7 +99,7 @@ class MainFrame(ctk.CTkFrame):
                                pady=self.pady_up,
                                ipadx=self.ipadx_button,
                                ipady=self.ipady_button)
-        packer_projects = ScrollableCheckboxFrame(
+        self.packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
             title='Packer Projects',
             values=sorted([
@@ -105,13 +107,14 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
             ])
         )
-        packer_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
+        self.packer_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
                              pady=self.pady_equal)
         packer_delete_button = ctk.CTkButton(
             packer_menu_frame,
             text='Delete',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
+            command=lambda: self._delete_projects('packer')
         )
         packer_delete_button.grid(row=3, column=0,
                                   padx=self.padx_std, pady=self.pady_down,
@@ -146,7 +149,7 @@ class MainFrame(ctk.CTkFrame):
                                 pady=self.pady_up,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
-        vagrant_projects = ScrollableCheckboxFrame(
+        self.vagrant_projects = ScrollableCheckboxFrame(
             master=vagrant_menu_frame,
             title='Vagrant Projects',
             values=[
@@ -154,13 +157,14 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
             ]
         )
-        vagrant_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
+        self.vagrant_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
                               pady=self.pady_equal)
         vagrant_delete_button = ctk.CTkButton(
             vagrant_menu_frame,
             text='Delete',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
+            command=lambda: self._delete_projects('vagrant')
         )
         vagrant_delete_button.grid(row=3, column=0,
                                    padx=self.padx_std, pady=self.pady_down,
@@ -270,6 +274,29 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         )
         self.provisions_configs = json.loads(file_to_load.read())
         self.add_vagrant_configs(load=True)
+
+    def _delete_projects(self, vm_type):
+        if vm_type == 'packer':
+            project_folder = constants.PACKER_MACHINES_PATH
+            projects = self.packer_projects.get()
+        elif vm_type == 'vagrant':
+            project_folder = constants.VAGRANT_MACHINES_PATH
+            projects = self.vagrant_projects.get()
+
+        message = (
+            'This operation in irreversible.\n'
+            'You choose to delete the following projects:\n'
+        )
+        for project in projects:
+            message += f'\t- {project}\n'
+        yes = mb.askyesnocancel(
+            title='Delete Confirm',
+            message=message
+        )
+        if yes:
+            for project in projects:
+                shutil.rmtree(f'{project_folder}/{project}')
+            self.add_lateral_menu()
 
     def add_packer_configs(self):
         pass

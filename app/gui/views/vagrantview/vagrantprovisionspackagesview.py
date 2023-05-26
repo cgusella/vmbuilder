@@ -523,15 +523,14 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             vagrant_builder.set_credentials()
             vagrant_builder.create_project_folder()
             vagrant_builder.generate_main_file()
-            info = mb.showinfo(
+            mb.showinfo(
                 title='Well done!',
                 message=(
                     f'Your new "{self.provisions_configs["configurations"]["project_name"]}" machine '
                     'was succesfully created'
                 )
             )
-            if info == 'ok':
-                exit()
+            self.master.add_lateral_menu()
         except (
             NoFileToUploadError,
             PackageNotFoundError,

@@ -130,7 +130,7 @@ class EditFileWindow(ctk.CTkToplevel):
         self.provisions_configs = provisions_configs
         ctk.CTkToplevel.__init__(self, master)
         self.geometry(
-            '400x400'
+            '1200x400'
         )
         self.title('Edit File')
         self.set_grid()
@@ -142,7 +142,7 @@ class EditFileWindow(ctk.CTkToplevel):
         file_label.grid(row=1, column=0, columnspan=3)
         self.open_text_box = ctk.CTkTextbox(
             self,
-            width=600,
+            width=900,
             font=self.master.font_std
         )
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:

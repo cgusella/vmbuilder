@@ -17,13 +17,16 @@ def is_empty_script(script: str):
     Return True the given script is empty
     """
     with open(script) as script_file:
-        lines = script_file.read().split("\n")
+        lines = script_file.readlines()
 
+    list_to_evaluate = list()
     for line in lines:
-        if line in ['#!/bin/bash', '']:
-            lines.remove(line)
+        if line.startswith('#') or line == '':
+            pass
+        else:
+            list_to_evaluate.append(line)
 
-    return not any(lines)
+    return not any(list_to_evaluate)
 
 
 def get_packages_upload_files(packages: list) -> dict:
