@@ -195,17 +195,23 @@ class MainFrame(ctk.CTkFrame):
             ctk.set_appearance_mode('dark')
 
     def add_initial_message(self):
-        self.initial_message_frame = ctk.CTkScrollableFrame(
-            self,
-            label_text='Welcome!',
-        )
+        self.initial_message_frame = ctk.CTkScrollableFrame(self)
+        self.initial_message_frame.__init__(self)
         self.initial_message_frame.grid(row=0, column=1, rowspan=self.rows,
                                         columnspan=self.columns-1,
                                         sticky='wnes')
         self.initial_message_frame.columnconfigure(0, weight=1)
         self.initial_message_frame.rowconfigure(0, weight=1)
+        self.initial_message_frame.rowconfigure(1, weight=1)
+        title_label = ctk.CTkLabel(
+            self.initial_message_frame,
+            font=self.font_std,
+            text='Welcome!'
+        )
+        title_label.grid(row=0, column=0, sticky='wens')
         message_label = ctk.CTkLabel(
             self.initial_message_frame,
+            font=self.font_std,
             text="""
 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
 laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi
@@ -228,7 +234,7 @@ rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molesti
 non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis
 """
         )
-        message_label.pack(padx=(0, 0))
+        message_label.grid(row=1, column=0, sticky='wens')
 
     def add_vagrant_configs(self):
         with open(f'{constants.VAGRANT_PROVS_CONFS_PATH}/template.json') as template_json:
@@ -236,12 +242,16 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         for operation in ('install', 'uninstall', 'config'):
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
         self.initial_message_frame.destroy()
-        vagrant_configs_frame = VagrantConfigsFrame(self, self.provisions_configs)
-        vagrant_configs_frame.grid(row=0, column=1, columnspan=self.columns-1,
-                                   rowspan=self.rows, sticky='wens')
+        self.vagrant_configs_frame = VagrantConfigsFrame(
+            self,
+            self.provisions_configs
+        )
+        self.vagrant_configs_frame.grid(row=0, column=1,
+                                        columnspan=self.columns-1,
+                                        rowspan=self.rows, sticky='wens')
 
     def add_vagrant_provisions_frame(self):
-        self.initial_message_frame.destroy()
+        self.vagrant_configs_frame.destroy()
         vagrant_configs_view = VagrantProvisionsPackagesFrame(
             master=self,
             provisions_configs=self.provisions_configs

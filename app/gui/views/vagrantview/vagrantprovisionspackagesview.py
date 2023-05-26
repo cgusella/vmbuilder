@@ -123,7 +123,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.add_additional_scripts()
         self.add_selected_packages_frame()
         self.add_packages_frame()
-        self.add_build_button()
+        self.add_bottom_button_frame()
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -348,20 +348,21 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         new_package_label.grid(row=1, column=0, sticky='w',
                                padx=self.padx_std, pady=self.pady_std,
                                ipadx=self.ipadx_std)
-        new_package_entry = ctk.CTkEntry(
+        self.new_package_entry = ctk.CTkEntry(
             packages_frame,
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std
         )
-        new_package_entry.grid(row=2, column=0, columnspan=2, sticky='wne',
+        self.new_package_entry.grid(row=2, column=0, columnspan=2, sticky='wne',
                                padx=self.padx_std, pady=self.pady_std)
 
         add_package_button = ctk.CTkButton(
             packages_frame,
             text='Add',
             font=self.font_std,
-            width=self.width_button_std
+            width=self.width_button_std,
+            command=self._add_package
         )
         add_package_button.grid(row=3, column=0,
                                 padx=self.padx_std, pady=self.pady_std,
@@ -378,54 +379,38 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
 
-    def add_build_button(self):
+    def add_bottom_button_frame(self):
+        bottom_button_frame = ctk.CTkFrame(self)
+        bottom_button_frame.grid(row=5, column=1, sticky='wens',
+                                 padx=self.padx_std, pady=self.pady_std,
+                                 ipadx=self.ipadx_std,
+                                 ipady=self.ipady_std)
+        bottom_button_frame.columnconfigure(0, weight=1)
+        bottom_button_frame.columnconfigure(1, weight=1)
+        bottom_button_frame.rowconfigure(0, weight=1)
+        set_configs_button = ctk.CTkButton(
+            bottom_button_frame,
+            text='Set Configs',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self.set_configs,
+        )
+        set_configs_button.grid(row=0, column=0,
+                                padx=self.padx_std, pady=self.pady_std,
+                                ipadx=self.ipadx_button,
+                                ipady=self.ipady_button)
         build_button = ctk.CTkButton(
-            self,
+            bottom_button_frame,
             text='Build',
             font=self.font_std,
             width=self.width_button_std
         )
-        build_button.grid(row=5, column=1,
+        build_button.grid(row=0, column=1,
                           padx=self.padx_std, pady=self.pady_std,
                           ipadx=self.ipadx_button,
                           ipady=self.ipady_button)
 
-    def add_install_uninstal_conf_buttons(self):
-        for count, operation in enumerate(('install', 'uninstall', 'config')):
-            operation_button = ctk.CTkButton(
-                self,
-                text=f'Add to {operation.title()}',
-                command=lambda operation=operation: self.save_packages(operation)
-            )
-            operation_button.grid(row=5, column=self.startcolumn+count)
-
-    def add_delete_button(self):
-        delete_button = ctk.CTkButton(
-            self,
-            text='Delete Packages',
-            command=self.delete_packages
-        )
-        delete_button.grid(row=3, column=self.startcolumn, rowspan=2)
-
-    def add_new_package_button(self):
-        new_package_frame = ctk.CTkFrame(
-            self
-        )
-        new_package_frame.grid(row=3, column=self.startcolumn+2, rowspan=2)
-        new_package_frame.columnconfigure(0, weight=1)
-        new_package_frame.rowconfigure(0, weight=1)
-        new_package_frame.rowconfigure(1, weight=1)
-        self.new_package_entry = ctk.CTkEntry(new_package_frame)
-        self.new_package_entry.insert(0, 'New Package Name')
-        self.new_package_entry.grid(row=0, column=0)
-        new_package_button = ctk.CTkButton(
-            new_package_frame,
-            text='Add package',
-            command=self.add_package
-        )
-        new_package_button.grid(row=1, column=0)
-
-    def save_packages(self, operation: str):
+    def _save_packages(self, operation: str):
         packages = list()
         for pack in self.packages_listbox.curselection():
             packages.append(
@@ -435,7 +420,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             self.provisions_configs["provisions"][f"packages_to_{operation}"].add(package)
         self.master.add_vagrant_provisions_frame()
 
-    def delete_packages(self):
+    def _delete_packages(self):
         packages_to_delete = ()
         for pack in self.packages_listbox.curselection():
             packages_to_delete += (self.packages_listbox.get(pack),)
@@ -452,25 +437,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         else:
             mb.showerror('Error', 'You have selected no packages')
 
-    def add_bottom_button(self):
-        build_button = ctk.CTkButton(
-            self,
-            text='Set Configs',
-            command=self.set_configs,
-            width=7
-        )
-        build_button.grid(row=self.number_of_rows-1, column=self.startcolumn)
-        build_button = ctk.CTkButton(
-            self,
-            text='Build',
-            text_color='black',
-            fg_color='#248a55',
-            command=self.build,
-            hover_color='#39d584'
-        )
-        build_button.grid(row=self.number_of_rows-1, column=3)
-
-    def add_package(self):
+    def _add_package(self):
         package_name = self.new_package_entry.get()
         if package_name not in os.listdir(constants.PACKAGES_PATH):
             confirm = mb.askyesnocancel("Add package",
@@ -478,7 +445,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                         'as package?')
             if confirm:
                 make_package_folder(package_name)
-                self.add_listbox()
+                self.add_packages_frame()
         else:
             mb.showerror('Error', 'Package already exists')
 
@@ -487,13 +454,14 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                        provisions_configs=self.provisions_configs)
 
     def set_configs(self):
-        from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        vagrant_configs_view = VagrantConfigsView(
+        from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
+        vagrant_configs_view = VagrantConfigsFrame(
             master=self.master,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=1, column=0,
-                                  columnspan=5, rowspan=2,
+        vagrant_configs_view.grid(row=0, column=1,
+                                  columnspan=self.master.columns-1,
+                                  rowspan=self.master.rows,
                                   sticky='wens')
 
     def build(self):
