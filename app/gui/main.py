@@ -3,6 +3,9 @@ import customtkinter as ctk
 import json
 import os
 import shutil
+import subprocess
+from argumentparser.helper import get_local_vagrant_boxes
+from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.views.utilsview import ScrollableCheckboxFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
@@ -17,7 +20,9 @@ ctk.set_appearance_mode('light')
 
 class MainFrame(ctk.CTkFrame):
 
-    def __init__(self, master):
+    def __init__(self, master, local_vagrant_boxes, vbox_list):
+        self.local_vagrant_boxes = local_vagrant_boxes
+        self.vbox_list = vbox_list
         ctk.CTkFrame.__init__(self, master)
         self.master = master
         self.rows = 4
@@ -25,11 +30,9 @@ class MainFrame(ctk.CTkFrame):
         self.family = 'Sans'
         self.title_std = ctk.CTkFont(family=self.family, size=24)
         self.font_std = ctk.CTkFont(family=self.family, size=20)
+        self.font_packages = ctk.CTkFont(family=self.family, size=16)
         self.set_dimensions()
         self.set_grid(rows=self.rows, columns=self.columns)
-
-        # we separate the main frame into 2 parts:
-        # the menu frame and the view frame.
 
         # add menu frame
         self.menu_frame = ctk.CTkFrame(self)
@@ -47,9 +50,9 @@ class MainFrame(ctk.CTkFrame):
         self.ipadx_button = 5
         self.ipady_button = 5
         self.width_button_std = 100
-        self.pady_up = (10, 5)
-        self.pady_down = (5, 10)
-        self.pady_equal = (5, 5)
+        self.pad_left = (10, 5)
+        self.pad_right = (5, 10)
+        self.pad_five = (5, 5)
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -71,6 +74,8 @@ class MainFrame(ctk.CTkFrame):
         self.menu_frame.rowconfigure(1, weight=1)
         self.menu_frame.rowconfigure(2, weight=1)
         self.menu_frame.rowconfigure(3, weight=1)
+        self.menu_frame.rowconfigure(4, weight=1)
+        self.menu_frame.rowconfigure(5, weight=1)
 
         # add menu title
         project_title = ctk.CTkLabel(
@@ -78,12 +83,14 @@ class MainFrame(ctk.CTkFrame):
             text='Projects',
             font=self.title_std
         )
-        project_title.grid(row=0, column=0, padx=self.padx_std,
-                           pady=self.pady_std)
+        project_title.grid(row=0, column=0,
+                           padx=self.padx_std, pady=self.pady_std,
+                           ipadx=self.ipadx, ipady=self.ipady)
 
         # add packer frame to menu
         packer_menu_frame = ctk.CTkFrame(self.menu_frame)
-        packer_menu_frame.grid(row=1, column=0)
+        packer_menu_frame.grid(row=1, column=0, rowspan=2, sticky='ns',
+                               padx=self.padx_std, pady=self.pad_left)
         packer_menu_frame.columnconfigure(0, weight=1)
         packer_menu_frame.columnconfigure(1, weight=1)
         packer_menu_frame.rowconfigure(0, weight=1)
@@ -95,8 +102,8 @@ class MainFrame(ctk.CTkFrame):
             command=self.add_packer_configs,
             font=self.font_std
         )
-        add_packer_button.grid(row=1, column=0, columnspan=2,
-                               pady=self.pady_up,
+        add_packer_button.grid(row=0, column=0, columnspan=2,
+                               pady=self.pad_five,
                                ipadx=self.ipadx_button,
                                ipady=self.ipady_button)
         self.packer_projects = ScrollableCheckboxFrame(
@@ -107,8 +114,8 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
             ])
         )
-        self.packer_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
-                             pady=self.pady_equal)
+        self.packer_projects.grid(row=1, column=0, columnspan=2, padx=self.padx_std,
+                             pady=self.pad_five)
         packer_delete_button = ctk.CTkButton(
             packer_menu_frame,
             text='Delete',
@@ -116,8 +123,8 @@ class MainFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._delete_projects('packer')
         )
-        packer_delete_button.grid(row=3, column=0,
-                                  padx=self.padx_std, pady=self.pady_down,
+        packer_delete_button.grid(row=2, column=0,
+                                  padx=self.pad_right, pady=self.pad_right,
                                   ipadx=self.ipadx_button,
                                   ipady=self.ipady_button)
         packer_load_button = ctk.CTkButton(
@@ -126,16 +133,18 @@ class MainFrame(ctk.CTkFrame):
             font=self.font_std,
             width=self.width_button_std,
         )
-        packer_load_button.grid(row=3, column=1,
-                                padx=self.padx_std, pady=self.pady_down,
+        packer_load_button.grid(row=2, column=1,
+                                padx=self.pad_right, pady=self.pad_right,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
 
         # add vagrant frame to menu
         vagrant_menu_frame = ctk.CTkFrame(self.menu_frame)
-        vagrant_menu_frame.grid(row=2, column=0)
+        vagrant_menu_frame.grid(row=3, column=0, rowspan=2, sticky='ns',
+                                padx=self.padx_std, pady=self.pad_left)
         vagrant_menu_frame.columnconfigure(0, weight=1)
         vagrant_menu_frame.columnconfigure(1, weight=1)
+        vagrant_menu_frame.columnconfigure(2, weight=1)
         vagrant_menu_frame.rowconfigure(0, weight=1)
         vagrant_menu_frame.rowconfigure(1, weight=1)
         vagrant_menu_frame.rowconfigure(2, weight=1)
@@ -145,20 +154,20 @@ class MainFrame(ctk.CTkFrame):
             command=self.add_vagrant_configs,
             font=self.font_std,
         )
-        add_vagrant_button.grid(row=1, column=0, columnspan=2,
-                                pady=self.pady_up,
+        add_vagrant_button.grid(row=0, column=0, columnspan=3,
+                                pady=self.pad_five,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
         self.vagrant_projects = ScrollableCheckboxFrame(
             master=vagrant_menu_frame,
             title='Vagrant Projects',
-            values=[
+            values=sorted([
                 folder for folder in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}')
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
-            ]
+            ])
         )
-        self.vagrant_projects.grid(row=2, column=0, columnspan=2, padx=self.padx_std,
-                              pady=self.pady_equal)
+        self.vagrant_projects.grid(row=1, column=0, columnspan=3,
+                                   padx=self.padx_std, pady=self.pad_five)
         vagrant_delete_button = ctk.CTkButton(
             vagrant_menu_frame,
             text='Delete',
@@ -166,8 +175,19 @@ class MainFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._delete_projects('vagrant')
         )
-        vagrant_delete_button.grid(row=3, column=0,
-                                   padx=self.padx_std, pady=self.pady_down,
+        vagrant_delete_button.grid(row=2, column=0,
+                                   padx=self.padx_std, pady=self.pad_right,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
+        vagrant_up_button = ctk.CTkButton(
+            vagrant_menu_frame,
+            text='Up',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._up
+        )
+        vagrant_up_button.grid(row=2, column=1,
+                                   padx=self.padx_std, pady=self.pad_right,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
         vagrant_load_button = ctk.CTkButton(
@@ -177,8 +197,8 @@ class MainFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=self._load_vagrant
         )
-        vagrant_load_button.grid(row=3, column=1,
-                                 padx=self.padx_std, pady=self.pady_down,
+        vagrant_load_button.grid(row=2, column=2,
+                                 padx=self.padx_std, pady=self.pad_right,
                                  ipadx=self.ipadx_button,
                                  ipady=self.ipady_button)
 
@@ -187,12 +207,15 @@ class MainFrame(ctk.CTkFrame):
         swith_light_dark_mode = ctk.CTkSwitch(
             self.menu_frame,
             text='Switch theme',
+            font=self.title_std,
             variable=self.switch_var,
             onvalue='on',
             offvalue='off',
             command=self._swith_light_dark_mode
         )
-        swith_light_dark_mode.grid(row=3, column=0, columnspan=2)
+        swith_light_dark_mode.grid(row=5, column=0,
+                                   ipadx=self.ipadx_button, ipady=self.ipadx_button,
+                                   pady=self.pad_right)
 
     def _swith_light_dark_mode(self):
         if self.switch_var.get() == 'on':
@@ -298,6 +321,19 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
                 shutil.rmtree(f'{project_folder}/{project}')
             self.add_lateral_menu()
 
+    def _up(self):
+        project_name = self.vagrant_projects.get()
+        if project_name:
+            if len(project_name) > 1:
+                mb.showerror('Up Error', 'You must select just one project to up')
+            else:
+                os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
+                subprocess.run(
+                    "vagrant up",
+                    shell=True,
+                )
+            os.chdir(constants.VMBUILDER_PATH)
+
     def add_packer_configs(self):
         pass
 
@@ -306,8 +342,16 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
 
 
 if __name__ == "__main__":
+    # we launch here any expansive command that took
+    # execution time that slower the gui
+    local_vagrant_boxes = get_local_vagrant_boxes()
+    vbox_list = launch_vboxmanage_lst_command()
     root = ctk.CTk()
     root.wm_geometry("1800x1100")
-    main = MainFrame(root)
+    main = MainFrame(
+        master=root,
+        local_vagrant_boxes=local_vagrant_boxes,
+        vbox_list=vbox_list
+    )
     main.master.title('HackTheMonkey')
     root.mainloop()

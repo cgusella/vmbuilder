@@ -1,14 +1,13 @@
 import constants
 import os
 import customtkinter as ctk
-from argumentparser.helper import get_local_vagrant_boxes
-from existencecontroller.controller import launch_vboxmanage_lst_command
 from tkinter import messagebox as mb
 from tkinter import StringVar
 
 
 class VagrantConfigsFrame(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
+        self.master = master
         ctk.CTkFrame.__init__(self, master)
         self.provisions_configs = provisions_configs
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
@@ -44,9 +43,9 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         # titles
         self.rowconfigure(0, weight=2)
         # project, vagrant box
-        self.rowconfigure(1, weight=2)
+        self.rowconfigure(1, weight=8)
         # vbox_host, connection mode
-        self.rowconfigure(2, weight=2)
+        self.rowconfigure(2, weight=8)
         # username_password, set provision button
         self.rowconfigure(3, weight=1)
 
@@ -112,7 +111,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                                ipadx=self.ipadx_std, ipady=self.ipady_std)
         vagrant_box_frame.columnconfigure(0, weight=1)
         vagrant_box_frame.rowconfigure(0, weight=1)
-        local_vagrant_boxes = get_local_vagrant_boxes()
+        local_vagrant_boxes = self.master.local_vagrant_boxes
         if local_vagrant_boxes == 'No Box':
             # add column since we have two objects in this frame
             vagrant_box_frame.columnconfigure(1, weight=1)
@@ -342,20 +341,21 @@ class VagrantConfigsFrame(ctk.CTkFrame):
 
     def _go_to_provision_page(self):
         project_name = self.entry_project_name.get()
+        vbox_name = self.entry_vbox_name.get()
         if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
-            mb.showerror('Error', 'A machine with this name already exists')
+            mb.showerror('Error', f'A project with the name "{project_name}" already exists!')
         elif not project_name:
-            mb.showerror('Error', 'You must choose a name for the virtual machine')
-        elif not self.entry_vbox_name.get():
-            mb.showerror('Error', 'You must choose a name for the virtual box machine')
-        elif self.entry_vbox_name.get() in launch_vboxmanage_lst_command():
-            mb.showerror('Error', 'A box with the same name already exists')
+            mb.showerror('Error', 'You must choose a name for the project!')
+        elif not vbox_name:
+            mb.showerror('Error', 'You must choose a name for the virtual box machine!')
+        elif vbox_name in self.master.vbox_list:
+            mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
         elif not self.entry_default_username.get():
-            mb.showerror('Error', 'You must choose a main username')
+            mb.showerror('Error', 'You must specify the existing username of the vagrant box for vagrant to be able to connect to the machine!')
         elif not self.entry_default_password.get():
-            mb.showerror('Error', 'You must choose a password')
+            mb.showerror('Error', 'You must specify the password of the specified user for vagrant to be able to connect to the machine!')
         elif self.vagrant_box.get() == 'Select Vagrant Box':
-            mb.showerror('Error', 'You must select a Vagrant box')
+            mb.showerror('Error', 'You must choose a Vagrant box!')
         else:
             self.provisions_configs["configurations"]["project_name"] = project_name
             self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
