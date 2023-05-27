@@ -257,7 +257,10 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 text='Clean',
                 command=lambda operation=(operation,): self._clean_packages(*operation)
             )
-            clean_button.grid(row=2, column=count)
+            clean_button.grid(row=2, column=count,
+                              pady=self.pady_std,
+                              ipadx=self.ipadx_button,
+                              ipady=self.ipady_button)
 
     def _clean_packages(self, operation: str):
         self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
