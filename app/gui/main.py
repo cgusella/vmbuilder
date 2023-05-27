@@ -3,6 +3,7 @@ import customtkinter as ctk
 import json
 import os
 import shutil
+import subprocess
 from argumentparser.helper import get_local_vagrant_boxes
 from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.views.utilsview import ScrollableCheckboxFrame
@@ -143,6 +144,7 @@ class MainFrame(ctk.CTkFrame):
                                 padx=self.padx_std, pady=self.pad_left)
         vagrant_menu_frame.columnconfigure(0, weight=1)
         vagrant_menu_frame.columnconfigure(1, weight=1)
+        vagrant_menu_frame.columnconfigure(2, weight=1)
         vagrant_menu_frame.rowconfigure(0, weight=1)
         vagrant_menu_frame.rowconfigure(1, weight=1)
         vagrant_menu_frame.rowconfigure(2, weight=1)
@@ -152,7 +154,7 @@ class MainFrame(ctk.CTkFrame):
             command=self.add_vagrant_configs,
             font=self.font_std,
         )
-        add_vagrant_button.grid(row=0, column=0, columnspan=2,
+        add_vagrant_button.grid(row=0, column=0, columnspan=3,
                                 pady=self.pad_five,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
@@ -164,7 +166,7 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
             ])
         )
-        self.vagrant_projects.grid(row=1, column=0, columnspan=2,
+        self.vagrant_projects.grid(row=1, column=0, columnspan=3,
                                    padx=self.padx_std, pady=self.pad_five)
         vagrant_delete_button = ctk.CTkButton(
             vagrant_menu_frame,
@@ -177,6 +179,17 @@ class MainFrame(ctk.CTkFrame):
                                    padx=self.padx_std, pady=self.pad_right,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
+        vagrant_up_button = ctk.CTkButton(
+            vagrant_menu_frame,
+            text='Up',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._up
+        )
+        vagrant_up_button.grid(row=2, column=1,
+                                   padx=self.padx_std, pady=self.pad_right,
+                                   ipadx=self.ipadx_button,
+                                   ipady=self.ipady_button)
         vagrant_load_button = ctk.CTkButton(
             vagrant_menu_frame,
             text='Load',
@@ -184,7 +197,7 @@ class MainFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=self._load_vagrant
         )
-        vagrant_load_button.grid(row=2, column=1,
+        vagrant_load_button.grid(row=2, column=2,
                                  padx=self.padx_std, pady=self.pad_right,
                                  ipadx=self.ipadx_button,
                                  ipady=self.ipady_button)
@@ -307,6 +320,19 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
             for project in projects:
                 shutil.rmtree(f'{project_folder}/{project}')
             self.add_lateral_menu()
+
+    def _up(self):
+        project_name = self.vagrant_projects.get()
+        if project_name:
+            if len(project_name) > 1:
+                mb.showerror('Up Error', 'You must select just one project to up')
+            else:
+                os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
+                subprocess.run(
+                    "vagrant up",
+                    shell=True,
+                )
+            os.chdir(constants.VMBUILDER_PATH)
 
     def add_packer_configs(self):
         pass
