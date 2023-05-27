@@ -3,6 +3,8 @@ import customtkinter as ctk
 import json
 import os
 import shutil
+from argumentparser.helper import get_local_vagrant_boxes
+from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.views.utilsview import ScrollableCheckboxFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
@@ -17,7 +19,9 @@ ctk.set_appearance_mode('light')
 
 class MainFrame(ctk.CTkFrame):
 
-    def __init__(self, master):
+    def __init__(self, master, local_vagrant_boxes, vbox_list):
+        self.local_vagrant_boxes = local_vagrant_boxes
+        self.vbox_list = vbox_list
         ctk.CTkFrame.__init__(self, master)
         self.master = master
         self.rows = 4
@@ -307,8 +311,16 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
 
 
 if __name__ == "__main__":
+    # we launch here any expansive command that took
+    # execution time that slower the gui
+    local_vagrant_boxes = get_local_vagrant_boxes()
+    vbox_list = launch_vboxmanage_lst_command()
     root = ctk.CTk()
     root.wm_geometry("1800x1100")
-    main = MainFrame(root)
+    main = MainFrame(
+        master=root,
+        local_vagrant_boxes=local_vagrant_boxes,
+        vbox_list=vbox_list
+    )
     main.master.title('HackTheMonkey')
     root.mainloop()

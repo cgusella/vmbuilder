@@ -233,7 +233,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             text='Selected Packages',
             font=self.little_title
         )
-        selected_packages_label.grid(row=0, column=0, sticky='w',
+        selected_packages_label.grid(row=0, column=0, columnspan=3, sticky='w',
                                      padx=self.padx_std, pady=self.pady_std)
 
         for count, operation in enumerate(('install', 'uninstall', 'config')):

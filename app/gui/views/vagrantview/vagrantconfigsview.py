@@ -1,7 +1,6 @@
 import constants
 import os
 import customtkinter as ctk
-from argumentparser.helper import get_local_vagrant_boxes
 from existencecontroller.controller import launch_vboxmanage_lst_command
 from tkinter import messagebox as mb
 from tkinter import StringVar
@@ -9,6 +8,7 @@ from tkinter import StringVar
 
 class VagrantConfigsFrame(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
+        self.master = master
         ctk.CTkFrame.__init__(self, master)
         self.provisions_configs = provisions_configs
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
@@ -112,7 +112,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                                ipadx=self.ipadx_std, ipady=self.ipady_std)
         vagrant_box_frame.columnconfigure(0, weight=1)
         vagrant_box_frame.rowconfigure(0, weight=1)
-        local_vagrant_boxes = get_local_vagrant_boxes()
+        local_vagrant_boxes = self.master.local_vagrant_boxes
         if local_vagrant_boxes == 'No Box':
             # add column since we have two objects in this frame
             vagrant_box_frame.columnconfigure(1, weight=1)
@@ -349,7 +349,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             mb.showerror('Error', 'You must choose a name for the project!')
         elif not vbox_name:
             mb.showerror('Error', 'You must choose a name for the virtual box machine!')
-        elif vbox_name in launch_vboxmanage_lst_command():
+        elif vbox_name in self.master.vbox_list:
             mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
         elif not self.entry_default_username.get():
             mb.showerror('Error', 'You must specify the existing username of the vagrant box for vagrant to be able to connect to the machine!')
