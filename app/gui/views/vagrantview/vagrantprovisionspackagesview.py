@@ -47,7 +47,9 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.pady_std = (10, 10)
         self.pady_title = (10, 2)
         self.pady_entry = (2, 10)
-        self.pad_equal = (1, 1)
+        self.pad_left = (10, 5)
+        self.pad_right = (5, 10)
+        self.pad_equal = (5, 5)
         self.ipadx_std = 10
         self.ipady_std = 10
         self.ipadx_button = 5
@@ -299,7 +301,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=lambda: self._add_to_operation('install')
         )
         add_to_install_button.grid(row=1, column=0,
-                                   padx=self.padx_std, pady=self.pady_std,
+                                   padx=self.pad_left, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
         add_to_uninstall_button = ctk.CTkButton(
@@ -310,7 +312,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=lambda: self._add_to_operation('uninstall')
         )
         add_to_uninstall_button.grid(row=1, column=1,
-                                     padx=self.padx_std, pady=self.pady_std,
+                                     padx=self.pad_equal, pady=self.pady_std,
                                      ipadx=self.ipadx_button,
                                      ipady=self.ipady_button)
         add_to_config_button = ctk.CTkButton(
@@ -321,7 +323,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=lambda: self._add_to_operation('config')
         )
         add_to_config_button.grid(row=1, column=2,
-                                  padx=self.padx_std, pady=self.pady_std,
+                                  padx=self.pad_right, pady=self.pady_std,
                                   ipadx=self.ipadx_button,
                                   ipady=self.ipady_button)
 
@@ -365,7 +367,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=self._add_package
         )
         add_package_button.grid(row=5, column=0,
-                                padx=self.padx_std, pady=self.pady_std,
+                                padx=self.pad_left, pady=self.pady_std,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
 
@@ -378,7 +380,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 command=self.add_packages_frame
             )
             deselect_all_button.grid(row=5, column=1,
-                                     padx=self.padx_std, pady=self.pady_std,
+                                     padx=self.pad_equal, pady=self.pady_std,
                                      ipadx=self.ipadx_button,
                                      ipady=self.ipady_button)
         else:
@@ -390,7 +392,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                 command=lambda: self.add_packages_frame(select_all=True)
             )
             select_all_button.grid(row=5, column=1,
-                                   padx=self.padx_std, pady=self.pady_std,
+                                   padx=self.pad_equal, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
         delete_package_button = ctk.CTkButton(
@@ -401,7 +403,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=self._delete_packages
         )
         delete_package_button.grid(row=5, column=2,
-                                   padx=self.padx_std, pady=self.pady_std,
+                                   padx=self.pad_right, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
 
@@ -423,7 +425,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=self.set_configs,
         )
         set_configs_button.grid(row=0, column=0,
-                                padx=self.padx_std, pady=self.pady_std,
+                                padx=self.pad_left, pady=self.pady_std,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
 
@@ -435,7 +437,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=self._save,
         )
         save_button.grid(row=0, column=1,
-                         padx=self.padx_std, pady=self.pady_std,
+                         padx=self.pad_equal, pady=self.pady_std,
                          ipadx=self.ipadx_button,
                          ipady=self.ipady_button)
 
@@ -447,7 +449,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=self.build
         )
         build_button.grid(row=0, column=2,
-                          padx=self.padx_std, pady=self.pady_std,
+                          padx=self.pad_right, pady=self.pady_std,
                           ipadx=self.ipadx_button,
                           ipady=self.ipady_button)
 

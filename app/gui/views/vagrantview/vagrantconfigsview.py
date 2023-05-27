@@ -1,7 +1,6 @@
 import constants
 import os
 import customtkinter as ctk
-from existencecontroller.controller import launch_vboxmanage_lst_command
 from tkinter import messagebox as mb
 from tkinter import StringVar
 
@@ -44,9 +43,9 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         # titles
         self.rowconfigure(0, weight=2)
         # project, vagrant box
-        self.rowconfigure(1, weight=2)
+        self.rowconfigure(1, weight=8)
         # vbox_host, connection mode
-        self.rowconfigure(2, weight=2)
+        self.rowconfigure(2, weight=8)
         # username_password, set provision button
         self.rowconfigure(3, weight=1)
 
