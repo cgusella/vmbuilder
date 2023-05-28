@@ -55,7 +55,7 @@ class SetUpScriptEdit(ctk.CTkToplevel):
             f'{constants.SETUP_SCRIPTS_PATH}/{self.operation}.sh', 'w'
         ) as file:
             file.write(self.open_text_box.get("1.0", "end"))
-        self.master.add_vagrant_provisions_frame()
+        self.master.master.add_vagrant_provisions_frame()
         self.destroy()
 
 
