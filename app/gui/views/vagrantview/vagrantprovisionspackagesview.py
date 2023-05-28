@@ -100,6 +100,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.additional_scripts_frame.rowconfigure(2, weight=1)
         self.additional_scripts_frame.rowconfigure(3, weight=1)
         self.additional_scripts_frame.rowconfigure(4, weight=1)
+        self.additional_scripts_frame.rowconfigure(5, weight=1)
 
         additional_scripts_label = ctk.CTkLabel(
             self.additional_scripts_frame,
@@ -150,6 +151,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.update_upgrade_full.grid(row=3, column=0, sticky='w',
                                       padx=self.padx_std)
 
+        # add checkbox for clean packages
         self.clean_var = StringVar()
         provisions = self.provisions_configs["provisions"]
         default_clean_var = 'clean_packages' if provisions["clean_packages"] else ''
@@ -163,12 +165,33 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             height=1,
             width=15,
             font=self.font_std,
-            command=self._check_checkbox_status
+            command=self._check_checkbox_clean_status
         )
         clean_button.grid(row=4, column=0, sticky='w',
                           padx=self.padx_std, pady=self.pady_std)
         if self.clean_var.get():
-            self.add_edit_clean_button()
+            self._add_edit_clean_button(self.clean_var.get())
+
+        # add checkbox for reboot
+        self.reboot = StringVar()
+        provisions = self.provisions_configs["provisions"]
+        default_clean_var = 'reboot' if provisions["reboot"] else ''
+        self.clean_var.set(default_clean_var)
+        clean_button = ctk.CTkCheckBox(
+            self.additional_scripts_frame,
+            text="Reboot",
+            variable=self.reboot,
+            onvalue='reboot',
+            offvalue='',
+            height=1,
+            width=15,
+            font=self.font_std,
+            command=self._check_checkbox_reboot_status
+        )
+        clean_button.grid(row=5, column=0, sticky='w',
+                          padx=self.padx_std, pady=self.pady_std)
+        if self.reboot.get():
+            self._add_edit_reboot_button(self.reboot.get())
 
     def _add_edit_button(self):
         if self.radio_var.get() == 'update_upgrade':
@@ -195,15 +218,23 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         except (AttributeError, ValueError):
             pass
 
-    def _check_checkbox_status(self):
+    def _check_checkbox_clean_status(self):
         if self.clean_var.get():
             self.provisions_configs["provisions"]["clean_packages"] = True
-            self.add_edit_clean_button()
+            self._add_edit_clean_button()
         else:
             self.provisions_configs["provisions"]["clean_packages"] = False
             self.edit_clean_button.destroy()
 
-    def add_edit_clean_button(self):
+    def _check_checkbox_reboot_status(self):
+        if self.reboot.get():
+            self.provisions_configs["provisions"]["reboot"] = True
+            self._add_edit_reboot_button()
+        else:
+            self.provisions_configs["provisions"]["reboot"] = False
+            self.edit_reboot_button.destroy()
+
+    def _add_edit_clean_button(self):
         self.edit_clean_button = ctk.CTkButton(
             self.additional_scripts_frame,
             text='Edit',
@@ -212,6 +243,16 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             command=lambda: self._edit_additional_script(self.clean_var)
         )
         self.edit_clean_button.grid(row=4, column=1)
+
+    def _add_edit_reboot_button(self):
+        self.edit_reboot_button = ctk.CTkButton(
+            self.additional_scripts_frame,
+            text='Edit',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=lambda: self._edit_additional_script(self.reboot)
+        )
+        self.edit_reboot_button.grid(row=5, column=1)
 
     def _edit_additional_script(self, variable):
         SetUpScriptEdit(self, variable=variable,

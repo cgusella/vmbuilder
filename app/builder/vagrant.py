@@ -133,6 +133,7 @@ class Vagrant(Builder):
                 f'\tconfig.vm.define "{self.configs["hostname"]}"\n'
                 f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'
                 f'\t\tvb.name = "{self.configs["vbox_name"]}"\n'
+                '\t\tvb.gui = true\n'
                 '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
                 '\tend\n'
             )
@@ -190,6 +191,12 @@ class Vagrant(Builder):
             self._generate_provision_section(
                 src=f'{constants.SETUP_SCRIPTS_PATH}/clean_packages.sh',
                 title="CLEAN apt packages",
+                package=''
+            )
+        if self.provisions['reboot']:
+            self._generate_provision_section(
+                src=f'{constants.SETUP_SCRIPTS_PATH}/reboot.sh',
+                title="REBOOT",
                 package=''
             )
         if self.provisions['custom_scripts']:

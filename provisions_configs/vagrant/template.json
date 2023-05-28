@@ -11,6 +11,7 @@
     "packages_to_uninstall": [],
     "packages_to_config": [],
     "clean_packages": false,
+    "reboot": false,
     "custom_scripts": []
   },
   "configurations": {
