@@ -158,7 +158,8 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         vbox_hostname_frame.grid(row=2, column=0, sticky='wne',
                                  padx=self.padx_std, pady=self.pady_std,
                                  ipadx=self.ipadx_std, ipady=self.ipady_std)
-        vbox_hostname_frame.columnconfigure(0, weight=1)
+        vbox_hostname_frame.columnconfigure(0, weight=10)
+        vbox_hostname_frame.columnconfigure(1, weight=5)
         vbox_hostname_frame.rowconfigure(0, weight=1)
         vbox_hostname_frame.rowconfigure(1, weight=1)
         vbox_hostname_frame.rowconfigure(2, weight=1)
@@ -182,6 +183,16 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         )
         self.entry_vbox_name.grid(row=1, column=0, sticky='w',
                                   padx=self.padx_std, pady=self.pady_entry)
+
+        if self.provisions_configs["configurations"]['vbox_name'] in self.master.vbox_list:
+            warning_label = ctk.CTkLabel(
+                vbox_hostname_frame,
+                text='A box with this name\nalready exists',
+                text_color='red',
+                font=self.font_std
+            )
+            warning_label.grid(row=0, column=1, sticky='wens', rowspan=2,
+                               padx=self.padx_std, pady=self.pady_entry)
 
         hostname_label = ctk.CTkLabel(
             vbox_hostname_frame,
@@ -342,14 +353,20 @@ class VagrantConfigsFrame(ctk.CTkFrame):
     def _go_to_provision_page(self):
         project_name = self.entry_project_name.get()
         vbox_name = self.entry_vbox_name.get()
-        if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
-            mb.showerror('Error', f'A project with the name "{project_name}" already exists!')
-        elif not project_name:
+        # if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
+        #     mb.showwarning(
+        #         title='Project name duplicate',
+        #         message=(
+        #             f'A project with the name "{project_name}" already exists.\n'
+        #             'If you build this project you will override the old one.'
+        #         )
+        #     )
+        if not project_name:
             mb.showerror('Error', 'You must choose a name for the project!')
         elif not vbox_name:
             mb.showerror('Error', 'You must choose a name for the virtual box machine!')
-        elif vbox_name in self.master.vbox_list:
-            mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
+        # elif vbox_name in self.master.vbox_list:
+        #     mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
         elif not self.entry_default_username.get():
             mb.showerror('Error', 'You must specify the existing username of the vagrant box for vagrant to be able to connect to the machine!')
         elif not self.entry_default_password.get():

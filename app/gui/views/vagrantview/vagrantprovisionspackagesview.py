@@ -496,7 +496,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def _delete_packages(self):
         if self.packages_scrollable.get():
-            print(self.packages_scrollable.get())
             warning_text = 'This operation is irreversible.\nYou choose to delete:\n'
             for package in self.packages_scrollable.get():
                 warning_text += f'\t- {package}\n'
@@ -504,7 +503,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             yes = mb.askyesno('Confirm Delete', warning_text)
             if yes:
                 for package in self.packages_scrollable.get():
-                    print(f'{constants.PACKAGES_PATH}/{package}')
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
                 self.add_packages_frame()
         else:

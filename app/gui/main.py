@@ -11,6 +11,7 @@ from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
 from tkinter import filedialog
 from tkinter import messagebox as mb
+from PIL import Image
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -43,7 +44,7 @@ class MainFrame(ctk.CTkFrame):
         self.pack(side="top", fill="both", expand=True)
 
     def set_dimensions(self):
-        self.padx_std = (20, 20)
+        self.padx_std = (10, 10)
         self.pady_std = (10, 10)
         self.ipadx = 10
         self.ipady = 10
@@ -93,19 +94,12 @@ class MainFrame(ctk.CTkFrame):
                                padx=self.padx_std, pady=self.pad_left)
         packer_menu_frame.columnconfigure(0, weight=1)
         packer_menu_frame.columnconfigure(1, weight=1)
+        packer_menu_frame.columnconfigure(2, weight=1)
+        packer_menu_frame.columnconfigure(3, weight=1)
         packer_menu_frame.rowconfigure(0, weight=1)
         packer_menu_frame.rowconfigure(1, weight=1)
         packer_menu_frame.rowconfigure(2, weight=1)
-        add_packer_button = ctk.CTkButton(
-            packer_menu_frame,
-            text='Add Packer Project',
-            command=self.add_packer_configs,
-            font=self.font_std
-        )
-        add_packer_button.grid(row=0, column=0, columnspan=2,
-                               pady=self.pad_five,
-                               ipadx=self.ipadx_button,
-                               ipady=self.ipady_button)
+
         self.packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
             title='Packer Projects',
@@ -114,8 +108,29 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
             ])
         )
-        self.packer_projects.grid(row=1, column=0, columnspan=2, padx=self.padx_std,
-                             pady=self.pad_five)
+        self.packer_projects.grid(row=0, column=0, columnspan=4, rowspan=2,
+                                  sticky='wens',
+                                  padx=self.padx_std, pady=self.pad_five)
+
+        plus_icon = ctk.CTkImage(
+            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus.png'),
+            size=(40, 40)
+        )
+        add_packer_button = ctk.CTkButton(
+            packer_menu_frame,
+            text='',
+            command=self.add_vagrant_configs,
+            font=self.font_std,
+            image=plus_icon,
+            width=10,
+            height=10,
+            fg_color='grey86',
+            hover_color='grey76'
+        )
+        add_packer_button.grid(row=2, column=0,
+                               padx=self.padx_std, pady=self.pad_right,
+                               ipadx=self.ipadx_button,
+                               ipady=self.ipady_button)
         packer_delete_button = ctk.CTkButton(
             packer_menu_frame,
             text='Delete',
@@ -123,8 +138,8 @@ class MainFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._delete_projects('packer')
         )
-        packer_delete_button.grid(row=2, column=0,
-                                  padx=self.pad_right, pady=self.pad_right,
+        packer_delete_button.grid(row=2, column=1,
+                                  padx=self.padx_std, pady=self.pad_right,
                                   ipadx=self.ipadx_button,
                                   ipady=self.ipady_button)
         packer_load_button = ctk.CTkButton(
@@ -132,11 +147,23 @@ class MainFrame(ctk.CTkFrame):
             text='Load',
             font=self.font_std,
             width=self.width_button_std,
+            command=self._load_packer
         )
-        packer_load_button.grid(row=2, column=1,
-                                padx=self.pad_right, pady=self.pad_right,
+        packer_load_button.grid(row=2, column=2,
+                                padx=self.padx_std, pady=self.pad_right,
                                 ipadx=self.ipadx_button,
                                 ipady=self.ipady_button)
+        packer_build_button = ctk.CTkButton(
+            packer_menu_frame,
+            text='Build',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._build
+        )
+        packer_build_button.grid(row=2, column=3,
+                                 padx=self.padx_std, pady=self.pad_right,
+                                 ipadx=self.ipadx_button,
+                                 ipady=self.ipady_button)
 
         # add vagrant frame to menu
         vagrant_menu_frame = ctk.CTkFrame(self.menu_frame)
@@ -145,19 +172,11 @@ class MainFrame(ctk.CTkFrame):
         vagrant_menu_frame.columnconfigure(0, weight=1)
         vagrant_menu_frame.columnconfigure(1, weight=1)
         vagrant_menu_frame.columnconfigure(2, weight=1)
+        vagrant_menu_frame.columnconfigure(3, weight=1)
         vagrant_menu_frame.rowconfigure(0, weight=1)
         vagrant_menu_frame.rowconfigure(1, weight=1)
         vagrant_menu_frame.rowconfigure(2, weight=1)
-        add_vagrant_button = ctk.CTkButton(
-            vagrant_menu_frame,
-            text='Add Vagrant Project',
-            command=self.add_vagrant_configs,
-            font=self.font_std,
-        )
-        add_vagrant_button.grid(row=0, column=0, columnspan=3,
-                                pady=self.pad_five,
-                                ipadx=self.ipadx_button,
-                                ipady=self.ipady_button)
+
         self.vagrant_projects = ScrollableCheckboxFrame(
             master=vagrant_menu_frame,
             title='Vagrant Projects',
@@ -166,8 +185,25 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
             ])
         )
-        self.vagrant_projects.grid(row=1, column=0, columnspan=3,
+        self.vagrant_projects.grid(row=0, column=0, rowspan=2, columnspan=4,
+                                   sticky='wens',
                                    padx=self.padx_std, pady=self.pad_five)
+
+        add_vagrant_button = ctk.CTkButton(
+            vagrant_menu_frame,
+            text='',
+            command=self.add_vagrant_configs,
+            font=self.font_std,
+            image=plus_icon,
+            width=10,
+            height=10,
+            fg_color='grey86',
+            hover_color='grey76',
+        )
+        add_vagrant_button.grid(row=2, column=0,
+                                padx=self.padx_std, pady=self.pad_right,
+                                ipadx=self.ipadx_button,
+                                ipady=self.ipady_button)
         vagrant_delete_button = ctk.CTkButton(
             vagrant_menu_frame,
             text='Delete',
@@ -175,18 +211,7 @@ class MainFrame(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._delete_projects('vagrant')
         )
-        vagrant_delete_button.grid(row=2, column=0,
-                                   padx=self.padx_std, pady=self.pad_right,
-                                   ipadx=self.ipadx_button,
-                                   ipady=self.ipady_button)
-        vagrant_up_button = ctk.CTkButton(
-            vagrant_menu_frame,
-            text='Up',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=self._up
-        )
-        vagrant_up_button.grid(row=2, column=1,
+        vagrant_delete_button.grid(row=2, column=1,
                                    padx=self.padx_std, pady=self.pad_right,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
@@ -201,6 +226,17 @@ class MainFrame(ctk.CTkFrame):
                                  padx=self.padx_std, pady=self.pad_right,
                                  ipadx=self.ipadx_button,
                                  ipady=self.ipady_button)
+        vagrant_up_button = ctk.CTkButton(
+            vagrant_menu_frame,
+            text='Up',
+            font=self.font_std,
+            width=self.width_button_std,
+            command=self._up
+        )
+        vagrant_up_button.grid(row=2, column=3,
+                               padx=self.padx_std, pady=self.pad_right,
+                               ipadx=self.ipadx_button,
+                               ipady=self.ipady_button)
 
         # add switch light/dark mode
         self.switch_var = ctk.StringVar(value="on")
@@ -333,6 +369,12 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
                     shell=True,
                 )
             os.chdir(constants.VMBUILDER_PATH)
+
+    def _load_packer(self):
+        pass
+
+    def _build(self):
+        pass
 
     def add_packer_configs(self):
         pass

@@ -47,6 +47,8 @@ class Vagrant(Builder):
         """
         project_folder = f'{self.machine_path}/{self.configs["project_name"]}'
         # create project folder
+        if os.path.exists(project_folder):
+            shutil.rmtree(project_folder)
         os.mkdir(project_folder)
 
         # create upload folder
