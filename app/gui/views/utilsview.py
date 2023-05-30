@@ -107,16 +107,18 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
 
         for count, value in enumerate(self.values):
             # color = '#3996D5'
-            color = '#333333'
+            btn_color = ['#cfcfcf', '#333333']
+            txt_color = ['#333333', '#cfcfcf']
             package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{value}/{self.operation}.sh')
             if package_is_empty:
-                color = 'red'
+                btn_color = 'red'
             checkbox = ctk.CTkButton(
                 self,
                 text=value,
                 font=master.master.master.font_packages,
                 command=lambda args=(value, self.operation): master.master._open_text_window(*args),
-                fg_color=color,
+                fg_color=btn_color,
+                text_color=txt_color,
                 anchor='w'
             )
             checkbox.grid(row=count, column=0, padx=10, pady=(10, 0),

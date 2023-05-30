@@ -383,7 +383,10 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
                                     columnspan=self.columns-1, rowspan=2)
                 wid = terminal_frame.winfo_id()
                 os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
-                os.system(f'xterm -fs 20 -into {wid} -geometry 218x38 -sb -e vagrant up &')
+                # os.system(f'xterm -into {wid} -geometry 218x38 -sb -c "vagrant up ; while true ; do sleep 100 ; done" &')
+                os.system(f'xterm -into {wid} -geometry 218x38 -sb -hold -e /bin/bash vagrant up &')
+
+                
                 os.chdir(f'{constants.VMBUILDER_PATH}')
 
     def _load_packer(self):

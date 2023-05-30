@@ -71,16 +71,16 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.conf_label.grid(row=1, column=0, sticky='w')
 
     def add_project_name(self):
-        project_name_frame = ctk.CTkFrame(self)
-        project_name_frame.grid(row=1, column=0, sticky='wne',
+        self.project_name_frame = ctk.CTkFrame(self)
+        self.project_name_frame.grid(row=1, column=0, sticky='wne',
                                 padx=self.padx_std, pady=self.pady_std,
                                 ipadx=self.ipadx_std, ipady=self.ipady_std)
-        project_name_frame.columnconfigure(0, weight=10)
-        project_name_frame.columnconfigure(1, weight=1)
-        project_name_frame.rowconfigure(0, weight=1)
-        project_name_frame.rowconfigure(1, weight=1)
+        self.project_name_frame.columnconfigure(0, weight=10)
+        self.project_name_frame.columnconfigure(1, weight=1)
+        self.project_name_frame.rowconfigure(0, weight=1)
+        self.project_name_frame.rowconfigure(1, weight=1)
         project_name_label = ctk.CTkLabel(
-            project_name_frame,
+            self.project_name_frame,
             text="New Project Name:",
             font=self.font_std
         )
@@ -88,7 +88,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                                 padx=self.padx_std, pady=self.pady_title,
                                 sticky='w')
         self.entry_project_name = ctk.CTkEntry(
-            project_name_frame,
+            self.project_name_frame,
             height=self.entry_height_std,
             width=self.entry_width_std,
             font=self.font_std
@@ -100,15 +100,32 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.entry_project_name.grid(row=1, column=0, columnspan=2,
                                      padx=self.padx_std, pady=self.pady_entry,
                                      sticky='w')
+    
         if self.provisions_configs["configurations"]["project_name"] in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            warning_label = ctk.CTkLabel(
-                project_name_frame,
+            self.warning_label = ctk.CTkLabel(
+                self.project_name_frame,
                 text='A project with this name\nalready exists',
                 text_color='red',
                 font=self.font_std
             )
-            warning_label.grid(row=1, column=1, sticky='e',
-                               padx=self.padx_std, pady=self.pady_entry)
+            self.warning_label.grid(row=1, column=1, sticky='e',
+                               padx=self.padx_std, pady=0)
+        self.entry_project_name.bind("<KeyRelease>", self.project_name_check)
+
+    def project_name_check(self, e):
+        project_name_typed = self.entry_project_name.get()
+        if project_name_typed not in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
+            self.warning_label.destroy()
+        if project_name_typed in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
+            self.warning_label = ctk.CTkLabel(
+               self.project_name_frame,
+                text='A project with this name\nalready exists',
+                text_color='red',
+                font=self.font_std
+            )
+            self.warning_label.grid(row=1, column=1, sticky='e',
+                               padx=self.padx_std, pady=0) 
+         
 
     def add_select_vagrant_box(self):
         """Select vagrant boxes.
