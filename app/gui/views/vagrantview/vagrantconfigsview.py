@@ -75,7 +75,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         project_name_frame.grid(row=1, column=0, sticky='wne',
                                 padx=self.padx_std, pady=self.pady_std,
                                 ipadx=self.ipadx_std, ipady=self.ipady_std)
-        project_name_frame.columnconfigure(0, weight=1)
+        project_name_frame.columnconfigure(0, weight=10)
         project_name_frame.columnconfigure(1, weight=1)
         project_name_frame.rowconfigure(0, weight=1)
         project_name_frame.rowconfigure(1, weight=1)
@@ -100,6 +100,15 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.entry_project_name.grid(row=1, column=0, columnspan=2,
                                      padx=self.padx_std, pady=self.pady_entry,
                                      sticky='w')
+        if self.provisions_configs["configurations"]["project_name"] in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
+            warning_label = ctk.CTkLabel(
+                project_name_frame,
+                text='A project with this name\nalready exists',
+                text_color='red',
+                font=self.font_std
+            )
+            warning_label.grid(row=1, column=1, sticky='e',
+                               padx=self.padx_std, pady=self.pady_entry)
 
     def add_select_vagrant_box(self):
         """Select vagrant boxes.
@@ -191,7 +200,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                 text_color='red',
                 font=self.font_std
             )
-            warning_label.grid(row=0, column=1, sticky='wens', rowspan=2,
+            warning_label.grid(row=1, column=1, sticky='e',
                                padx=self.padx_std, pady=self.pady_entry)
 
         hostname_label = ctk.CTkLabel(

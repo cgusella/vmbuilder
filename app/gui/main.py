@@ -114,7 +114,7 @@ class MainFrame(ctk.CTkFrame):
 
         plus_icon = ctk.CTkImage(
             light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus.png'),
-            size=(40, 40)
+            size=(38, 38)
         )
         add_packer_button = ctk.CTkButton(
             packer_menu_frame,
