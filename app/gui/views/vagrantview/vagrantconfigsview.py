@@ -33,7 +33,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.ipadx_button = 5
         self.ipady_button = 5
         self.entry_height_std = 50
-        self.entry_width_std = 300
+        self.entry_width_std = 380
 
     def set_grid(self):
         self.grid()
@@ -91,12 +91,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             self.project_name_frame,
             height=self.entry_height_std,
             width=self.entry_width_std,
-            font=self.font_std
+            font=self.font_std,
+            placeholder_text='Project name to be created'
         )
-        self.entry_project_name.insert(
-            0,
-            self.provisions_configs["configurations"]["project_name"]
-        )
+        if self.provisions_configs["configurations"]["project_name"] != "Project Name":
+            self.entry_project_name.insert(
+                0,
+                self.provisions_configs["configurations"]["project_name"]
+            )
         self.entry_project_name.grid(row=1, column=0, columnspan=2,
                                      padx=self.padx_std, pady=self.pady_entry,
                                      sticky='w')
@@ -201,12 +203,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             self.vbox_hostname_frame,
             font=self.font_std,
             width=self.entry_width_std,
-            height=self.entry_height_std
+            height=self.entry_height_std,
+            placeholder_text='Virtualbox name to be created'
         )
-        self.entry_vbox_name.insert(
-            0,
-            self.provisions_configs["configurations"]['vbox_name']
-        )
+        if self.provisions_configs["configurations"]['vbox_name'] != "Virtualbox Name":
+            self.entry_vbox_name.insert(
+                0,
+                self.provisions_configs["configurations"]['vbox_name']
+            )
         self.entry_vbox_name.grid(row=1, column=0, sticky='w',
                                   padx=self.padx_std, pady=self.pady_entry)
         
@@ -232,16 +236,19 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             self.vbox_hostname_frame,
             font=self.font_std,
             width=self.entry_width_std,
-            height=self.entry_height_std
+            height=self.entry_height_std,
+            placeholder_text='Hostname for the new VM'
         )
-        self.entry_hostname.insert(
-            0,
-            self.provisions_configs["configurations"]['hostname']
-        )
+        if self.provisions_configs["configurations"]['hostname'] != "Hostname":
+            self.entry_hostname.insert(
+                0,
+                self.provisions_configs["configurations"]['hostname']
+            )
         self.entry_hostname.grid(row=3, column=0, sticky='w',
                                  padx=self.padx_std, pady=self.pady_entry)
 
     def vbox_name_check(self, e):
+        print(self.master.vbox_list)
         vbox_name_typed = self.entry_vbox_name.get()
         if vbox_name_typed not in self.master.vbox_list:
             self.warning_label_vbox.destroy()
@@ -319,12 +326,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             credentials_frame,
             font=self.font_std,
             width=self.entry_width_std,
-            height=self.entry_height_std
+            height=self.entry_height_std,
+            placeholder_text="Existing user on the vagrant box"
         )
-        self.entry_default_username.insert(
-            0,
-            self.provisions_configs["credentials"]['username']
-        )
+        if self.provisions_configs["credentials"]['username'] != "Username":
+            self.entry_default_username.insert(
+                0,
+                self.provisions_configs["credentials"]['username']
+            )
         self.entry_default_username.grid(row=1, column=0, sticky='w',
                                          padx=self.padx_std,
                                          pady=self.pady_entry)
@@ -340,12 +349,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             credentials_frame,
             font=self.font_std,
             width=self.entry_width_std,
-            height=self.entry_height_std
+            height=self.entry_height_std,
+            placeholder_text="Password of the previous user"
         )
-        self.entry_default_password.insert(
-            0,
-            self.provisions_configs["credentials"]['password']
-        )
+        if self.provisions_configs["credentials"]['password'] != "Password":
+            self.entry_default_password.insert(
+                0,
+                self.provisions_configs["credentials"]['password']
+            )
         self.entry_default_password.grid(row=3, column=0, sticky='w',
                                          padx=self.padx_std,
                                          pady=self.pady_entry)
@@ -361,12 +372,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             credentials_frame,
             font=self.font_std,
             width=self.entry_width_std,
-            height=self.entry_height_std
+            height=self.entry_height_std,
+            placeholder_text="An extra user to be created"
         )
-        self.entry_extra_user.insert(
-            0,
-            self.provisions_configs["credentials"]['extra_user']
-        )
+        if self.provisions_configs["credentials"]['extra_user']:
+            self.entry_extra_user.insert(
+                0,
+                self.provisions_configs["credentials"]['extra_user']
+            )
         self.entry_extra_user.grid(row=5, column=0, sticky='w',
                                    padx=self.padx_std, pady=self.pady_entry)
 
