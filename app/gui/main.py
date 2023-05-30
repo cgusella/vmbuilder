@@ -3,7 +3,6 @@ import customtkinter as ctk
 import json
 import os
 import shutil
-import subprocess
 from argumentparser.helper import get_local_vagrant_boxes
 from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.views.utilsview import ScrollableCheckboxFrame
@@ -56,7 +55,6 @@ class MainFrame(ctk.CTkFrame):
         self.pad_five = (5, 5)
         self.padx_btn_right = (0, 5)
         self.padx_btn_left = (5, 0)
-
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -277,7 +275,7 @@ class MainFrame(ctk.CTkFrame):
     def add_initial_message(self):
         self.initial_message_frame = ctk.CTkScrollableFrame(self)
         self.initial_message_frame.__init__(self)
-        self.initial_message_frame.grid(row=0, column=1, rowspan=self.rows,
+        self.initial_message_frame.grid(row=0, column=1, rowspan=2,
                                         columnspan=self.columns-1,
                                         sticky='wnes')
         self.initial_message_frame.columnconfigure(0, weight=1)
@@ -378,12 +376,15 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
             if len(project_name) > 1:
                 mb.showerror('Up Error', 'You must select just one project to up')
             else:
+                self.destroy()
+                self.__init__(self.master, self.local_vagrant_boxes, vbox_list=self.vbox_list)
+                terminal_frame = ctk.CTkFrame(self)
+                terminal_frame.grid(row=2, column=1, sticky='wens',
+                                    columnspan=self.columns-1, rowspan=2)
+                wid = terminal_frame.winfo_id()
                 os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
-                subprocess.run(
-                    "vagrant up",
-                    shell=True,
-                )
-            os.chdir(constants.VMBUILDER_PATH)
+                os.system(f'xterm -fs 20 -into {wid} -geometry 218x38 -sb -e vagrant up &')
+                os.chdir(f'{constants.VMBUILDER_PATH}')
 
     def _load_packer(self):
         pass
@@ -399,6 +400,7 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
 
 
 if __name__ == "__main__":
+    os.chdir(constants.VMBUILDER_PATH)
     # we launch here any expansive command that took
     # execution time that slower the gui
     local_vagrant_boxes = get_local_vagrant_boxes()

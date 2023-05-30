@@ -33,7 +33,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.ipadx_button = 5
         self.ipady_button = 5
         self.entry_height_std = 50
-        self.entry_width_std = 400
+        self.entry_width_std = 300
 
     def set_grid(self):
         self.grid()

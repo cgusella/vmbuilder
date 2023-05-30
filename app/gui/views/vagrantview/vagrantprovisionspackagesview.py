@@ -170,7 +170,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         clean_button.grid(row=4, column=0, sticky='w',
                           padx=self.padx_std, pady=self.pady_std)
         if self.clean_var.get():
-            self._add_edit_clean_button(self.clean_var.get())
+            self._add_edit_clean_button()
 
         # add checkbox for reboot
         self.reboot = StringVar()
