@@ -1,2 +1,2 @@
-sudo reboot
-
+#!/bin/bash
+reboot

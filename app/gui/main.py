@@ -115,26 +115,21 @@ class MainFrame(ctk.CTkFrame):
                                   sticky='wens',
                                   padx=self.padx_std, pady=self.pad_five)
 
-        plus_icon_light = ctk.CTkImage(
+        plus_icon = ctk.CTkImage(
             light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_light.png'),
+            dark_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_dark.png'),
             size=(40, 40)
         )
-        remove_icon_light = ctk.CTkImage(
+        remove_icon = ctk.CTkImage(
             light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_light.png'),
+            dark_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_dark.png'),
             size=(40, 40)
         )
-        # plus_icon_dark = ctk.CTkImage(
-        #     light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_dark.png'),
-        #     size=(40, 40)
-        # )
-        # remove_icon_dark = ctk.CTkImage(
-        #     light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_dark.png'),
-        #     size=(40, 40)
-        # )
+
         add_packer_button = ctk.CTkButton(
             packer_menu_frame,
             text='',
-            image=plus_icon_light,
+            image=plus_icon,
             width=10,
             height=10,
             fg_color=['grey86', 'grey17'],
@@ -148,7 +143,7 @@ class MainFrame(ctk.CTkFrame):
         packer_delete_button = ctk.CTkButton(
             packer_menu_frame,
             text='',
-            image=remove_icon_light,
+            image=remove_icon,
             width=10,
             height=10,
             fg_color=['grey86', 'grey17'],
@@ -211,7 +206,7 @@ class MainFrame(ctk.CTkFrame):
             text='',
             command=self.add_vagrant_configs,
             font=self.font_std,
-            image=plus_icon_light,
+            image=plus_icon,
             width=10,
             height=10,
             fg_color=['grey86', 'grey17'],
@@ -224,7 +219,7 @@ class MainFrame(ctk.CTkFrame):
         vagrant_delete_button = ctk.CTkButton(
             vagrant_menu_frame,
             text='',
-            image=remove_icon_light,
+            image=remove_icon,
             width=10,
             height=10,
             fg_color=['grey86', 'grey17'],

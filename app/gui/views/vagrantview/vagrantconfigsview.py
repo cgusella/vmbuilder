@@ -362,20 +362,10 @@ class VagrantConfigsFrame(ctk.CTkFrame):
     def _go_to_provision_page(self):
         project_name = self.entry_project_name.get()
         vbox_name = self.entry_vbox_name.get()
-        # if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
-        #     mb.showwarning(
-        #         title='Project name duplicate',
-        #         message=(
-        #             f'A project with the name "{project_name}" already exists.\n'
-        #             'If you build this project you will override the old one.'
-        #         )
-        #     )
         if not project_name:
             mb.showerror('Error', 'You must choose a name for the project!')
         elif not vbox_name:
             mb.showerror('Error', 'You must choose a name for the virtual box machine!')
-        # elif vbox_name in self.master.vbox_list:
-        #     mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
         elif not self.entry_default_username.get():
             mb.showerror('Error', 'You must specify the existing username of the vagrant box for vagrant to be able to connect to the machine!')
         elif not self.entry_default_password.get():

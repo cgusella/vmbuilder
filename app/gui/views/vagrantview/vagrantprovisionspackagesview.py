@@ -175,9 +175,9 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         # add checkbox for reboot
         self.reboot = StringVar()
         provisions = self.provisions_configs["provisions"]
-        default_clean_var = 'reboot' if provisions["reboot"] else ''
-        self.clean_var.set(default_clean_var)
-        clean_button = ctk.CTkCheckBox(
+        default_reboot_var = 'reboot' if provisions["reboot"] else ''
+        self.reboot.set(default_reboot_var)
+        reboot_checkbox = ctk.CTkCheckBox(
             self.additional_scripts_frame,
             text="Reboot",
             variable=self.reboot,
@@ -188,10 +188,10 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             font=self.font_std,
             command=self._check_checkbox_reboot_status
         )
-        clean_button.grid(row=5, column=0, sticky='w',
-                          padx=self.padx_std, pady=self.pady_std)
+        reboot_checkbox.grid(row=5, column=0, sticky='w',
+                             padx=self.padx_std, pady=self.pady_std)
         if self.reboot.get():
-            self._add_edit_reboot_button(self.reboot.get())
+            self._add_edit_reboot_button()
 
     def _add_edit_button(self):
         if self.radio_var.get() == 'update_upgrade':
@@ -551,30 +551,43 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def build(self):
         try:
-            provisions_configs_reader = ProvisionConfigReader(
-                self.provisions_configs,
-            )
-            provisions_configs_reader.check_packages_existence_for()
-
-            provisions_configs_reader.check_package_upload_files_existence()
-            provisions_configs_reader.check_upload_file_name_duplicates()
-            provisions_configs_reader.check_custom_script_existence()
-            provisions_configs_reader.check_update_upgrade_type()
-            provisions_configs_reader.check_if_clean_is_selected()
-            vagrant_builder = Vagrant(self.provisions_configs)
-            vagrant_builder.set_configs()
-            vagrant_builder.set_provisions()
-            vagrant_builder.set_credentials()
-            vagrant_builder.create_project_folder()
-            vagrant_builder.generate_main_file()
-            mb.showinfo(
-                title='Well done!',
-                message=(
-                    f'Your new "{self.provisions_configs["configurations"]["project_name"]}" machine '
-                    'was succesfully created'
+            project_name = self.provisions_configs["configurations"]["project_name"]
+            if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
+                mb.showwarning(
+                    title='Project name duplicate',
+                    message=(
+                        f'A project with the name "{project_name}" already exists.\n'
+                        'If you build this project you will override the old one.'
+                    )
                 )
-            )
-            self.master.add_lateral_menu()
+            vbox_name = self.provisions_configs["configurations"]["vbox_name"]
+            if vbox_name in self.master.vbox_list:
+                mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
+            else:
+                provisions_configs_reader = ProvisionConfigReader(
+                    self.provisions_configs,
+                )
+                provisions_configs_reader.check_packages_existence_for()
+
+                provisions_configs_reader.check_package_upload_files_existence()
+                provisions_configs_reader.check_upload_file_name_duplicates()
+                provisions_configs_reader.check_custom_script_existence()
+                provisions_configs_reader.check_update_upgrade_type()
+                provisions_configs_reader.check_if_clean_is_selected()
+                vagrant_builder = Vagrant(self.provisions_configs)
+                vagrant_builder.set_configs()
+                vagrant_builder.set_provisions()
+                vagrant_builder.set_credentials()
+                vagrant_builder.create_project_folder()
+                vagrant_builder.generate_main_file()
+                mb.showinfo(
+                    title='Well done!',
+                    message=(
+                        f'Your new "{self.provisions_configs["configurations"]["project_name"]}" machine '
+                        'was succesfully created'
+                    )
+                )
+                self.master.add_lateral_menu()
         except (
             NoFileToUploadError,
             PackageNotFoundError,
