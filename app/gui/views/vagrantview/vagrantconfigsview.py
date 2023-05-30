@@ -102,28 +102,28 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                                      sticky='w')
     
         if self.provisions_configs["configurations"]["project_name"] in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            self.warning_label = ctk.CTkLabel(
+            self.warning_label_project = ctk.CTkLabel(
                 self.project_name_frame,
                 text='A project with this name\nalready exists',
                 text_color='red',
                 font=self.font_std
             )
-            self.warning_label.grid(row=1, column=1, sticky='e',
+            self.warning_label_project.grid(row=1, column=1, sticky='e',
                                padx=self.padx_std, pady=0)
         self.entry_project_name.bind("<KeyRelease>", self.project_name_check)
 
     def project_name_check(self, e):
         project_name_typed = self.entry_project_name.get()
         if project_name_typed not in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            self.warning_label.destroy()
+            self.warning_label_project.destroy()
         if project_name_typed in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            self.warning_label = ctk.CTkLabel(
+            self.warning_label_project = ctk.CTkLabel(
                self.project_name_frame,
                 text='A project with this name\nalready exists',
                 text_color='red',
                 font=self.font_std
             )
-            self.warning_label.grid(row=1, column=1, sticky='e',
+            self.warning_label_project.grid(row=1, column=1, sticky='e',
                                padx=self.padx_std, pady=0) 
          
 
@@ -180,25 +180,25 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                               padx=self.padx_std, pady=self.pady_std)
 
     def add_vbox_hostname(self):
-        vbox_hostname_frame = ctk.CTkFrame(self)
-        vbox_hostname_frame.grid(row=2, column=0, sticky='wne',
+        self.vbox_hostname_frame = ctk.CTkFrame(self)
+        self.vbox_hostname_frame.grid(row=2, column=0, sticky='wne',
                                  padx=self.padx_std, pady=self.pady_std,
                                  ipadx=self.ipadx_std, ipady=self.ipady_std)
-        vbox_hostname_frame.columnconfigure(0, weight=10)
-        vbox_hostname_frame.columnconfigure(1, weight=5)
-        vbox_hostname_frame.rowconfigure(0, weight=1)
-        vbox_hostname_frame.rowconfigure(1, weight=1)
-        vbox_hostname_frame.rowconfigure(2, weight=1)
-        vbox_hostname_frame.rowconfigure(3, weight=1)
+        self.vbox_hostname_frame.columnconfigure(0, weight=10)
+        self.vbox_hostname_frame.columnconfigure(1, weight=1)
+        self.vbox_hostname_frame.rowconfigure(0, weight=1)
+        self.vbox_hostname_frame.rowconfigure(1, weight=1)
+        self.vbox_hostname_frame.rowconfigure(2, weight=1)
+        self.vbox_hostname_frame.rowconfigure(3, weight=1)
         vbox_name_label = ctk.CTkLabel(
-            vbox_hostname_frame,
+            self.vbox_hostname_frame,
             text="Virtual box name:",
             font=self.font_std
         )
         vbox_name_label.grid(row=0, column=0, columnspan=2, sticky='w',
                              padx=self.padx_std, pady=self.pady_title)
         self.entry_vbox_name = ctk.CTkEntry(
-            vbox_hostname_frame,
+            self.vbox_hostname_frame,
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std
@@ -209,26 +209,27 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         )
         self.entry_vbox_name.grid(row=1, column=0, sticky='w',
                                   padx=self.padx_std, pady=self.pady_entry)
-
+        
         if self.provisions_configs["configurations"]['vbox_name'] in self.master.vbox_list:
-            warning_label = ctk.CTkLabel(
-                vbox_hostname_frame,
+            self.warning_label_vbox = ctk.CTkLabel(
+                self.vbox_hostname_frame,
                 text='A box with this name\nalready exists',
                 text_color='red',
                 font=self.font_std
             )
-            warning_label.grid(row=1, column=1, sticky='e',
-                               padx=self.padx_std, pady=self.pady_entry)
+            self.warning_label_vbox.grid(row=1, column=1, sticky='e',
+                               padx=self.padx_std, pady=0)
+        self.entry_vbox_name.bind("<KeyRelease>", self.vbox_name_check)
 
         hostname_label = ctk.CTkLabel(
-            vbox_hostname_frame,
+            self.vbox_hostname_frame,
             text="Hostname:",
             font=self.font_std
         )
         hostname_label.grid(row=2, column=0, sticky='w',
                             padx=self.padx_std, pady=self.pady_title)
         self.entry_hostname = ctk.CTkEntry(
-            vbox_hostname_frame,
+            self.vbox_hostname_frame,
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std
@@ -239,6 +240,20 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         )
         self.entry_hostname.grid(row=3, column=0, sticky='w',
                                  padx=self.padx_std, pady=self.pady_entry)
+
+    def vbox_name_check(self, e):
+        vbox_name_typed = self.entry_vbox_name.get()
+        if vbox_name_typed not in self.master.vbox_list:
+            self.warning_label_vbox.destroy()
+        if vbox_name_typed in self.master.vbox_list:
+            self.warning_label_vbox = ctk.CTkLabel(
+                self.vbox_hostname_frame,
+                text='A box with this name\nalready exists',
+                text_color='red',
+                font=self.font_std
+            )
+            self.warning_label_vbox.grid(row=1, column=1, sticky='e',
+                               padx=self.padx_std, pady=0)
 
     def add_connection_mode_frame(self):
         connection_mode_frame = ctk.CTkFrame(self)
