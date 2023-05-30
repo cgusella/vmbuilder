@@ -252,20 +252,37 @@ class MainFrame(ctk.CTkFrame):
                                ipadx=self.ipadx_button,
                                ipady=self.ipady_button)
 
+        self.off_on_switch_frame = ctk.CTkFrame(self.menu_frame, width=50, fg_color='transparent')
+        self.off_on_switch_frame.grid(row=5, column=0,
+                                padx=self.padx_std, pady=0)
+        self.off_on_switch_frame.rowconfigure(0, weight=1)
+        self.off_on_switch_frame.columnconfigure(0, weight=1)
+        self.off_on_switch_frame.columnconfigure(1, weight=1)
+        self.off_on_switch_frame.columnconfigure(2, weight=1)
+
+        off_title = ctk.CTkLabel(
+            self.off_on_switch_frame,
+            text='OFF',
+            font=ctk.CTkFont(family=self.family, size=14)
+        )
+        off_title.grid(row=0, column=0,
+                           padx=(0, 5), pady=0,
+                           ipadx=0, ipady=0)
+
         # add switch light/dark mode
         self.switch_var = ctk.StringVar(value="on")
         swith_light_dark_mode = ctk.CTkSwitch(
-            self.menu_frame,
-            text='Switch theme',
-            font=self.title_std,
+            self.off_on_switch_frame,
+            text='ON',
+            font=ctk.CTkFont(family=self.family, size=14),
             variable=self.switch_var,
             onvalue='on',
             offvalue='off',
             command=self._swith_light_dark_mode
         )
-        swith_light_dark_mode.grid(row=5, column=0,
-                                   ipadx=self.ipadx_button, ipady=self.ipadx_button,
-                                   pady=self.pad_right)
+        swith_light_dark_mode.grid(row=0, column=1, 
+                           padx=(0, 0), pady=0,
+                           ipadx=0, ipady=0)
 
     def _swith_light_dark_mode(self):
         if self.switch_var.get() == 'on':
