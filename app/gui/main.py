@@ -54,6 +54,9 @@ class MainFrame(ctk.CTkFrame):
         self.pad_left = (10, 5)
         self.pad_right = (5, 10)
         self.pad_five = (5, 5)
+        self.padx_btn_right = (0, 5)
+        self.padx_btn_left = (5, 0)
+
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -112,36 +115,50 @@ class MainFrame(ctk.CTkFrame):
                                   sticky='wens',
                                   padx=self.padx_std, pady=self.pad_five)
 
-        plus_icon = ctk.CTkImage(
-            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus.png'),
-            size=(38, 38)
+        plus_icon_light = ctk.CTkImage(
+            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_light.png'),
+            size=(40, 40)
         )
+        remove_icon_light = ctk.CTkImage(
+            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_light.png'),
+            size=(40, 40)
+        )
+        # plus_icon_dark = ctk.CTkImage(
+        #     light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_dark.png'),
+        #     size=(40, 40)
+        # )
+        # remove_icon_dark = ctk.CTkImage(
+        #     light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_dark.png'),
+        #     size=(40, 40)
+        # )
         add_packer_button = ctk.CTkButton(
             packer_menu_frame,
             text='',
-            command=self.add_vagrant_configs,
-            font=self.font_std,
-            image=plus_icon,
+            image=plus_icon_light,
             width=10,
             height=10,
-            fg_color='grey86',
-            hover_color='grey76'
+            fg_color=['grey86', 'grey17'],
+            hover_color=['grey76', 'grey7'],
+            command=self.add_vagrant_configs
         )
         add_packer_button.grid(row=2, column=0,
-                               padx=self.padx_std, pady=self.pad_right,
-                               ipadx=self.ipadx_button,
-                               ipady=self.ipady_button)
+                               padx=self.padx_btn_left, pady=self.pad_right,
+                               ipadx=0,
+                               ipady=0)
         packer_delete_button = ctk.CTkButton(
             packer_menu_frame,
-            text='Delete',
-            font=self.font_std,
-            width=self.width_button_std,
+            text='',
+            image=remove_icon_light,
+            width=10,
+            height=10,
+            fg_color=['grey86', 'grey17'],
+            hover_color=['grey76', 'grey7'],
             command=lambda: self._delete_projects('packer')
         )
         packer_delete_button.grid(row=2, column=1,
-                                  padx=self.padx_std, pady=self.pad_right,
-                                  ipadx=self.ipadx_button,
-                                  ipady=self.ipady_button)
+                                  padx=self.padx_btn_left, pady=self.pad_right,
+                                  ipadx=0,
+                                  ipady=0)
         packer_load_button = ctk.CTkButton(
             packer_menu_frame,
             text='Load',
@@ -194,27 +211,30 @@ class MainFrame(ctk.CTkFrame):
             text='',
             command=self.add_vagrant_configs,
             font=self.font_std,
-            image=plus_icon,
+            image=plus_icon_light,
             width=10,
             height=10,
-            fg_color='grey86',
-            hover_color='grey76',
+            fg_color=['grey86', 'grey17'],
+            hover_color=['grey76', 'grey7']
         )
         add_vagrant_button.grid(row=2, column=0,
-                                padx=self.padx_std, pady=self.pad_right,
-                                ipadx=self.ipadx_button,
-                                ipady=self.ipady_button)
+                                padx=self.padx_btn_left, pady=self.pad_right,
+                                ipadx=0,
+                                ipady=0)
         vagrant_delete_button = ctk.CTkButton(
             vagrant_menu_frame,
-            text='Delete',
-            font=self.font_std,
-            width=self.width_button_std,
+            text='',
+            image=remove_icon_light,
+            width=10,
+            height=10,
+            fg_color=['grey86', 'grey17'],
+            hover_color=['grey76', 'grey7'],
             command=lambda: self._delete_projects('vagrant')
         )
         vagrant_delete_button.grid(row=2, column=1,
-                                   padx=self.padx_std, pady=self.pad_right,
-                                   ipadx=self.ipadx_button,
-                                   ipady=self.ipady_button)
+                                   padx=self.padx_btn_left, pady=self.pad_right,
+                                   ipadx=0,
+                                   ipady=0)
         vagrant_load_button = ctk.CTkButton(
             vagrant_menu_frame,
             text='Load',
