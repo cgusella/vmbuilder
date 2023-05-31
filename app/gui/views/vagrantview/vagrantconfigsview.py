@@ -1,12 +1,16 @@
 import constants
 import os
 import customtkinter as ctk
+from argumentparser.helper import get_local_vagrant_boxes
+from existencecontroller.controller import launch_vboxmanage_lst_command
 from tkinter import messagebox as mb
 from tkinter import StringVar
 
 
 class VagrantConfigsFrame(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
+        self.local_vagrant_boxes = get_local_vagrant_boxes()
+        self.vbox_list = launch_vboxmanage_lst_command()
         self.master = master
         ctk.CTkFrame.__init__(self, master)
         self.provisions_configs = provisions_configs
@@ -75,9 +79,10 @@ class VagrantConfigsFrame(ctk.CTkFrame):
     def add_project_name(self):
         self.project_name_frame = ctk.CTkFrame(self)
         self.project_name_frame.grid(row=1, column=0, sticky='wne',
-                                padx=self.padx_std, pady=self.pady_std,
-                                ipadx=self.ipadx_std, ipady=self.ipady_std)
-        self.project_name_frame.columnconfigure(0, weight=10)
+                                     padx=self.padx_std, pady=self.pady_std,
+                                     ipadx=self.ipadx_std, ipady=self.ipady_std)
+        # self.project_name_frame.grid_propagate(False)
+        self.project_name_frame.columnconfigure(0, weight=1)
         self.project_name_frame.columnconfigure(1, weight=1)
         self.project_name_frame.rowconfigure(0, weight=1)
         self.project_name_frame.rowconfigure(1, weight=1)
@@ -104,6 +109,8 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.entry_project_name.grid(row=1, column=0, columnspan=2,
                                      padx=self.padx_std, pady=self.pady_entry,
                                      sticky='w')
+        self.entry_project_name.bind("<Configure>", self._project_name_check)
+        self.entry_project_name.bind("<KeyRelease>", self._project_name_check)
 
         if self.provisions_configs["configurations"]["project_name"] in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
             self.warning_label_project = ctk.CTkLabel(
@@ -113,13 +120,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                 font=self.font_std
             )
             self.warning_label_project.grid(row=1, column=1, sticky='e',
-                               padx=self.padx_std, pady=0)
-        self.entry_project_name.bind("<KeyRelease>", self.project_name_check)
+                                            padx=self.padx_std, pady=0)
 
-    def project_name_check(self, e):
+    def _project_name_check(self, e):
         project_name_typed = self.entry_project_name.get()
         if project_name_typed not in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            self.warning_label_project.destroy()
+            self.entry_project_name.configure(border_color=["#979DA2", "#565B5E"])
+            if self.warning_label_project.winfo_exists():
+                self.warning_label_project.destroy()
         if project_name_typed in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
             self.warning_label_project = ctk.CTkLabel(
                 self.project_name_frame,
@@ -129,6 +137,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             )
             self.warning_label_project.grid(row=1, column=1, sticky='e',
                                             padx=self.padx_std, pady=0)
+            self.entry_project_name.configure(border_color='red')
 
     def add_select_vagrant_box(self):
         """Select vagrant boxes.
@@ -141,7 +150,6 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         vagrant_box_frame.columnconfigure(0, weight=1)
         vagrant_box_frame.rowconfigure(0, weight=1)
         vagrant_box_frame.rowconfigure(1, weight=1)
-        local_vagrant_boxes = self.master.local_vagrant_boxes
 
         vagrant_box_label = ctk.CTkLabel(
             vagrant_box_frame,
@@ -156,7 +164,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         vagrant_drop = ctk.CTkComboBox(
             master=vagrant_box_frame,
             variable=self.vagrant_box,
-            values=local_vagrant_boxes.split("\n"),
+            values=self.local_vagrant_boxes.split("\n"),
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std,
@@ -170,7 +178,8 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.vbox_hostname_frame.grid(row=2, column=0, sticky='wne',
                                       padx=self.padx_std, pady=self.pady_std,
                                       ipadx=self.ipadx_std, ipady=self.ipady_std)
-        self.vbox_hostname_frame.columnconfigure(0, weight=10)
+        self.vbox_hostname_frame.grid_propagate(False)
+        self.vbox_hostname_frame.columnconfigure(0, weight=1)
         self.vbox_hostname_frame.columnconfigure(1, weight=1)
         self.vbox_hostname_frame.rowconfigure(0, weight=1)
         self.vbox_hostname_frame.rowconfigure(1, weight=1)
@@ -197,8 +206,10 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             )
         self.entry_vbox_name.grid(row=1, column=0, sticky='w',
                                   padx=self.padx_std, pady=self.pady_entry)
+        self.entry_vbox_name.bind("<Configure>", self._vbox_name_check)
+        self.entry_vbox_name.bind("<KeyRelease>", self._vbox_name_check)
 
-        if self.provisions_configs["configurations"]['vbox_name'] in self.master.vbox_list:
+        if self.provisions_configs["configurations"]['vbox_name'] in self.vbox_list:
             self.warning_label_vbox = ctk.CTkLabel(
                 self.vbox_hostname_frame,
                 text='A box with this name\nalready exists',
@@ -206,8 +217,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                 font=self.font_std
             )
             self.warning_label_vbox.grid(row=1, column=1, sticky='e',
-                               padx=self.padx_std, pady=0)
-        self.entry_vbox_name.bind("<KeyRelease>", self.vbox_name_check)
+                                         padx=self.padx_std, pady=0)
 
         hostname_label = ctk.CTkLabel(
             self.vbox_hostname_frame,
@@ -231,12 +241,13 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.entry_hostname.grid(row=3, column=0, sticky='w',
                                  padx=self.padx_std, pady=self.pady_entry)
 
-    def vbox_name_check(self, e):
-        print(self.master.vbox_list)
+    def _vbox_name_check(self, e):
         vbox_name_typed = self.entry_vbox_name.get()
-        if vbox_name_typed not in self.master.vbox_list:
-            self.warning_label_vbox.destroy()
-        if vbox_name_typed in self.master.vbox_list:
+        if vbox_name_typed not in self.vbox_list:
+            self.entry_vbox_name.configure(border_color=["#979DA2", "#565B5E"])
+            if self.warning_label_vbox.winfo_exists():
+                self.warning_label_vbox.destroy()
+        if vbox_name_typed in self.vbox_list:
             self.warning_label_vbox = ctk.CTkLabel(
                 self.vbox_hostname_frame,
                 text='A box with this name\nalready exists',
@@ -244,7 +255,8 @@ class VagrantConfigsFrame(ctk.CTkFrame):
                 font=self.font_std
             )
             self.warning_label_vbox.grid(row=1, column=1, sticky='e',
-                               padx=self.padx_std, pady=0)
+                                         padx=self.padx_std, pady=0)
+            self.entry_vbox_name.configure(border_color='red')
 
     def add_connection_mode_frame(self):
         connection_mode_frame = ctk.CTkFrame(self)
