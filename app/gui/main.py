@@ -32,7 +32,10 @@ class MainFrame(ctk.CTkFrame):
         self.set_grid(rows=self.rows, columns=self.columns)
 
         # add menu frame
-        self.menu_frame = ctk.CTkFrame(self)
+        self.menu_frame = ctk.CTkFrame(
+            self,
+            height=500
+        )
         self.menu_frame.grid(row=0, column=0, rowspan=self.rows, sticky='wens')
         self.add_lateral_menu()
 
@@ -80,7 +83,7 @@ class MainFrame(ctk.CTkFrame):
         project_title = ctk.CTkLabel(
             self.menu_frame,
             text='Projects',
-            font=self.title_std
+            font=self.title_std,
         )
         project_title.grid(row=0, column=0,
                            padx=self.padx_std, pady=self.pady_std,
@@ -399,8 +402,6 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
                 os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
                 # os.system(f'xterm -into {wid} -geometry 218x38 -sb -e "vagrant up ; while true ; do sleep 100 ; done" &')
                 os.system(f'xterm -into {wid} -geometry 218x38 -sb -e vagrant up &')
-
-                
                 os.chdir(f'{constants.VMBUILDER_PATH}')
 
     def _load_packer(self):
@@ -419,7 +420,7 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
 if __name__ == "__main__":
     os.chdir(constants.VMBUILDER_PATH)
     root = ctk.CTk()
-    root.wm_geometry("1800x1100")
+    root.wm_geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")
     main = MainFrame(
         master=root,
     )

@@ -317,24 +317,24 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.add_selected_packages_frame()
 
     def add_packages_frame(self, select_all=False):
-        packages_frame = ctk.CTkFrame(self)
-        packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens',
+        self.packages_frame = ctk.CTkFrame(self)
+        self.packages_frame.grid(row=1, column=1, rowspan=4, sticky='wens',
                             padx=self.padx_std, pady=self.pady_std,
                             ipadx=self.ipadx_std,
                             ipady=self.ipady_std)
-        packages_frame.columnconfigure(0, weight=1)
-        packages_frame.columnconfigure(1, weight=1)
-        packages_frame.columnconfigure(2, weight=1)
-        packages_frame.rowconfigure(0, weight=1)
-        packages_frame.rowconfigure(1, weight=1)
-        packages_frame.rowconfigure(2, weight=10)
-        packages_frame.rowconfigure(3, weight=1)
-        packages_frame.rowconfigure(4, weight=1)
-        packages_frame.rowconfigure(5, weight=1)
+        self.packages_frame.columnconfigure(0, weight=1)
+        self.packages_frame.columnconfigure(1, weight=1)
+        self.packages_frame.columnconfigure(2, weight=1)
+        self.packages_frame.rowconfigure(0, weight=1)
+        self.packages_frame.rowconfigure(1, weight=1)
+        self.packages_frame.rowconfigure(2, weight=10)
+        self.packages_frame.rowconfigure(3, weight=1)
+        self.packages_frame.rowconfigure(4, weight=1)
+        self.packages_frame.rowconfigure(5, weight=1)
 
         # add frame title
         packages_label = ctk.CTkLabel(
-            packages_frame,
+            self.packages_frame,
             text='Packages Manager',
             font=self.little_title
         )
@@ -342,7 +342,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                             padx=self.padx_std, pady=self.pady_title)
         # add install, uninstall, config
         add_to_install_button = ctk.CTkButton(
-            packages_frame,
+            self.packages_frame,
             text='Install',
             font=self.font_std,
             width=self.width_button_std,
@@ -353,7 +353,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
         add_to_uninstall_button = ctk.CTkButton(
-            packages_frame,
+            self.packages_frame,
             text='Uninstall',
             font=self.font_std,
             width=self.width_button_std,
@@ -364,7 +364,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                      ipadx=self.ipadx_button,
                                      ipady=self.ipady_button)
         add_to_config_button = ctk.CTkButton(
-            packages_frame,
+            self.packages_frame,
             text='Configure',
             font=self.font_std,
             width=self.width_button_std,
@@ -377,7 +377,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
         # add scrollable checkbox
         self.packages_scrollable = ScrollableCheckboxFrame(
-            master=packages_frame,
+            master=self.packages_frame,
             title='Packages',
             values=sorted([
                 package for package in os.listdir(f'{constants.PACKAGES_PATH}')
@@ -389,62 +389,11 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                       sticky='wens',
                                       padx=self.padx_std, pady=self.pady_std)
 
-        # add new package
-        # new_package_label = ctk.CTkLabel(
-        #     packages_frame,
-        #     text='New package:',
-        #     font=self.font_std
-        # )
-        # new_package_label.grid(row=3, column=0, columnspan=3, sticky='w',
-        #                        padx=self.padx_std, pady=self.pady_title,
-        #                        ipadx=self.ipadx_std)
-
-        # add new package sub frame
-        new_package_subframe = ctk.CTkFrame(
-            packages_frame,
-            width=500,
-            height=60,
-            fg_color='transparent'
-        )
-        new_package_subframe.grid(row=4, column=0, columnspan=3, sticky='w',
-                                  padx=self.padx_std, pady=self.pady_entry)
-        new_package_subframe.grid_propagate(False)
-        new_package_subframe.columnconfigure(0, weight=10)
-        new_package_subframe.columnconfigure(1, weight=1)
-        new_package_subframe.rowconfigure(0, weight=1)
-        self.new_package_entry = ctk.CTkEntry(
-            new_package_subframe,
-            font=self.font_std,
-            width=450,
-            height=self.entry_height_std,
-            placeholder_text='Insert New Package Name'
-        )
-        self.new_package_entry.grid(row=0, column=0, sticky='e',
-                                    padx=(0, 0), pady=(0, 0))
-        plus_icon = ctk.CTkImage(
-            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_light_cube.png'),
-            dark_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_dark_cube.png'),
-            size=(45, 45)
-        )
-        add_package_button = ctk.CTkButton(
-            new_package_subframe,
-            text='',
-            image=plus_icon,
-            width=10,
-            height=10,
-            corner_radius=50,
-            fg_color=['grey86', 'grey17'],
-            hover_color=['grey76', 'grey7'],
-            command=self._add_package
-        )
-        add_package_button.grid(row=0, column=1, sticky='w',
-                                padx=(0, 0), pady=(0, 0),
-                                ipadx=0,
-                                ipady=0)
+        self.new_package_subframe()
 
         if self.packages_scrollable.get():
             deselect_all_button = ctk.CTkButton(
-                packages_frame,
+                self.packages_frame,
                 text='Deselect All',
                 font=self.font_std,
                 width=self.width_button_std,
@@ -456,7 +405,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                      ipady=self.ipady_button)
         else:
             select_all_button = ctk.CTkButton(
-                packages_frame,
+                self.packages_frame,
                 text='Select All',
                 font=self.font_std,
                 width=self.width_button_std,
@@ -467,7 +416,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
         delete_package_button = ctk.CTkButton(
-            packages_frame,
+            self.packages_frame,
             text='Delete',
             font=self.font_std,
             width=self.width_button_std,
@@ -550,6 +499,19 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         else:
             mb.showerror('Error', 'Package already exists')
 
+    def _active_add_package(self, e):
+        new_package_typed = self.new_package_entry.get()
+        if new_package_typed:
+            self.add_package_button.configure(
+                state="normal",
+                image=self.plus_active
+            )
+        else:
+            self.add_package_button.configure(
+                state="disabled",
+                image=self.plus_disabled
+            )
+
     def _open_text_window(self, package, operation):
         EditFileWindow(self, package=package, operation=operation,
                        provisions_configs=self.provisions_configs)
@@ -630,3 +592,54 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         for package in self.packages_scrollable.get():
             self.provisions_configs["provisions"][f"packages_to_{opearation}"].add(package)
         self.add_selected_packages_frame()
+
+    def new_package_subframe(self):
+        # add new package sub frame
+        new_package_subframe = ctk.CTkFrame(
+            self.packages_frame,
+            width=500,
+            height=60,
+            fg_color='transparent'
+        )
+        new_package_subframe.grid(row=4, column=0, columnspan=3, sticky='w',
+                                  padx=self.padx_std, pady=self.pady_entry)
+        new_package_subframe.grid_propagate(False)
+        new_package_subframe.columnconfigure(0, weight=10)
+        new_package_subframe.columnconfigure(1, weight=1)
+        new_package_subframe.rowconfigure(0, weight=1)
+        self.new_package_entry = ctk.CTkEntry(
+            new_package_subframe,
+            font=self.font_std,
+            width=450,
+            height=self.entry_height_std,
+            placeholder_text='Insert New Package Name'
+        )
+        self.new_package_entry.grid(row=0, column=0, sticky='e',
+                                    padx=(0, 0), pady=(0, 0))
+        self.new_package_entry.bind('<KeyRelease>', self._active_add_package)
+
+        self.plus_active = ctk.CTkImage(
+            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_light_cube.png'),
+            dark_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_dark_cube.png'),
+            size=(45, 45)
+        )
+        self.plus_disabled = ctk.CTkImage(
+            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_disabled_cube.png'),
+            size=(45, 45)
+        )
+        self.add_package_button = ctk.CTkButton(
+            new_package_subframe,
+            text='',
+            image=self.plus_disabled,
+            width=10,
+            height=10,
+            corner_radius=50,
+            fg_color=['grey86', 'grey17'],
+            hover_color=['grey76', 'grey7'],
+            state='disabled',
+            command=self._add_package
+        )
+        self.add_package_button.grid(row=0, column=1, sticky='w',
+                                padx=(0, 0), pady=(0, 0),
+                                ipadx=0,
+                                ipady=0)

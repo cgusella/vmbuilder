@@ -45,13 +45,13 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.columnconfigure(1, weight=1)
 
         # titles
-        self.rowconfigure(0, weight=2)
+        self.rowconfigure(0, weight=1)
         # project
-        self.rowconfigure(1, weight=8)
+        self.rowconfigure(1, weight=1)
         # vbox_host, connection mode
-        self.rowconfigure(2, weight=8)
+        self.rowconfigure(2, weight=1)
         # select vagrant box
-        self.rowconfigure(3, weight=4)
+        self.rowconfigure(3, weight=1)
         # username_password, set provision button
         self.rowconfigure(4, weight=1)
 
