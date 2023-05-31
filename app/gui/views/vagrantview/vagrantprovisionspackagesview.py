@@ -389,6 +389,9 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.packages_scrollable.grid(row=2, column=0, columnspan=3,
                                       sticky='wens',
                                       padx=self.padx_std, pady=self.pady_std)
+        self.packages_scrollable.bind("<Motion>", self._check_package_selected)
+        self.packages_scrollable.bind("<Leave>", self._check_package_selected)
+
 
         self.new_package_subframe()
 
@@ -416,17 +419,25 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                                    padx=self.pad_equal, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
-        delete_package_button = ctk.CTkButton(
+        self.delete_package_button = ctk.CTkButton(
             self.packages_frame,
             text='Delete',
             font=self.font_std,
             width=self.width_button_std,
-            command=self._delete_packages
+            command=self._delete_packages,
+            state='disabled'
         )
-        delete_package_button.grid(row=5, column=2,
+        self.delete_package_button.grid(row=5, column=2,
                                    padx=self.pad_right, pady=self.pady_std,
                                    ipadx=self.ipadx_button,
                                    ipady=self.ipady_button)
+
+    def _check_package_selected(self, e):
+        print("hello")
+        if self.packages_scrollable.get():
+            self.delete_package_button.configure(state='normal')
+        else:
+            self.delete_package_button.configure(state='disabled')
 
     def add_bottom_button_frame(self):
         bottom_button_frame = ctk.CTkFrame(self)
