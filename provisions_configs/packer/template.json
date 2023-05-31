@@ -1,7 +1,8 @@
 {
   "credentials": {
     "username": "default_user",
-    "password": "deafult_pass"
+    "password": "deafult_pass",
+    "extra_user": ""
   },
   "provisions": {
     "update_upgrade": false,
@@ -10,9 +11,12 @@
     "packages_to_uninstall": [],
     "packages_to_config": [],
     "clean_packages": false,
+    "reboot": false,
     "custom_scripts": []
   },
-  "virtual_machine_configs": {
+  "configurations": {
+    "project_name": "Project Name",
+    "vbox_name": "Virtualbox Name",
     "cpus":{
       "description":"Number of CPU cores for the machine",
       "default":"2"

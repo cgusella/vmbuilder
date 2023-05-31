@@ -9,11 +9,11 @@ from tkinter import StringVar
 
 class VagrantConfigsFrame(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
-        self.local_vagrant_boxes = get_local_vagrant_boxes()
-        self.vbox_list = launch_vboxmanage_lst_command()
         self.master = master
-        ctk.CTkFrame.__init__(self, master)
         self.provisions_configs = provisions_configs
+        self.vbox_list = launch_vboxmanage_lst_command()
+        self.local_vagrant_boxes = get_local_vagrant_boxes()
+        ctk.CTkFrame.__init__(self, master)
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
                                      weight='bold')
         self.font_std = ctk.CTkFont(family=self.master.family, size=20)
@@ -46,7 +46,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
 
         # titles
         self.rowconfigure(0, weight=1)
-        # project
+        # project name
         self.rowconfigure(1, weight=1)
         # vbox_host, connection mode
         self.rowconfigure(2, weight=1)
@@ -112,15 +112,17 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.entry_project_name.bind("<Configure>", self._project_name_check)
         self.entry_project_name.bind("<KeyRelease>", self._project_name_check)
 
+        self.warning_label_project = ctk.CTkLabel(
+            self.project_name_frame,
+            font=self.font_std
+        )
+        self.warning_label_project.grid(row=1, column=1, sticky='e',
+                                        padx=self.padx_std, pady=0)
         if self.provisions_configs["configurations"]["project_name"] in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            self.warning_label_project = ctk.CTkLabel(
-                self.project_name_frame,
+            self.warning_label_project.configure(
                 text='A project with this name\nalready exists',
                 text_color='red',
-                font=self.font_std
             )
-            self.warning_label_project.grid(row=1, column=1, sticky='e',
-                                            padx=self.padx_std, pady=0)
 
     def _project_name_check(self, e):
         project_name_typed = self.entry_project_name.get()
@@ -128,7 +130,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             self.entry_project_name.configure(border_color=["#979DA2", "#565B5E"])
             if self.warning_label_project.winfo_exists():
                 self.warning_label_project.destroy()
-        if project_name_typed in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
+        else:
             self.warning_label_project = ctk.CTkLabel(
                 self.project_name_frame,
                 text='A project with this name\nalready exists',
@@ -209,15 +211,17 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         self.entry_vbox_name.bind("<Configure>", self._vbox_name_check)
         self.entry_vbox_name.bind("<KeyRelease>", self._vbox_name_check)
 
+        self.warning_label_vbox = ctk.CTkLabel(
+            self.vbox_hostname_frame,
+            font=self.font_std
+        )
+        self.warning_label_vbox.grid(row=1, column=1, sticky='e',
+                                        padx=self.padx_std, pady=0)
         if self.provisions_configs["configurations"]['vbox_name'] in self.vbox_list:
-            self.warning_label_vbox = ctk.CTkLabel(
-                self.vbox_hostname_frame,
+            self.warning_label_vbox.configure(
                 text='A box with this name\nalready exists',
-                text_color='red',
-                font=self.font_std
+                text_color='red'
             )
-            self.warning_label_vbox.grid(row=1, column=1, sticky='e',
-                                         padx=self.padx_std, pady=0)
 
         hostname_label = ctk.CTkLabel(
             self.vbox_hostname_frame,

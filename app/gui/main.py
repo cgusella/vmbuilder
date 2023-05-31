@@ -4,6 +4,7 @@ import customtkinter as ctk
 import json
 import os
 import shutil
+from gui.views.packerview.packerconfigsview import PackerConfigsFrame
 from gui.views.utilsview import ScrollableCheckboxFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
 from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
@@ -132,7 +133,7 @@ class MainFrame(ctk.CTkFrame):
             height=10,
             fg_color=['grey86', 'grey17'],
             hover_color=['grey76', 'grey7'],
-            command=self.add_vagrant_configs
+            command=self.add_packer_configs
         )
         add_packer_button.grid(row=2, column=0,
                                padx=self.padx_btn_left, pady=self.pad_right,
@@ -411,7 +412,20 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
         pass
 
     def add_packer_configs(self):
-        pass
+        with open(f'{constants.PACKER_PROVS_CONFS_PATH}/template.json') as template_json:
+            self.provisions_configs = json.loads(template_json.read())
+        for operation in ('install', 'uninstall', 'config'):
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            )
+        self.initial_message_frame.destroy()
+        self.vagrant_configs_frame = PackerConfigsFrame(
+            self,
+            self.provisions_configs
+        )
+        self.vagrant_configs_frame.grid(row=0, column=1,
+                                        columnspan=self.columns-1,
+                                        rowspan=self.rows, sticky='wens')
 
     def close_window(self):
         self.master.destroy()
