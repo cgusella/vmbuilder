@@ -412,7 +412,7 @@ class MainFrame(ctk.CTkFrame):
             sticky=self.sticky_title
         )
         message_label = ctk.CTkLabel(
-            self.initial_message_frame,
+            master=self.initial_message_frame,
             font=self.font_std,
             text="""
 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
@@ -427,16 +427,13 @@ Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihi
 consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? [33] At vero eos
 et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti
 atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate
-non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est
-laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.
-Nam libero tempore, cum soluta nobis est eligendi optio, cumque nihil impedit,
-quo minus id, quod maxime placeat, facere possimus, omnis voluptas assumenda est,
-omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut
-rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molestiae
-non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis
 """
         )
-        message_label.grid(row=1, column=0, sticky='wens')
+        message_label.grid(
+            row=1,
+            column=0,
+            sticky='wens'
+        )
 
     def add_vagrant_configs(self, load=False):
         if not load:
@@ -447,13 +444,18 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
         self.initial_message_frame.destroy()
+
         self.vagrant_configs_frame = VagrantConfigsFrame(
             self,
             self.provisions_configs
         )
-        self.vagrant_configs_frame.grid(row=0, column=1,
-                                        columnspan=self.columns-1,
-                                        rowspan=self.rows, sticky='wens')
+        self.vagrant_configs_frame.grid(
+            row=0,
+            column=1,
+            columnspan=self.columns-1,
+            rowspan=self.rows,
+            sticky=self.sticky_frame
+        )
 
     def add_vagrant_provisions_frame(self):
         self.vagrant_configs_frame.destroy()
@@ -461,8 +463,13 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
             master=self,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(row=0, column=1, columnspan=self.columns-1,
-                                  rowspan=self.rows, sticky='wens')
+        vagrant_configs_view.grid(
+            row=0,
+            column=1,
+            columnspan=self.columns-1,
+            rowspan=self.rows,
+            sticky=self.sticky_frame
+        )
 
     def _load_vagrant(self):
         file_to_load = filedialog.askopenfile(
@@ -502,9 +509,15 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
             else:
                 self.destroy()
                 self.__init__(self.master, self.local_vagrant_boxes, vbox_list=self.vbox_list)
+
                 terminal_frame = ctk.CTkFrame(self)
-                terminal_frame.grid(row=2, column=1, sticky='wens',
-                                    columnspan=self.columns-1, rowspan=2)
+                terminal_frame.grid(
+                    row=2,
+                    column=1,
+                    columnspan=self.columns-1,
+                    rowspan=2,
+                    sticky=self.sticky_frame
+                )
                 wid = terminal_frame.winfo_id()
                 os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
                 # os.system(f'xterm -into {wid} -geometry 218x38 -sb -e "vagrant up ; while true ; do sleep 100 ; done" &')
@@ -529,9 +542,13 @@ non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reici
             self,
             self.provisions_configs
         )
-        self.vagrant_configs_frame.grid(row=0, column=1,
-                                        columnspan=self.columns-1,
-                                        rowspan=self.rows, sticky='wens')
+        self.vagrant_configs_frame.grid(
+            row=0,
+            column=1,
+            columnspan=self.columns-1,
+            rowspan=self.rows,
+            sticky=self.sticky_frame
+        )
 
     def close_window(self):
         self.master.destroy()
