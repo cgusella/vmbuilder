@@ -120,6 +120,8 @@ class Vagrant(Builder):
 
     def _initialize_vagrantfile(self):
         """Add initial configurations to Vagrantfile"""
+        connection = 'true' if self.configs["connection"] == 'key' else 'false'
+        print(connection)
         with open(self.vagrantfile_path, 'w') as vagrantfile:
             vagrantfile.write(
                 '# -*- mode: ruby -*-\n'
@@ -130,7 +132,7 @@ class Vagrant(Builder):
                 f'\tconfig.vm.box = "{self.configs["image"]}"\n'
                 f'\tconfig.ssh.username = "{self.credentials["username"]}"\n'
                 f'\tconfig.ssh.password = "{self.credentials["password"]}"\n'
-                f'\tconfig.ssh.insert_key = "{self.configs["connection"]}"\n'
+                f'\tconfig.ssh.insert_key = {connection}\n'
                 f'\tconfig.vm.hostname = \"{self.configs["hostname"]}\"\n'
                 f'\tconfig.vm.define "{self.configs["hostname"]}"\n'
                 f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'

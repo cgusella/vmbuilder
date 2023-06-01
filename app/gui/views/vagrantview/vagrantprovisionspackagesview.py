@@ -3,6 +3,7 @@ import os
 import shutil
 import customtkinter as ctk
 import json
+from argumentparser.helper import get_local_vagrant_boxes
 from builder.vagrant import Vagrant
 from cli.provisionsreader import ProvisionConfigReader
 from cli.newpackage import make_package_folder
@@ -18,6 +19,7 @@ from gui.views.utilsview import (
     ScrollableCheckboxFrame,
     SetUpScriptEdit
 )
+from existencecontroller.controller import launch_vboxmanage_lst_command
 from PIL import Image
 from tkinter import filedialog
 from tkinter import messagebox as mb
@@ -28,6 +30,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
+        self.vbox_list = launch_vboxmanage_lst_command()
+        self.local_vagrant_boxes = get_local_vagrant_boxes()
         ctk.CTkFrame.__init__(self, master)
         self.family = 'Sans'
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
@@ -392,7 +396,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.packages_scrollable.bind("<Motion>", self._check_package_selected)
         self.packages_scrollable.bind("<Leave>", self._check_package_selected)
 
-
         self.new_package_subframe()
 
         if self.packages_scrollable.get():
@@ -428,12 +431,11 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             state='disabled'
         )
         self.delete_package_button.grid(row=5, column=2,
-                                   padx=self.pad_right, pady=self.pady_std,
-                                   ipadx=self.ipadx_button,
-                                   ipady=self.ipady_button)
+                                        padx=self.pad_right, pady=self.pady_std,
+                                        ipadx=self.ipadx_button,
+                                        ipady=self.ipady_button)
 
     def _check_package_selected(self, e):
-        print("hello")
         if self.packages_scrollable.get():
             self.delete_package_button.configure(state='normal')
         else:
@@ -565,7 +567,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
                     )
                 )
             vbox_name = self.provisions_configs["configurations"]["vbox_name"]
-            if vbox_name in self.master.vbox_list:
+            if vbox_name in self.vbox_list:
                 mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
             else:
                 provisions_configs_reader = ProvisionConfigReader(
