@@ -17,6 +17,10 @@
   "configurations": {
     "project_name": "Project Name",
     "vbox_name": "Virtualbox Name",
+    "iso_link":{
+      "description":"Iso link",
+      "default":""
+    },
     "cpus":{
       "description":"Number of CPU cores for the machine",
       "default":"2"

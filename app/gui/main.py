@@ -56,6 +56,11 @@ class MainFrame(ctk.CTkFrame):
         self.pad_five = (5, 5)
         self.padx_btn_right = (0, 5)
         self.padx_btn_left = (5, 0)
+        self.sticky_title = 'wn'
+        self.sticky_label = 'wn'
+        self.sticky_entry = 'ws'
+        self.sticky_frame = 'wens'
+        self.sticky_optionmenu = 'w'
 
     def set_grid(self, rows: int, columns: int):
         self.grid()
@@ -82,18 +87,21 @@ class MainFrame(ctk.CTkFrame):
 
         # add menu title
         project_title = ctk.CTkLabel(
-            self.menu_frame,
+            master=self.menu_frame,
             text='Projects',
-            font=self.title_std,
+            font=self.title_std
         )
-        project_title.grid(row=0, column=0,
-                           padx=self.padx_std, pady=self.pady_std,
-                           ipadx=self.ipadx, ipady=self.ipady)
+        project_title.grid(
+            row=0,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx,
+            ipady=self.ipady
+        )
 
         # add packer frame to menu
         packer_menu_frame = ctk.CTkFrame(self.menu_frame)
-        packer_menu_frame.grid(row=1, column=0, rowspan=2, sticky='ns',
-                               padx=self.padx_std, pady=self.pad_left)
         packer_menu_frame.columnconfigure(0, weight=1)
         packer_menu_frame.columnconfigure(1, weight=1)
         packer_menu_frame.columnconfigure(2, weight=1)
@@ -101,6 +109,16 @@ class MainFrame(ctk.CTkFrame):
         packer_menu_frame.rowconfigure(0, weight=1)
         packer_menu_frame.rowconfigure(1, weight=1)
         packer_menu_frame.rowconfigure(2, weight=1)
+
+        packer_menu_frame.grid(
+            row=1,
+            column=0,
+            rowspan=2,
+            padx=self.padx_std,
+            pady=self.pad_left,
+            # sticky='ns'
+            sticky=self.sticky_frame
+        )
 
         self.packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
@@ -110,23 +128,29 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
             ])
         )
-        self.packer_projects.grid(row=0, column=0, columnspan=4, rowspan=2,
-                                  sticky='wens',
-                                  padx=self.padx_std, pady=self.pad_five)
+        self.packer_projects.grid(
+            row=0,
+            column=0,
+            columnspan=4,
+            rowspan=2,
+            padx=self.padx_std,
+            pady=self.pad_five,
+            sticky=self.sticky_frame
+        )
 
         plus_icon = ctk.CTkImage(
-            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_light.png'),
-            dark_image=Image.open(f'{constants.VMBUILDER_PATH}/images/plus_dark.png'),
+            light_image=Image.open(f'{constants.IMAGES_PATH}/plus_light.png'),
+            dark_image=Image.open(f'{constants.IMAGES_PATH}/plus_dark.png'),
             size=(40, 40)
         )
         remove_icon = ctk.CTkImage(
-            light_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_light.png'),
-            dark_image=Image.open(f'{constants.VMBUILDER_PATH}/images/remove_dark.png'),
+            light_image=Image.open(f'{constants.IMAGES_PATH}/remove_light.png'),
+            dark_image=Image.open(f'{constants.IMAGES_PATH}/remove_dark.png'),
             size=(40, 40)
         )
 
         add_packer_button = ctk.CTkButton(
-            packer_menu_frame,
+            master=packer_menu_frame,
             text='',
             image=plus_icon,
             width=10,
@@ -135,12 +159,17 @@ class MainFrame(ctk.CTkFrame):
             hover_color=['grey76', 'grey7'],
             command=self.add_packer_configs
         )
-        add_packer_button.grid(row=2, column=0,
-                               padx=self.padx_btn_left, pady=self.pad_right,
-                               ipadx=0,
-                               ipady=0)
+        add_packer_button.grid(
+            row=2,
+            column=0,
+            padx=self.padx_btn_left,
+            pady=self.pad_right,
+            ipadx=0,
+            ipady=0
+        )
+
         packer_delete_button = ctk.CTkButton(
-            packer_menu_frame,
+            master=packer_menu_frame,
             text='',
             image=remove_icon,
             width=10,
@@ -149,37 +178,49 @@ class MainFrame(ctk.CTkFrame):
             hover_color=['grey76', 'grey7'],
             command=lambda: self._delete_projects('packer')
         )
-        packer_delete_button.grid(row=2, column=1,
-                                  padx=self.padx_btn_left, pady=self.pad_right,
-                                  ipadx=0,
-                                  ipady=0)
+        packer_delete_button.grid(
+            row=2,
+            column=1,
+            padx=self.padx_btn_left,
+            pady=self.pad_right,
+            ipadx=0,
+            ipady=0
+        )
+
         packer_load_button = ctk.CTkButton(
-            packer_menu_frame,
+            master=packer_menu_frame,
             text='Load',
             font=self.font_std,
             width=self.width_button_std,
             command=self._load_packer
         )
-        packer_load_button.grid(row=2, column=2,
-                                padx=self.padx_std, pady=self.pad_right,
-                                ipadx=self.ipadx_button,
-                                ipady=self.ipady_button)
+        packer_load_button.grid(
+            row=2,
+            column=2,
+            padx=self.padx_std,
+            pady=self.pad_right,
+            ipadx=self.ipadx_button,
+            ipady=self.ipady_button
+        )
+
         packer_build_button = ctk.CTkButton(
-            packer_menu_frame,
+            master=packer_menu_frame,
             text='Build',
             font=self.font_std,
             width=self.width_button_std,
             command=self._build
         )
-        packer_build_button.grid(row=2, column=3,
-                                 padx=self.padx_std, pady=self.pad_right,
-                                 ipadx=self.ipadx_button,
-                                 ipady=self.ipady_button)
+        packer_build_button.grid(
+            row=2,
+            column=3,
+            padx=self.padx_std,
+            pady=self.pad_right,
+            ipadx=self.ipadx_button,
+            ipady=self.ipady_button
+        )
 
         # add vagrant frame to menu
         vagrant_menu_frame = ctk.CTkFrame(self.menu_frame)
-        vagrant_menu_frame.grid(row=3, column=0, rowspan=2, sticky='ns',
-                                padx=self.padx_std, pady=self.pad_left)
         vagrant_menu_frame.columnconfigure(0, weight=1)
         vagrant_menu_frame.columnconfigure(1, weight=1)
         vagrant_menu_frame.columnconfigure(2, weight=1)
@@ -187,6 +228,15 @@ class MainFrame(ctk.CTkFrame):
         vagrant_menu_frame.rowconfigure(0, weight=1)
         vagrant_menu_frame.rowconfigure(1, weight=1)
         vagrant_menu_frame.rowconfigure(2, weight=1)
+
+        vagrant_menu_frame.grid(
+            row=3,
+            column=0,
+            rowspan=2,
+            padx=self.padx_std,
+            pady=self.pad_left,
+            sticky=self.sticky_frame
+        )
 
         self.vagrant_projects = ScrollableCheckboxFrame(
             master=vagrant_menu_frame,
@@ -196,12 +246,18 @@ class MainFrame(ctk.CTkFrame):
                 if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
             ])
         )
-        self.vagrant_projects.grid(row=0, column=0, rowspan=2, columnspan=4,
-                                   sticky='wens',
-                                   padx=self.padx_std, pady=self.pad_five)
+        self.vagrant_projects.grid(
+            row=0,
+            column=0,
+            rowspan=2,
+            columnspan=4,
+            padx=self.padx_std,
+            pady=self.pad_five,
+            sticky=self.sticky_frame
+        )
 
         add_vagrant_button = ctk.CTkButton(
-            vagrant_menu_frame,
+            master=vagrant_menu_frame,
             text='',
             command=self.add_vagrant_configs,
             font=self.font_std,
@@ -211,12 +267,17 @@ class MainFrame(ctk.CTkFrame):
             fg_color=['grey86', 'grey17'],
             hover_color=['grey76', 'grey7']
         )
-        add_vagrant_button.grid(row=2, column=0,
-                                padx=self.padx_btn_left, pady=self.pad_right,
-                                ipadx=0,
-                                ipady=0)
-        vagrant_delete_button = ctk.CTkButton(
-            vagrant_menu_frame,
+        add_vagrant_button.grid(
+            row=2,
+            column=0,
+            padx=self.padx_btn_left,
+            pady=self.pad_right,
+            ipadx=0,
+            ipady=0
+        )
+
+        delete_vagrant_button = ctk.CTkButton(
+            master=vagrant_menu_frame,
             text='',
             image=remove_icon,
             width=10,
@@ -225,54 +286,82 @@ class MainFrame(ctk.CTkFrame):
             hover_color=['grey76', 'grey7'],
             command=lambda: self._delete_projects('vagrant')
         )
-        vagrant_delete_button.grid(row=2, column=1,
-                                   padx=self.padx_btn_left, pady=self.pad_right,
-                                   ipadx=0,
-                                   ipady=0)
-        vagrant_load_button = ctk.CTkButton(
-            vagrant_menu_frame,
+        delete_vagrant_button.grid(
+            row=2,
+            column=1,
+            padx=self.padx_btn_left,
+            pady=self.pad_right,
+            ipadx=0,
+            ipady=0
+        )
+
+        load_vagrant_button = ctk.CTkButton(
+            master=vagrant_menu_frame,
             text='Load',
             font=self.font_std,
             width=self.width_button_std,
             command=self._load_vagrant
         )
-        vagrant_load_button.grid(row=2, column=2,
-                                 padx=self.padx_std, pady=self.pad_right,
-                                 ipadx=self.ipadx_button,
-                                 ipady=self.ipady_button)
+        load_vagrant_button.grid(
+            row=2,
+            column=2,
+            padx=self.padx_std,
+            pady=self.pad_right,
+            ipadx=self.ipadx_button,
+            ipady=self.ipady_button
+        )
+
         vagrant_up_button = ctk.CTkButton(
-            vagrant_menu_frame,
+            master=vagrant_menu_frame,
             text='Up',
             font=self.font_std,
             width=self.width_button_std,
             command=self._up
         )
-        vagrant_up_button.grid(row=2, column=3,
-                               padx=self.padx_std, pady=self.pad_right,
-                               ipadx=self.ipadx_button,
-                               ipady=self.ipady_button)
+        vagrant_up_button.grid(
+            row=2,
+            column=3,
+            padx=self.padx_std,
+            pady=self.pad_right,
+            ipadx=self.ipadx_button,
+            ipady=self.ipady_button
+        )
 
-        self.off_on_switch_frame = ctk.CTkFrame(self.menu_frame, width=50, fg_color='transparent')
-        self.off_on_switch_frame.grid(row=5, column=0,
-                                padx=self.padx_std, pady=0)
+        self.off_on_switch_frame = ctk.CTkFrame(
+            master=self.menu_frame,
+            width=50,
+            fg_color='transparent'
+        )
         self.off_on_switch_frame.rowconfigure(0, weight=1)
         self.off_on_switch_frame.columnconfigure(0, weight=1)
         self.off_on_switch_frame.columnconfigure(1, weight=1)
         self.off_on_switch_frame.columnconfigure(2, weight=1)
 
+        self.off_on_switch_frame.grid(
+            row=5,
+            column=0,
+            padx=self.padx_std,
+            pady=0
+        )
+
         off_title = ctk.CTkLabel(
-            self.off_on_switch_frame,
+            master=self.off_on_switch_frame,
             text='OFF',
             font=ctk.CTkFont(family=self.family, size=14)
         )
-        off_title.grid(row=0, column=0,
-                           padx=(0, 5), pady=0,
-                           ipadx=0, ipady=0)
+        off_title.grid(
+            row=0,
+            column=0,
+            padx=(0, 5),
+            pady=0,
+            ipadx=0,
+            ipady=0
+        )
 
         # add switch light/dark mode
         self.switch_var = ctk.StringVar(value="on")
         swith_light_dark_mode = ctk.CTkSwitch(
-            self.off_on_switch_frame,
+            master=self.off_on_switch_frame,
             text='ON',
             font=ctk.CTkFont(family=self.family, size=14),
             variable=self.switch_var,
@@ -280,9 +369,15 @@ class MainFrame(ctk.CTkFrame):
             offvalue='off',
             command=self._swith_light_dark_mode
         )
-        swith_light_dark_mode.grid(row=0, column=1, 
-                           padx=(0, 0), pady=0,
-                           ipadx=0, ipady=0)
+        swith_light_dark_mode.grid(
+            row=0,
+            column=1,
+            # padx=(0, 0),
+            padx=0,
+            pady=0,
+            ipadx=0,
+            ipady=0
+        )
 
     def _swith_light_dark_mode(self):
         if self.switch_var.get() == 'on':
@@ -293,18 +388,29 @@ class MainFrame(ctk.CTkFrame):
     def add_initial_message(self):
         self.initial_message_frame = ctk.CTkScrollableFrame(self)
         self.initial_message_frame.__init__(self)
-        self.initial_message_frame.grid(row=0, column=1, rowspan=2,
-                                        columnspan=self.columns-1,
-                                        sticky='wnes')
+
         self.initial_message_frame.columnconfigure(0, weight=1)
         self.initial_message_frame.rowconfigure(0, weight=1)
         self.initial_message_frame.rowconfigure(1, weight=1)
+
+        self.initial_message_frame.grid(
+            row=0,
+            column=1,
+            rowspan=2,
+            columnspan=self.columns-1,
+            sticky=self.sticky_frame
+        )
+
         title_label = ctk.CTkLabel(
-            self.initial_message_frame,
+            master=self.initial_message_frame,
             font=self.font_std,
             text='Welcome!'
         )
-        title_label.grid(row=0, column=0, sticky='wens')
+        title_label.grid(
+            row=0,
+            column=0,
+            sticky=self.sticky_title
+        )
         message_label = ctk.CTkLabel(
             self.initial_message_frame,
             font=self.font_std,
