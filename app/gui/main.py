@@ -30,7 +30,7 @@ class MainFrame(ctk.CTkFrame):
         self.font_std = ctk.CTkFont(family=self.family, size=16)
         self.font_packages = ctk.CTkFont(family=self.family, size=14)
         self.set_dimensions()
-        self.set_grid(rows=self.rows, columns=self.columns)
+        self.set_menu_grid(rows=self.rows, columns=self.columns)
 
         # add menu frame
         self.menu_frame = ctk.CTkFrame(
@@ -57,26 +57,39 @@ class MainFrame(ctk.CTkFrame):
         self.padx_btn_right = (0, 5)
         self.padx_btn_left = (5, 0)
         self.sticky_title = 'wn'
-        self.sticky_label = 'wn'
-        self.sticky_entry = 'ws'
+        self.sticky_label = 'ws'
+        self.sticky_entry = 'wn'
         self.sticky_frame = 'wens'
         self.sticky_optionmenu = 'w'
 
-    def set_grid(self, rows: int, columns: int):
-        self.grid()
+    def set_menu_grid(self, rows: int, columns: int):
+        # self.grid()
         for i in range(columns):
             weight = 1
             if i > 1:
                 # this weight set the menu width respect to the
                 # view frame. Larger the weight, smaller the menu
-                weight = 15
+                weight = 20
             self.columnconfigure(i, weight=weight)
 
         for i in range(rows):
             self.rowconfigure(i, weight=1)
 
+    def set_general_grid(frame: ctk.CTkFrame, rows: int, columns: int):
+        # self.grid()
+        for i in range(columns):
+            frame.columnconfigure(i, weight=1)
+
+        for i in range(rows):
+            frame.rowconfigure(i, weight=1)
+
     def add_lateral_menu(self):
         # configure menu frame
+        # self.set_general_grid(
+        #     frame=self.menu_frame,
+        #     rows=6,
+        #     columns=1
+        # )
         self.menu_frame.columnconfigure(0, weight=1)
         self.menu_frame.rowconfigure(0, weight=1)
         self.menu_frame.rowconfigure(1, weight=1)
@@ -119,6 +132,12 @@ class MainFrame(ctk.CTkFrame):
             # sticky='ns'
             sticky=self.sticky_frame
         )
+        
+        # packer_buttons_frame = ctk.CTkFrame(packer_menu_frame)
+        # packer_buttons_frame.columnconfigure(0, weight=1)
+        # packer_buttons_frame.columnconfigure(1, weight=1)
+        # packer_buttons_frame.columnconfigure(2, weight=1)
+        # packer_buttons_frame.columnconfigure(3, weight=1)
 
         self.packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
@@ -165,7 +184,7 @@ class MainFrame(ctk.CTkFrame):
             padx=self.padx_btn_left,
             pady=self.pad_right,
             ipadx=0,
-            ipady=0
+            ipady=0,
         )
 
         packer_delete_button = ctk.CTkButton(
@@ -184,7 +203,7 @@ class MainFrame(ctk.CTkFrame):
             padx=self.padx_btn_left,
             pady=self.pad_right,
             ipadx=0,
-            ipady=0
+            ipady=0,
         )
 
         packer_load_button = ctk.CTkButton(
@@ -200,7 +219,7 @@ class MainFrame(ctk.CTkFrame):
             padx=self.padx_std,
             pady=self.pad_right,
             ipadx=self.ipadx_button,
-            ipady=self.ipady_button
+            ipady=self.ipady_button,
         )
 
         packer_build_button = ctk.CTkButton(
@@ -216,7 +235,7 @@ class MainFrame(ctk.CTkFrame):
             padx=self.padx_std,
             pady=self.pad_right,
             ipadx=self.ipadx_button,
-            ipady=self.ipady_button
+            ipady=self.ipady_button,
         )
 
         # add vagrant frame to menu
