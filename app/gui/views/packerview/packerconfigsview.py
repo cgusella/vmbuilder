@@ -19,8 +19,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.add_title()
         self.add_project_name()
         self.add_vboxname()
-        self.add_iso_frame()
         self.add_iso_file()
+        self.add_iso_frame()
+        self.add_deatils_column()
 
     def set_grid(self):
         self.grid()
@@ -273,6 +274,49 @@ class PackerConfigsFrame(ctk.CTkFrame):
             )
             self.entry_vbox_name.configure(border_color='red')
 
+    def add_iso_file(self):
+        iso_file_frame = ctk.CTkFrame(self)
+        iso_file_frame.columnconfigure(0, weight=1)
+        iso_file_frame.columnconfigure(1, weight=1)
+        iso_file_frame.rowconfigure(0, weight=1)
+        iso_file_frame.rowconfigure(1, weight=1)
+        iso_file_frame.grid(
+            row=3,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+
+        iso_file_label = ctk.CTkLabel(
+            master=iso_file_frame,
+            font=self.font_std,
+            text='Insert Iso File'
+        )
+        iso_file_label.grid(
+            row=0,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.iso_file_entry = ctk.CTkEntry(
+            master=iso_file_frame,
+            font=self.font_std,
+            width=self.entry_width_std,
+            height=self.entry_height_std,
+            placeholder_text='Iso File'
+        )
+        self.iso_file_entry.grid(
+            row=1,
+            column=0,
+            sticky=self.sticky_entry,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+
     def add_iso_frame(self):
         iso_frame = ctk.CTkFrame(self)
         iso_frame.columnconfigure(0, weight=1)
@@ -284,8 +328,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
         iso_frame.rowconfigure(3, weight=1)
 
         iso_frame.grid(
-            row=3,
+            row=4,
             column=0,
+            columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
@@ -295,12 +340,13 @@ class PackerConfigsFrame(ctk.CTkFrame):
 
         iso_link_label = ctk.CTkLabel(
             master=iso_frame,
-            text='Insert IsoLink',
+            text='Insert Iso Link',
             font=self.font_std
         )
         iso_link_label.grid(
             row=0,
             column=0,
+            columnspan=2,
             sticky=self.sticky_label,
             padx=self.padx_std,
             pady=self.pady_title
@@ -345,7 +391,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
         )
         checksum_subframe.grid(
             row=3,
-            column=0
+            column=0,
         )
         self.checksum_types = ctk.CTkOptionMenu(
             master=checksum_subframe,
@@ -362,7 +408,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.checksum_entry = ctk.CTkEntry(
             master=checksum_subframe,
             font=self.font_std,
-            width=self.entry_width_std,
+            width=2*self.entry_width_std,
             height=self.entry_height_std,
             placeholder_text='Checksum'
         )
@@ -374,15 +420,14 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_entry
         )
 
-    def add_iso_file(self):
-        iso_file_frame = ctk.CTkFrame(self)
-        iso_file_frame.columnconfigure(0, weight=1)
-        iso_file_frame.columnconfigure(1, weight=1)
-        iso_file_frame.rowconfigure(0, weight=1)
-        iso_file_frame.rowconfigure(1, weight=1)
-        iso_file_frame.grid(
-            row=4,
-            column=0,
+
+    def add_deatils_column(self):
+        """Add entries for cpus, memory, disk size"""
+        self.details_frame = ctk.CTkFrame(self)
+        self.details_frame.grid(
+            row=1,
+            column=1,
+            rowspan=3,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
@@ -390,29 +435,108 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
 
-        iso_file_label = ctk.CTkLabel(
-            master=iso_file_frame,
+        # specify cpus
+        cpus_label = ctk.CTkLabel(
+            master=self.details_frame,
             font=self.font_std,
-            text='Insert Iso File'
+            text='Specify CPUs number'
         )
-        iso_file_label.grid(
+        cpus_label.grid(
             row=0,
             column=0,
             sticky=self.sticky_label,
             padx=self.padx_std,
             pady=self.pady_title
         )
-        self.iso_file_entry = ctk.CTkEntry(
-            master=iso_file_frame,
+        self.cpus_entry = ctk.CTkEntry(
+            master=self.details_frame,
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std,
-            placeholder_text='Iso File'
+            placeholder_text='CPUs'
         )
-        self.iso_file_entry.grid(
+        self.cpus_entry.grid(
             row=1,
             column=0,
             sticky=self.sticky_label,
             padx=self.padx_std,
             pady=self.pady_title
+        )
+
+        # specify memory
+        memory_label = ctk.CTkLabel(
+            master=self.details_frame,
+            font=self.font_std,
+            text='Specify Memory in MB'
+        )
+        memory_label.grid(
+            row=2,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.memory_var = ctk.IntVar()
+        self.memory_var.set(8192)
+        self.memory_slider = ctk.CTkSlider(
+            master=self.details_frame,
+            variable=self.memory_var,
+            from_=256,
+            to=16384,
+            number_of_steps=63,
+            width=self.entry_width_std,
+            command=self._show_slider_value
+        )
+        self.memory_slider.grid(
+            row=3,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self._show_slider_value(self.memory_var.get())
+
+        # specify disk size
+        disk_label = ctk.CTkLabel(
+            master=self.details_frame,
+            font=self.font_std,
+            text='Specify Disk Size in MB'
+        )
+        disk_label.grid(
+            row=5,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.disk_entry = ctk.CTkEntry(
+            master=self.details_frame,
+            font=self.font_std,
+            width=self.entry_width_std,
+            height=self.entry_height_std,
+            placeholder_text='Disk Size'
+        )
+        self.disk_entry.grid(
+            row=6,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+
+    def _show_slider_value(self, slider_value):
+        self.slider_label = ctk.CTkLabel(
+            self.details_frame,
+            width=250
+        )
+        self.slider_label.grid(
+            row=4,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std
+        )
+        if slider_value:
+            self.slider_label.configure(
+            font=self.font_std,
+            text=f'Selected Value: {slider_value}'
         )
