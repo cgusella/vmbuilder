@@ -448,7 +448,7 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
-        self.initial_message_frame.destroy()
+        # self.initial_message_frame.destroy()
 
         self.vagrant_configs_frame = VagrantConfigsFrame(
             self,

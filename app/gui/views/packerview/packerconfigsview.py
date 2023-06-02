@@ -127,10 +127,10 @@ class PackerConfigsFrame(ctk.CTkFrame):
             font=self.font_std,
             placeholder_text='Project name to be created'
         )
-        if self.provisions_configs["configurations"]["project_name"] != "Project Name":
+        if self.provisions_configs["configurations"]["project_name"]["default"]:
             self.entry_project_name.insert(
                 0,
-                self.provisions_configs["configurations"]["project_name"]
+                self.provisions_configs["configurations"]["project_name"]["default"]
             )
         self.entry_project_name.grid(
             row=1,
@@ -220,10 +220,10 @@ class PackerConfigsFrame(ctk.CTkFrame):
             height=self.entry_height_std,
             placeholder_text='Virtualbox name to be created'
         )
-        if self.provisions_configs["configurations"]['vbox_name'] != "Virtualbox Name":
+        if self.provisions_configs["configurations"]['vbox_name']["default"]:
             self.entry_vbox_name.insert(
                 0,
-                self.provisions_configs["configurations"]['vbox_name']
+                self.provisions_configs["configurations"]['vbox_name']["default"]
             )
         self.entry_vbox_name.grid(
             row=1,
@@ -540,3 +540,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
             font=self.font_std,
             text=f'Selected Value: {slider_value}'
         )
+
+    def add_set_provisions(self):
+        pass

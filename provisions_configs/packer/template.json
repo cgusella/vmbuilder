@@ -15,8 +15,14 @@
     "custom_scripts": []
   },
   "configurations": {
-    "project_name": "Project Name",
-    "vbox_name": "Virtualbox Name",
+    "project_name": {
+      "description":"The project name",
+      "default":""
+    },
+    "vbox_name":{
+      "description":"Vbox Name",
+      "default":""
+    },
     "iso_file": "",
     "iso_link":{
       "description":"Iso link",
