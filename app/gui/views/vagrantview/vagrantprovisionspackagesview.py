@@ -80,7 +80,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def set_grid(self):
         self.grid()
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=5)
         self.columnconfigure(1, weight=1)
 
         self.rowconfigure(0, weight=1)
@@ -428,9 +428,9 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.packages_frame.rowconfigure(5, weight=1)
 
         self.packages_frame.grid(
-            row=3,
+            row=2,
             column=1,
-            rowspan=2,
+            rowspan=3,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
