@@ -118,6 +118,7 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 btn_color = 'red'
             checkbox = ctk.CTkButton(
                 self,
+                height=20,
                 text=value,
                 font=master.master.master.font_packages,
                 command=lambda args=(value, self.operation): master.master._open_text_window(*args),
@@ -129,8 +130,8 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 row=count,
                 column=0,
                 padx=10,
-                pady=(10, 0),
-                sticky="wn"
+                pady=(0, 0),
+                sticky="wn",
             )
             self.checkboxes.append(checkbox)
 
@@ -143,7 +144,7 @@ class EditFileWindow(ctk.CTkToplevel):
         self.provisions_configs = provisions_configs
         ctk.CTkToplevel.__init__(self, master)
         self.geometry(
-            '1200x400'
+            '1200x600'
         )
         self.title('Edit File')
         self.set_grid()
@@ -155,7 +156,8 @@ class EditFileWindow(ctk.CTkToplevel):
         file_label.grid(row=1, column=0, columnspan=3)
         self.open_text_box = ctk.CTkTextbox(
             self,
-            width=900,
+            width=1100,
+            height=400,
             font=self.master.font_std
         )
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:

@@ -30,7 +30,7 @@ class MainFrame(ctk.CTkFrame):
         self.font_std = ctk.CTkFont(family=self.family, size=16)
         self.font_packages = ctk.CTkFont(family=self.family, size=14)
         self.set_dimensions()
-        self.set_menu_grid(rows=self.rows, columns=self.columns)
+        self.set_menu_row_col_conf(rows=self.rows, columns=self.columns)
 
         # add menu frame
         self.menu_frame = ctk.CTkFrame(
@@ -62,7 +62,7 @@ class MainFrame(ctk.CTkFrame):
         self.sticky_frame = 'wens'
         self.sticky_optionmenu = 'w'
 
-    def set_menu_grid(self, rows: int, columns: int):
+    def set_menu_row_col_conf(self, rows: int, columns: int):
         # self.grid()
         for i in range(columns):
             weight = 1
@@ -75,8 +75,7 @@ class MainFrame(ctk.CTkFrame):
         for i in range(rows):
             self.rowconfigure(i, weight=1)
 
-    def set_general_grid(frame: ctk.CTkFrame, rows: int, columns: int):
-        # self.grid()
+    def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
         for i in range(columns):
             frame.columnconfigure(i, weight=1)
 
@@ -85,18 +84,11 @@ class MainFrame(ctk.CTkFrame):
 
     def add_lateral_menu(self):
         # configure menu frame
-        # self.set_general_grid(
-        #     frame=self.menu_frame,
-        #     rows=6,
-        #     columns=1
-        # )
-        self.menu_frame.columnconfigure(0, weight=1)
-        self.menu_frame.rowconfigure(0, weight=1)
-        self.menu_frame.rowconfigure(1, weight=1)
-        self.menu_frame.rowconfigure(2, weight=1)
-        self.menu_frame.rowconfigure(3, weight=1)
-        self.menu_frame.rowconfigure(4, weight=1)
-        self.menu_frame.rowconfigure(5, weight=1)
+        self.set_general_row_col_conf(
+            frame=self.menu_frame,
+            rows=6,
+            columns=1
+        )
 
         # add menu title
         project_title = ctk.CTkLabel(
@@ -115,13 +107,12 @@ class MainFrame(ctk.CTkFrame):
 
         # add packer frame to menu
         packer_menu_frame = ctk.CTkFrame(self.menu_frame)
-        packer_menu_frame.columnconfigure(0, weight=1)
-        packer_menu_frame.columnconfigure(1, weight=1)
-        packer_menu_frame.columnconfigure(2, weight=1)
-        packer_menu_frame.columnconfigure(3, weight=1)
-        packer_menu_frame.rowconfigure(0, weight=1)
-        packer_menu_frame.rowconfigure(1, weight=1)
-        packer_menu_frame.rowconfigure(2, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=packer_menu_frame,
+            rows=3,
+            columns=4
+        )
 
         packer_menu_frame.grid(
             row=1,
@@ -129,16 +120,9 @@ class MainFrame(ctk.CTkFrame):
             rowspan=2,
             padx=self.padx_std,
             pady=self.pad_left,
-            # sticky='ns'
             sticky=self.sticky_frame
         )
         
-        # packer_buttons_frame = ctk.CTkFrame(packer_menu_frame)
-        # packer_buttons_frame.columnconfigure(0, weight=1)
-        # packer_buttons_frame.columnconfigure(1, weight=1)
-        # packer_buttons_frame.columnconfigure(2, weight=1)
-        # packer_buttons_frame.columnconfigure(3, weight=1)
-
         self.packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
             title='Packer Projects',
@@ -240,13 +224,12 @@ class MainFrame(ctk.CTkFrame):
 
         # add vagrant frame to menu
         vagrant_menu_frame = ctk.CTkFrame(self.menu_frame)
-        vagrant_menu_frame.columnconfigure(0, weight=1)
-        vagrant_menu_frame.columnconfigure(1, weight=1)
-        vagrant_menu_frame.columnconfigure(2, weight=1)
-        vagrant_menu_frame.columnconfigure(3, weight=1)
-        vagrant_menu_frame.rowconfigure(0, weight=1)
-        vagrant_menu_frame.rowconfigure(1, weight=1)
-        vagrant_menu_frame.rowconfigure(2, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=vagrant_menu_frame,
+            rows=3,
+            columns=4
+        )
 
         vagrant_menu_frame.grid(
             row=3,
@@ -351,10 +334,12 @@ class MainFrame(ctk.CTkFrame):
             width=50,
             fg_color='transparent'
         )
-        self.off_on_switch_frame.rowconfigure(0, weight=1)
-        self.off_on_switch_frame.columnconfigure(0, weight=1)
-        self.off_on_switch_frame.columnconfigure(1, weight=1)
-        self.off_on_switch_frame.columnconfigure(2, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=self.off_on_switch_frame,
+            rows=1,
+            columns=3
+        )
 
         self.off_on_switch_frame.grid(
             row=5,
@@ -391,7 +376,6 @@ class MainFrame(ctk.CTkFrame):
         swith_light_dark_mode.grid(
             row=0,
             column=1,
-            # padx=(0, 0),
             padx=0,
             pady=0,
             ipadx=0,
@@ -408,9 +392,11 @@ class MainFrame(ctk.CTkFrame):
         self.initial_message_frame = ctk.CTkScrollableFrame(self)
         self.initial_message_frame.__init__(self)
 
-        self.initial_message_frame.columnconfigure(0, weight=1)
-        self.initial_message_frame.rowconfigure(0, weight=1)
-        self.initial_message_frame.rowconfigure(1, weight=1)
+        self.set_general_row_col_conf(
+            frame=self.initial_message_frame,
+            rows=2,
+            columns=1
+        )
 
         self.initial_message_frame.grid(
             row=0,

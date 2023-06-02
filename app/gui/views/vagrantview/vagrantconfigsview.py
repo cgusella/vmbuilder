@@ -66,11 +66,22 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         # username_password, set provision button
         self.rowconfigure(4, weight=1)
 
+    def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
+        # self.grid()
+        for i in range(columns):
+            frame.columnconfigure(i, weight=1)
+
+        for i in range(rows):
+            frame.rowconfigure(i, weight=1)
+
     def add_titles(self):
         title_frame = ctk.CTkFrame(self, fg_color='transparent')
-        title_frame.columnconfigure(0, weight=1)
-        title_frame.rowconfigure(0, weight=1)
-        title_frame.rowconfigure(1, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=title_frame,
+            rows=2,
+            columns=1
+        )
 
         title_frame.grid(
             row=0,
@@ -98,15 +109,20 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             text="Configurations",
             font=self.font_std
         )
-        self.conf_label.grid(row=1, column=0, sticky='w')
+        self.conf_label.grid(
+            row=1,
+            column=0,
+            sticky=self.sticky_label
+        )
 
     def add_project_name(self):
         self.project_name_frame = ctk.CTkFrame(self)
-        # self.project_name_frame.grid_propagate(False)
-        self.project_name_frame.columnconfigure(0, weight=1)
-        self.project_name_frame.columnconfigure(1, weight=1)
-        self.project_name_frame.rowconfigure(0, weight=1)
-        self.project_name_frame.rowconfigure(1, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=self.project_name_frame,
+            rows=2,
+            columns=2
+        )
 
         self.project_name_frame.grid(
             row=1,
@@ -115,7 +131,6 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             pady=self.pady_std,
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
-            # sticky='wne'
             sticky=self.sticky_horizontal
         )
 
@@ -239,12 +254,12 @@ class VagrantConfigsFrame(ctk.CTkFrame):
 
     def add_vbox_hostname(self):
         self.vbox_hostname_frame = ctk.CTkFrame(self)
-        self.vbox_hostname_frame.columnconfigure(0, weight=1)
-        self.vbox_hostname_frame.columnconfigure(1, weight=1)
-        self.vbox_hostname_frame.rowconfigure(0, weight=1)
-        self.vbox_hostname_frame.rowconfigure(1, weight=1)
-        self.vbox_hostname_frame.rowconfigure(2, weight=1)
-        self.vbox_hostname_frame.rowconfigure(3, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=self.vbox_hostname_frame,
+            rows=4,
+            columns=2
+        )
 
         self.vbox_hostname_frame.grid_propagate(False)
         self.vbox_hostname_frame.grid(
@@ -355,9 +370,12 @@ class VagrantConfigsFrame(ctk.CTkFrame):
 
     def add_connection_mode_frame(self):
         connection_mode_frame = ctk.CTkFrame(self)
-        connection_mode_frame.columnconfigure(0, weight=1)
-        connection_mode_frame.rowconfigure(0, weight=1)
-        connection_mode_frame.rowconfigure(1, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=connection_mode_frame,
+            rows=2,
+            columns=1
+        )
 
         connection_mode_frame.grid(
             row=1,
@@ -366,7 +384,6 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             pady=self.pady_std,
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
-            # sticky='wne'
             sticky=self.sticky_horizontal
         )
 
@@ -401,7 +418,6 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            # sticky='w'
             sticky=self.sticky_entry
         )
 
@@ -418,20 +434,18 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            # sticky='w'
             sticky=self.sticky_entry
         )
 
     def add_credentials_frame(self):
         credentials_frame = ctk.CTkFrame(self)
-        credentials_frame.columnconfigure(0, weight=1)
-        credentials_frame.rowconfigure(0, weight=1)
-        credentials_frame.rowconfigure(1, weight=1)
-        credentials_frame.rowconfigure(2, weight=1)
-        credentials_frame.rowconfigure(3, weight=1)
-        credentials_frame.rowconfigure(4, weight=1)
-        credentials_frame.rowconfigure(5, weight=1)
-        
+
+        self.set_general_row_col_conf(
+            frame=credentials_frame,
+            rows=6,
+            columns=1
+        )
+
         credentials_frame.grid(
             row=4,
             column=0,
@@ -439,7 +453,6 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             pady=self.pady_std,
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
-            # sticky='wne'
             sticky=self.sticky_frame
         )
         
@@ -547,8 +560,12 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             self,
             fg_color='transparent'
         )
-        set_provision_button_frame.columnconfigure(0, weight=1)
-        set_provision_button_frame.rowconfigure(0, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=set_provision_button_frame,
+            rows=1,
+            columns=1
+        )
 
         set_provision_button_frame.grid(
             row=4,
@@ -557,7 +574,6 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             pady=self.pady_std,
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
-            # sticky='se'
             sticky=self.sticky_frame
         )
 

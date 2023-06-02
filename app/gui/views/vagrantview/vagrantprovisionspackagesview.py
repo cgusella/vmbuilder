@@ -90,11 +90,21 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.rowconfigure(4, weight=1)
         self.rowconfigure(5, weight=1)
 
+    def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
+        for i in range(columns):
+            frame.columnconfigure(i, weight=1)
+
+        for i in range(rows):
+            frame.rowconfigure(i, weight=1)
+
     def add_titles(self):
         title_frame = ctk.CTkFrame(self, fg_color='transparent')
-        title_frame.columnconfigure(0, weight=1)
-        title_frame.rowconfigure(0, weight=1)
-        title_frame.rowconfigure(1, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=title_frame,
+            rows=2,
+            columns=1
+        )
 
         title_frame.grid(
             row=0,
@@ -129,15 +139,12 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def add_additional_scripts(self):
         self.additional_scripts_frame = ctk.CTkFrame(self)
-        self.additional_scripts_frame.columnconfigure(0, weight=1)
-        self.additional_scripts_frame.columnconfigure(1, weight=1)
-        self.additional_scripts_frame.rowconfigure(0, weight=1)
-        self.additional_scripts_frame.rowconfigure(1, weight=1)
-        self.additional_scripts_frame.rowconfigure(2, weight=1)
-        self.additional_scripts_frame.rowconfigure(3, weight=1)
-        self.additional_scripts_frame.rowconfigure(4, weight=1)
-        self.additional_scripts_frame.rowconfigure(5, weight=1)
-        self.additional_scripts_frame.grid_propagate(False)
+
+        self.set_general_row_col_conf(
+            frame=self.additional_scripts_frame,
+            rows=6,
+            columns=2
+        )
 
         self.additional_scripts_frame.grid(
             row=1,
@@ -185,7 +192,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            # sticky='w',
             sticky=self.sticky_title
         )
 
@@ -202,7 +208,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            # sticky='w',
             sticky=self.sticky_title
         )
         self.update_upgrade_full = ctk.CTkRadioButton(
@@ -218,7 +223,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            # sticky='w',
             sticky=self.sticky_title
         )
 
@@ -243,7 +247,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            # sticky='w',
             sticky=self.sticky_title
         )
         if self.clean_var.get():
@@ -349,7 +352,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         selected_packages_frame.columnconfigure(1, weight=1)
         selected_packages_frame.columnconfigure(2, weight=1)
         selected_packages_frame.rowconfigure(0, weight=1)
-        selected_packages_frame.rowconfigure(1, weight=10)
+        selected_packages_frame.rowconfigure(1, weight=20)
         selected_packages_frame.rowconfigure(2, weight=1)
 
         selected_packages_frame.grid(
@@ -388,7 +391,8 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             self.selected_packages_scrollable.grid(
                 row=1,
                 column=count,
-                padx=self.padx_std, pady=self.pady_std,
+                padx=(3, 3),
+                pady=self.pady_std,
                 sticky=self.sticky_frame
             )
             # add clean button
@@ -411,16 +415,17 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.add_selected_packages_frame()
 
     def add_packages_frame(self, select_all=False):
-        self.packages_frame = ctk.CTkFrame(self)
+        self.packages_frame = ctk.CTkFrame(self, width=120, height=810)
         self.packages_frame.columnconfigure(0, weight=1)
         self.packages_frame.columnconfigure(1, weight=1)
         self.packages_frame.columnconfigure(2, weight=1)
         self.packages_frame.rowconfigure(0, weight=1)
         self.packages_frame.rowconfigure(1, weight=1)
-        self.packages_frame.rowconfigure(2, weight=10)
+        self.packages_frame.rowconfigure(2, weight=40)
         self.packages_frame.rowconfigure(3, weight=1)
         self.packages_frame.rowconfigure(4, weight=1)
         self.packages_frame.rowconfigure(5, weight=1)
+        self.packages_frame.grid_propagate(False)
 
         self.packages_frame.grid(
             row=1,
@@ -575,10 +580,12 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def add_bottom_button_frame(self):
         bottom_button_frame = ctk.CTkFrame(self)
-        bottom_button_frame.columnconfigure(0, weight=1)
-        bottom_button_frame.columnconfigure(1, weight=1)
-        bottom_button_frame.columnconfigure(2, weight=1)
-        bottom_button_frame.rowconfigure(0, weight=1)
+
+        self.set_general_row_col_conf(
+            frame=bottom_button_frame,
+            rows=1,
+            columns=3
+        )
 
         bottom_button_frame.grid(
             row=5,
@@ -775,7 +782,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             columnspan=3,
             padx=self.padx_std,
             pady=self.pady_entry,
-            # sticky='w',
             sticky=self.sticky_horizontal,
         )
         new_package_subframe.grid_propagate(False)
@@ -786,7 +792,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.new_package_entry = ctk.CTkEntry(
             master=new_package_subframe,
             font=self.font_std,
-            width=450,
+            width=380,
             height=self.entry_height_std,
             placeholder_text='Insert New Package Name'
         )
@@ -795,7 +801,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             column=0,
             padx=(0, 0),
             pady=(0, 0),
-            # sticky='e'
             sticky=self.sticky_horizontal
         )
         self.new_package_entry.bind('<KeyRelease>', self._active_add_package)
