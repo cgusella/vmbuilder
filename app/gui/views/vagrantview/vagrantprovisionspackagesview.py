@@ -80,7 +80,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
 
     def set_grid(self):
         self.grid()
-        self.columnconfigure(0, weight=20)
+        self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
         self.rowconfigure(0, weight=1)
@@ -109,6 +109,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         title_frame.grid(
             row=0,
             column=0,
+            rowspan=2,
             columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
@@ -147,7 +148,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         )
 
         self.additional_scripts_frame.grid(
-            row=1,
+            row=2,
             column=0,
             rowspan=2,
             padx=self.padx_std,
@@ -356,9 +357,9 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         selected_packages_frame.rowconfigure(2, weight=1)
 
         selected_packages_frame.grid(
-            row=3,
+            row=4,
             column=0,
-            rowspan=3,
+            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
@@ -425,12 +426,11 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         self.packages_frame.rowconfigure(3, weight=1)
         self.packages_frame.rowconfigure(4, weight=1)
         self.packages_frame.rowconfigure(5, weight=1)
-        self.packages_frame.grid_propagate(False)
 
         self.packages_frame.grid(
-            row=1,
+            row=3,
             column=1,
-            rowspan=4,
+            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
