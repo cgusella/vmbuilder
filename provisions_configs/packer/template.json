@@ -17,8 +17,13 @@
   "configurations": {
     "project_name": "Project Name",
     "vbox_name": "Virtualbox Name",
+    "iso_file": "",
     "iso_link":{
       "description":"Iso link",
+      "default":""
+    },
+    "checksum":{
+      "description":"Checksum of the chosen iso image",
       "default":""
     },
     "cpus":{

@@ -20,6 +20,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.add_project_name()
         self.add_vboxname()
         self.add_iso_frame()
+        self.add_iso_file()
 
     def set_grid(self):
         self.grid()
@@ -45,8 +46,8 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.entry_height_std = 50
         self.entry_width_std = 380
         self.sticky_title = 'wn'
-        self.sticky_label = 'wn'
-        self.sticky_entry = 'ws'
+        self.sticky_label = 'w'
+        self.sticky_entry = 'w'
         self.sticky_frame = 'wens'
         self.sticky_optionmenu = 'w'
 
@@ -275,7 +276,8 @@ class PackerConfigsFrame(ctk.CTkFrame):
     def add_iso_frame(self):
         iso_frame = ctk.CTkFrame(self)
         iso_frame.columnconfigure(0, weight=1)
-        iso_frame.columnconfigure(1, weight=1)
+        iso_frame.columnconfigure(1, weight=5)
+        iso_frame.columnconfigure(2, weight=5)
         iso_frame.rowconfigure(0, weight=1)
         iso_frame.rowconfigure(1, weight=1)
         iso_frame.rowconfigure(2, weight=1)
@@ -324,29 +326,93 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_entry
         )
 
-        self.checksum_types = ctk.CTkOptionMenu(
+        checksum_label = ctk.CTkLabel(
             master=iso_frame,
+            text='Insert Checksum',
+            font=self.font_std
+        )
+        checksum_label.grid(
+            row=2,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+
+        checksum_subframe = ctk.CTkFrame(
+            master=iso_frame,
+            fg_color='transparent'
+        )
+        checksum_subframe.grid(
+            row=3,
+            column=0
+        )
+        self.checksum_types = ctk.CTkOptionMenu(
+            master=checksum_subframe,
             font=self.font_std,
             values=['SHA-1', 'SHA-224', 'SHA-256', 'SHA-384', 'SHA-512', 'MD5']
         )
         self.checksum_types.grid(
-            row=2,
+            row=0,
             column=0,
             padx=self.padx_std,
             pady=self.pady_entry,
             sticky=self.sticky_optionmenu
         )
         self.checksum_entry = ctk.CTkEntry(
-            master=iso_frame,
+            master=checksum_subframe,
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std,
-            placeholder_text='Iso link'
+            placeholder_text='Checksum'
         )
         self.checksum_entry.grid(
-            row=2,
+            row=0,
             column=1,
             padx=self.padx_std,
             pady=self.pady_entry,
             sticky=self.sticky_entry
+        )
+
+    def add_iso_file(self):
+        iso_file_frame = ctk.CTkFrame(self)
+        iso_file_frame.columnconfigure(0, weight=1)
+        iso_file_frame.columnconfigure(1, weight=1)
+        iso_file_frame.rowconfigure(0, weight=1)
+        iso_file_frame.rowconfigure(1, weight=1)
+        iso_file_frame.grid(
+            row=4,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+
+        iso_file_label = ctk.CTkLabel(
+            master=iso_file_frame,
+            font=self.font_std,
+            text='Insert Iso File'
+        )
+        iso_file_label.grid(
+            row=0,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.iso_file_entry = ctk.CTkEntry(
+            master=iso_file_frame,
+            font=self.font_std,
+            width=self.entry_width_std,
+            height=self.entry_height_std,
+            placeholder_text='Iso File'
+        )
+        self.iso_file_entry.grid(
+            row=1,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
         )
