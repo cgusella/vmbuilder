@@ -1,7 +1,7 @@
 import constants
 import customtkinter as ctk
 import os
-from existencecontroller.controller import launch_vboxmanage_lst_command
+from gui.widgets.vboxconfigs import VboxConfigs
 
 
 class PackerConfigsFrame(ctk.CTkFrame):
@@ -9,7 +9,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
     def __init__(self, master, provisions_configs: dict):
         self.master = master
         self.provisions_configs = provisions_configs
-        self.vbox_list = launch_vboxmanage_lst_command()
         ctk.CTkFrame.__init__(self, master)
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
                                      weight='bold')
@@ -21,7 +20,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.add_vboxname()
         self.add_iso_file()
         self.add_iso_frame()
-        self.add_deatils_column()
+        self.add_vbox_configs()
 
     def set_grid(self):
         self.grid()
@@ -51,7 +50,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.sticky_entry = 'w'
         self.sticky_frame = 'wens'
         self.sticky_optionmenu = 'w'
-
 
     def add_title(self):
         title_frame = ctk.CTkFrame(self, fg_color='transparent')
@@ -200,80 +198,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
 
-        vbox_name_label = ctk.CTkLabel(
-            master=self.vbox_hostname_frame,
-            text="Virtual box name:",
-            font=self.font_std
-        )
-        vbox_name_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-        self.entry_vbox_name = ctk.CTkEntry(
-            master=self.vbox_hostname_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Virtualbox name to be created'
-        )
-        if self.provisions_configs["configurations"]['vbox_name']["default"]:
-            self.entry_vbox_name.insert(
-                0,
-                self.provisions_configs["configurations"]['vbox_name']["default"]
-            )
-        self.entry_vbox_name.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-        self.entry_vbox_name.bind("<Configure>", self._vbox_name_check)
-        self.entry_vbox_name.bind("<KeyRelease>", self._vbox_name_check)
-
-        self.warning_label_vbox = ctk.CTkLabel(
-            master=self.vbox_hostname_frame,
-            font=self.font_std
-        )
-        self.warning_label_vbox.grid(
-            row=1,
-            column=1,
-            padx=self.padx_std,
-            pady=0,
-            sticky=self.sticky_label
-        )
-        if self.provisions_configs["configurations"]['vbox_name'] in self.vbox_list:
-            self.warning_label_vbox.configure(
-                text='A box with this name\nalready exists',
-                text_color='red'
-            )
-
-    def _vbox_name_check(self, event):
-        vbox_name_typed = self.entry_vbox_name.get()
-        if vbox_name_typed not in self.vbox_list:
-            self.entry_vbox_name.configure(border_color=["#979DA2", "#565B5E"])
-            if self.warning_label_vbox.winfo_exists():
-                self.warning_label_vbox.destroy()
-        if vbox_name_typed in self.vbox_list:
-            self.warning_label_vbox = ctk.CTkLabel(
-                master=self.vbox_hostname_frame,
-                text='A box with this name\nalready exists',
-                text_color='red',
-                font=self.font_std
-            )
-            self.warning_label_vbox.grid(
-                row=1,
-                column=1,
-                padx=self.padx_std,
-                pady=0,
-                sticky=self.sticky_label
-            )
-            self.entry_vbox_name.configure(border_color='red')
-
     def add_iso_file(self):
         iso_file_frame = ctk.CTkFrame(self)
         iso_file_frame.columnconfigure(0, weight=1)
@@ -360,7 +284,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
             placeholder_text='Iso link'
         )
         if self.provisions_configs["configurations"]["iso_link"]["default"]:
-            self.entry_vbox_name.insert(
+            self.iso_link_entry.insert(
                 0,
                 self.provisions_configs["configurations"]["iso_link"]["default"]
             )
@@ -420,11 +344,13 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_entry
         )
 
-
-    def add_deatils_column(self):
+    def add_vbox_configs(self):
         """Add entries for cpus, memory, disk size"""
-        self.details_frame = ctk.CTkFrame(self)
-        self.details_frame.grid(
+        vbox_configs = VboxConfigs(
+            master=self,
+            provisions_configs=self.provisions_configs
+        )
+        vbox_configs.grid(
             row=1,
             column=1,
             rowspan=3,
@@ -433,112 +359,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
             sticky=self.sticky_frame
-        )
-
-        # specify cpus
-        cpus_label = ctk.CTkLabel(
-            master=self.details_frame,
-            font=self.font_std,
-            text='Specify CPUs number'
-        )
-        cpus_label.grid(
-            row=0,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self.cpus_entry = ctk.CTkEntry(
-            master=self.details_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='CPUs'
-        )
-        self.cpus_entry.grid(
-            row=1,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-
-        # specify memory
-        memory_label = ctk.CTkLabel(
-            master=self.details_frame,
-            font=self.font_std,
-            text='Specify Memory in MB'
-        )
-        memory_label.grid(
-            row=2,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self.memory_var = ctk.IntVar()
-        self.memory_var.set(8192)
-        self.memory_slider = ctk.CTkSlider(
-            master=self.details_frame,
-            variable=self.memory_var,
-            from_=256,
-            to=16384,
-            number_of_steps=63,
-            width=self.entry_width_std,
-            command=self._show_slider_value
-        )
-        self.memory_slider.grid(
-            row=3,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self._show_slider_value(self.memory_var.get())
-
-        # specify disk size
-        disk_label = ctk.CTkLabel(
-            master=self.details_frame,
-            font=self.font_std,
-            text='Specify Disk Size in MB'
-        )
-        disk_label.grid(
-            row=5,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self.disk_entry = ctk.CTkEntry(
-            master=self.details_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Disk Size'
-        )
-        self.disk_entry.grid(
-            row=6,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-
-    def _show_slider_value(self, slider_value):
-        self.slider_label = ctk.CTkLabel(
-            self.details_frame,
-            width=250
-        )
-        self.slider_label.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std
-        )
-        if slider_value:
-            self.slider_label.configure(
-            font=self.font_std,
-            text=f'Selected Value: {slider_value}'
         )
 
     def add_set_provisions(self):

@@ -122,7 +122,7 @@ class MainFrame(ctk.CTkFrame):
             pady=self.pad_left,
             sticky=self.sticky_frame
         )
-        
+
         self.packer_projects = ScrollableCheckboxFrame(
             master=packer_menu_frame,
             title='Packer Projects',
