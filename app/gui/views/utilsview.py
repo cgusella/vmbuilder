@@ -18,7 +18,7 @@ class SetUpScriptEdit(ctk.CTkToplevel):
         file_label = ctk.CTkLabel(
             self,
             text=f'You are modifying "{self.operation}.sh"',
-            font=self.master.font_std
+            font=master.font_std
         )
         file_label.grid(row=1, column=1)
         self.open_text_box = ctk.CTkTextbox(
@@ -96,6 +96,7 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
                 checked_checkboxes.append(checkbox.cget("text"))
         return checked_checkboxes
 
+
 class ScrollableButtonFrame(ctk.CTkScrollableFrame):
     def __init__(self, master, title, values):
         super().__init__(
@@ -151,14 +152,14 @@ class EditFileWindow(ctk.CTkToplevel):
         file_label = ctk.CTkLabel(
             self,
             text=f'You are modifying "{operation}.sh"\nfrom package "{package}"',
-            font=self.master.font_std
+            font=self.master.label_font
         )
         file_label.grid(row=1, column=0, columnspan=3)
         self.open_text_box = ctk.CTkTextbox(
             self,
             width=1100,
             height=400,
-            font=self.master.font_std
+            font=self.master.label_font
         )
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
             text = file.read()
@@ -169,14 +170,14 @@ class EditFileWindow(ctk.CTkToplevel):
             upload_button = ctk.CTkButton(
                 self,
                 text='Upload',
-                font=self.master.font_std,
+                font=self.master.label_font,
                 command=self.upload_file
             )
             upload_button.grid(row=3, column=0)
             save_button = ctk.CTkButton(
                 self,
                 text='Save',
-                font=self.master.font_std,
+                font=self.master.label_font,
                 command=self.save_file
             )
             save_button.grid(row=3, column=2)
@@ -184,14 +185,14 @@ class EditFileWindow(ctk.CTkToplevel):
             save_button = ctk.CTkButton(
                 self,
                 text='Save',
-                font=self.master.font_std,
+                font=self.master.label_font,
                 command=self.save_file
             )
             save_button.grid(row=3, column=1)
         remove_button = ctk.CTkButton(
             self,
             text=f'Remove from {operation}',
-            font=self.master.font_std,
+            font=self.master.label_font,
             command=self.remove_from_operation
         )
         remove_button.grid(row=4, column=1)

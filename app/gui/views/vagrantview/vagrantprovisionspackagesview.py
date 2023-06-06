@@ -17,13 +17,12 @@ from gui.views.utilsview import (
     EditFileWindow,
     ScrollableButtonFrame,
     ScrollableCheckboxFrame,
-    SetUpScriptEdit
 )
+from gui.widgets.additionalscriptwidget import AdditionalScriptWidget
 from existencecontroller.controller import launch_vboxmanage_lst_command
 from PIL import Image
 from tkinter import filedialog
 from tkinter import messagebox as mb
-from tkinter import StringVar
 
 
 class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
@@ -44,7 +43,7 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             size=20,
             weight='bold'
         )
-        self.font_std = ctk.CTkFont(family=self.master.family, size=20)
+        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
         self.set_std_dimensions()
         self.set_grid()
         self.add_titles()
@@ -139,14 +138,10 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
         )
 
     def add_additional_scripts(self):
-        self.additional_scripts_frame = ctk.CTkFrame(self)
-
-        self.set_general_row_col_conf(
-            frame=self.additional_scripts_frame,
-            rows=6,
-            columns=2
+        self.additional_scripts_frame = AdditionalScriptWidget(
+            self,
+            self.provisions_configs
         )
-
         self.additional_scripts_frame.grid(
             row=2,
             column=0,
@@ -156,195 +151,6 @@ class VagrantProvisionsPackagesFrame(ctk.CTkFrame):
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
             sticky=self.sticky_frame,
-        )
-
-        additional_scripts_label = ctk.CTkLabel(
-            master=self.additional_scripts_frame,
-            text='Additional Scripts',
-            font=self.little_title
-        )
-        additional_scripts_label.grid(
-            row=0,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_title
-        )
-
-        # add radiobuttons
-        self.radio_var = StringVar(self, value=None)
-        if self.provisions_configs["provisions"]['update_upgrade']:
-            self.radio_var.set('update_upgrade')
-            self._add_edit_button()
-        if self.provisions_configs["provisions"]['update_upgrade_full']:
-            self.radio_var.set('update_upgrade_full')
-            self._add_edit_button()
-
-        self.update_upgrade = ctk.CTkRadioButton(
-            master=self.additional_scripts_frame,
-            text="Update upgrade",
-            variable=self.radio_var,
-            value='update_upgrade',
-            command=self._add_edit_button,
-            font=self.font_std
-        )
-        self.update_upgrade.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky=self.sticky_title
-        )
-
-        self.update_upgrade_full = ctk.CTkRadioButton(
-            master=self.additional_scripts_frame,
-            text="Update upgrade full",
-            variable=self.radio_var,
-            value='update_upgrade_full',
-            command=self._add_edit_button,
-            font=self.font_std
-        )
-        self.update_upgrade_full.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky=self.sticky_title
-        )
-        self.update_upgrade_full = ctk.CTkRadioButton(
-            self.additional_scripts_frame,
-            text="None",
-            variable=self.radio_var,
-            value=None,
-            font=self.font_std,
-            command=self._remove_edit_button
-        )
-        self.update_upgrade_full.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky=self.sticky_title
-        )
-
-        # add checkbox for clean packages
-        self.clean_var = StringVar()
-        provisions = self.provisions_configs["provisions"]
-        default_clean_var = 'clean_packages' if provisions["clean_packages"] else ''
-        self.clean_var.set(default_clean_var)
-        clean_button = ctk.CTkCheckBox(
-            master=self.additional_scripts_frame,
-            text="Clean packages",
-            variable=self.clean_var,
-            onvalue='clean_packages',
-            offvalue='',
-            height=1,
-            width=15,
-            font=self.font_std,
-            command=self._check_checkbox_clean_status
-        )
-        clean_button.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky=self.sticky_title
-        )
-        if self.clean_var.get():
-            self._add_edit_clean_button()
-
-        # add checkbox for reboot
-        self.reboot = StringVar()
-        provisions = self.provisions_configs["provisions"]
-        default_reboot_var = 'reboot' if provisions["reboot"] else ''
-        self.reboot.set(default_reboot_var)
-        reboot_checkbox = ctk.CTkCheckBox(
-            master=self.additional_scripts_frame,
-            text="Reboot",
-            variable=self.reboot,
-            onvalue='reboot',
-            offvalue='',
-            height=1,
-            width=15,
-            font=self.font_std,
-            command=self._check_checkbox_reboot_status
-        )
-        reboot_checkbox.grid(
-            row=5,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky=self.sticky_title
-        )
-        if self.reboot.get():
-            self._add_edit_reboot_button()
-
-    def _add_edit_button(self):
-        if self.radio_var.get() == 'update_upgrade':
-            self._remove_edit_button()
-            row = 1
-            self.provisions_configs["provisions"]['update_upgrade_full'] = False
-        elif self.radio_var.get() == 'update_upgrade_full':
-            self._remove_edit_button()
-            row = 2
-            self.provisions_configs["provisions"]['update_upgrade'] = False
-        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
-        self.edit_upgrade_button = ctk.CTkButton(
-            master=self.additional_scripts_frame,
-            text='Edit',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=lambda: self._edit_additional_script(self.radio_var)
-        )
-        self.edit_upgrade_button.grid(row=row, column=1)
-
-    def _remove_edit_button(self):
-        try:
-            self.edit_upgrade_button.destroy()
-        except (AttributeError, ValueError):
-            pass
-
-    def _check_checkbox_clean_status(self):
-        if self.clean_var.get():
-            self.provisions_configs["provisions"]["clean_packages"] = True
-            self._add_edit_clean_button()
-        else:
-            self.provisions_configs["provisions"]["clean_packages"] = False
-            self.edit_clean_button.destroy()
-
-    def _check_checkbox_reboot_status(self):
-        if self.reboot.get():
-            self.provisions_configs["provisions"]["reboot"] = True
-            self._add_edit_reboot_button()
-        else:
-            self.provisions_configs["provisions"]["reboot"] = False
-            self.edit_reboot_button.destroy()
-
-    def _add_edit_clean_button(self):
-        self.edit_clean_button = ctk.CTkButton(
-            master=self.additional_scripts_frame,
-            text='Edit',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=lambda: self._edit_additional_script(self.clean_var)
-        )
-        self.edit_clean_button.grid(row=4, column=1)
-
-    def _add_edit_reboot_button(self):
-        self.edit_reboot_button = ctk.CTkButton(
-            master=self.additional_scripts_frame,
-            text='Edit',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=lambda: self._edit_additional_script(self.reboot)
-        )
-        self.edit_reboot_button.grid(row=5, column=1)
-
-    def _edit_additional_script(self, variable):
-        SetUpScriptEdit(
-            self,
-            variable=variable,
-            provisions_configs=self.provisions_configs
         )
 
     def add_selected_packages_frame(self):

@@ -20,7 +20,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             size=30,
             weight='bold'
         )
-        self.font_std = ctk.CTkFont(family=self.master.family, size=20)
+        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_titles()

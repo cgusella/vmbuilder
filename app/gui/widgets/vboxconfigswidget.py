@@ -2,14 +2,13 @@ import customtkinter as ctk
 from existencecontroller.controller import launch_vboxmanage_lst_command
 
 
-class VboxConfigs(ctk.CTkFrame):
+class VboxConfigsWidget(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         self.vbox_list = launch_vboxmanage_lst_command()
         ctk.CTkFrame.__init__(self, master)
-        self.details_frame = ctk.CTkFrame(self)
-        self.font_std = ctk.CTkFont(family='Sans', size=20)
+        self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.warning_font = ctk.CTkFont(family='Sans', size=11)
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)

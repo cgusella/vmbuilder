@@ -1,7 +1,9 @@
 import constants
 import customtkinter as ctk
 import os
-from gui.widgets.vboxconfigs import VboxConfigs
+from gui.widgets.vboxconfigswidget import VboxConfigsWidget
+from gui.widgets.isowidget import IsoWidget
+from gui.widgets.titlewidget import TitleWidget
 
 
 class PackerConfigsFrame(ctk.CTkFrame):
@@ -12,13 +14,12 @@ class PackerConfigsFrame(ctk.CTkFrame):
         ctk.CTkFrame.__init__(self, master)
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
                                      weight='bold')
-        self.font_std = ctk.CTkFont(family=self.master.family, size=20)
+        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_title()
         self.add_project_name()
-        self.add_vboxname()
-        self.add_iso_file()
+        self.add_disk_name()
         self.add_iso_frame()
         self.add_vbox_configs()
 
@@ -41,50 +42,26 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.pady_entry = (2, 10)
         self.ipadx_std = 10
         self.ipady_std = 10
-        self.ipadx_button = 5
-        self.ipady_button = 5
         self.entry_height_std = 50
         self.entry_width_std = 380
-        self.sticky_title = 'wn'
         self.sticky_label = 'w'
         self.sticky_entry = 'w'
         self.sticky_frame = 'wens'
-        self.sticky_optionmenu = 'w'
 
     def add_title(self):
-        title_frame = ctk.CTkFrame(self, fg_color='transparent')
-        title_frame.columnconfigure(0, weight=1)
-        title_frame.rowconfigure(0, weight=1)
-        title_frame.rowconfigure(1, weight=1)
+        self.title_widget = TitleWidget(
+            master=self,
+            title='Packer',
+            subtitle='Configurations'
+        )
 
-        title_frame.grid(
+        self.title_widget.grid(
             row=0,
             column=0,
             columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky=self.sticky_frame
-        )
-        self.vagrant_label = ctk.CTkLabel(
-            master=title_frame,
-            text="Packer",
-            font=self.title_std
-        )
-        self.vagrant_label.grid(
-            row=0,
-            column=0,
-            sticky=self.sticky_label
-        )
-
-        self.conf_label = ctk.CTkLabel(
-            master=title_frame,
-            text="Configurations",
-            font=self.font_std
-        )
-        self.conf_label.grid(
-            row=1,
-            column=0,
-            sticky=self.sticky_label
         )
 
     def add_project_name(self):
@@ -180,15 +157,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
             )
             self.entry_project_name.configure(border_color='red')
 
-    def add_vboxname(self):
-        self.vbox_hostname_frame = ctk.CTkFrame(self)
-        # self.vbox_hostname_frame.grid_propagate(False)
-        self.vbox_hostname_frame.columnconfigure(0, weight=1)
-        self.vbox_hostname_frame.columnconfigure(1, weight=1)
-        self.vbox_hostname_frame.rowconfigure(0, weight=1)
-        self.vbox_hostname_frame.rowconfigure(1, weight=1)
-
-        self.vbox_hostname_frame.grid(
+    def add_disk_name(self):
+        self.disk_name_frame = ctk.CTkFrame(self)
+        self.disk_name_frame.grid(
             row=2,
             column=0,
             padx=self.padx_std,
@@ -198,59 +169,39 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
 
-    def add_iso_file(self):
-        iso_file_frame = ctk.CTkFrame(self)
-        iso_file_frame.columnconfigure(0, weight=1)
-        iso_file_frame.columnconfigure(1, weight=1)
-        iso_file_frame.rowconfigure(0, weight=1)
-        iso_file_frame.rowconfigure(1, weight=1)
-        iso_file_frame.grid(
-            row=3,
+        disk_name_label = ctk.CTkLabel(
+            self.disk_name_frame,
+            text='Insert Disk Name',
+            font=self.font_std
+        )
+        disk_name_label.grid(
+            row=0,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame
+            sticky=self.sticky_label
         )
 
-        iso_file_label = ctk.CTkLabel(
-            master=iso_file_frame,
-            font=self.font_std,
-            text='Insert Iso File'
-        )
-        iso_file_label.grid(
-            row=0,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self.iso_file_entry = ctk.CTkEntry(
-            master=iso_file_frame,
+        self.disk_name_entry = ctk.CTkEntry(
+            self.disk_name_frame,
             font=self.font_std,
             width=self.entry_width_std,
             height=self.entry_height_std,
-            placeholder_text='Iso File'
+            placeholder_text='Disk Name'
         )
-        self.iso_file_entry.grid(
+        self.disk_name_entry.grid(
             row=1,
             column=0,
-            sticky=self.sticky_entry,
             padx=self.padx_std,
-            pady=self.pady_title
+            pady=self.pady_std,
+            sticky=self.sticky_entry
         )
 
     def add_iso_frame(self):
-        iso_frame = ctk.CTkFrame(self)
-        iso_frame.columnconfigure(0, weight=1)
-        iso_frame.columnconfigure(1, weight=5)
-        iso_frame.columnconfigure(2, weight=5)
-        iso_frame.rowconfigure(0, weight=1)
-        iso_frame.rowconfigure(1, weight=1)
-        iso_frame.rowconfigure(2, weight=1)
-        iso_frame.rowconfigure(3, weight=1)
-
+        iso_frame = IsoWidget(
+            self,
+            self.provisions_configs
+        )
         iso_frame.grid(
             row=4,
             column=0,
@@ -262,91 +213,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
 
-        iso_link_label = ctk.CTkLabel(
-            master=iso_frame,
-            text='Insert Iso Link',
-            font=self.font_std
-        )
-        iso_link_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-
-        self.iso_link_entry = ctk.CTkEntry(
-            master=iso_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Iso link'
-        )
-        if self.provisions_configs["configurations"]["iso_link"]["default"]:
-            self.iso_link_entry.insert(
-                0,
-                self.provisions_configs["configurations"]["iso_link"]["default"]
-            )
-        self.iso_link_entry.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-
-        checksum_label = ctk.CTkLabel(
-            master=iso_frame,
-            text='Insert Checksum',
-            font=self.font_std
-        )
-        checksum_label.grid(
-            row=2,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-
-        checksum_subframe = ctk.CTkFrame(
-            master=iso_frame,
-            fg_color='transparent'
-        )
-        checksum_subframe.grid(
-            row=3,
-            column=0,
-        )
-        self.checksum_types = ctk.CTkOptionMenu(
-            master=checksum_subframe,
-            font=self.font_std,
-            values=['SHA-1', 'SHA-224', 'SHA-256', 'SHA-384', 'SHA-512', 'MD5']
-        )
-        self.checksum_types.grid(
-            row=0,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_optionmenu
-        )
-        self.checksum_entry = ctk.CTkEntry(
-            master=checksum_subframe,
-            font=self.font_std,
-            width=2*self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Checksum'
-        )
-        self.checksum_entry.grid(
-            row=0,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-
     def add_vbox_configs(self):
         """Add entries for cpus, memory, disk size"""
-        vbox_configs = VboxConfigs(
+        vbox_configs = VboxConfigsWidget(
             master=self,
             provisions_configs=self.provisions_configs
         )
