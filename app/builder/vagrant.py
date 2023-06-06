@@ -121,7 +121,6 @@ class Vagrant(Builder):
     def _initialize_vagrantfile(self):
         """Add initial configurations to Vagrantfile"""
         connection = 'true' if self.configs["connection"] == 'key' else 'false'
-        print(connection)
         with open(self.vagrantfile_path, 'w') as vagrantfile:
             vagrantfile.write(
                 '# -*- mode: ruby -*-\n'

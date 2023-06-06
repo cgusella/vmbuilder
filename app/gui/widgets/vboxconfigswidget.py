@@ -35,7 +35,6 @@ class VboxConfigsWidget(ctk.CTkFrame):
             padx=self.padx_std,
             pady=self.pady_std
         )
-        self.vbox_subframe.grid_propagate(False)
         vbox_name_label = ctk.CTkLabel(
             master=self.vbox_subframe,
             text="Virtual box name:",

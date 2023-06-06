@@ -65,7 +65,6 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
             master,
             label_text=title,
             label_font=master.master.master.font_std,
-            width=300
         )
         self.grid_columnconfigure(0, weight=1)
         self.values = values
@@ -103,7 +102,8 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
             master,
             label_text=title,
             label_font=master.master.master.font_std,
-            width=150
+            border_width=2,
+            border_color=['grey64', 'grey34']
         )
         self.grid_columnconfigure(0, weight=1)
         self.values = values
@@ -121,7 +121,7 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 self,
                 height=20,
                 text=value,
-                font=master.master.master.font_packages,
+                font=master.master.label_font,
                 command=lambda args=(value, self.operation): master.master._open_text_window(*args),
                 fg_color=btn_color,
                 text_color=txt_color,
@@ -148,18 +148,18 @@ class EditFileWindow(ctk.CTkToplevel):
             '1200x600'
         )
         self.title('Edit File')
-        self.set_grid()
+        self.font_std = ctk.CTkFont(family='Sans', size=18)
         file_label = ctk.CTkLabel(
             self,
             text=f'You are modifying "{operation}.sh"\nfrom package "{package}"',
-            font=self.master.label_font
+            font=self.font_std
         )
         file_label.grid(row=1, column=0, columnspan=3)
         self.open_text_box = ctk.CTkTextbox(
             self,
             width=1100,
             height=400,
-            font=self.master.label_font
+            font=self.font_std
         )
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
             text = file.read()
@@ -170,14 +170,14 @@ class EditFileWindow(ctk.CTkToplevel):
             upload_button = ctk.CTkButton(
                 self,
                 text='Upload',
-                font=self.master.label_font,
+                font=self.font_std,
                 command=self.upload_file
             )
             upload_button.grid(row=3, column=0)
             save_button = ctk.CTkButton(
                 self,
                 text='Save',
-                font=self.master.label_font,
+                font=self.font_std,
                 command=self.save_file
             )
             save_button.grid(row=3, column=2)
@@ -185,40 +185,27 @@ class EditFileWindow(ctk.CTkToplevel):
             save_button = ctk.CTkButton(
                 self,
                 text='Save',
-                font=self.master.label_font,
+                font=self.font_std,
                 command=self.save_file
             )
             save_button.grid(row=3, column=1)
         remove_button = ctk.CTkButton(
             self,
             text=f'Remove from {operation}',
-            font=self.master.label_font,
+            font=self.font_std,
             command=self.remove_from_operation
         )
         remove_button.grid(row=4, column=1)
 
-    def set_grid(self):
-        self.grid()
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
-
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
-        self.rowconfigure(5, weight=1)
-
     def save_file(self):
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
             file.write(self.open_text_box.get("1.0", "end"))
-        self.master.add_selected_packages_frame()
+        self.master.fill_selected_packages_frame()
         self.destroy()
 
     def remove_from_operation(self):
         self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        self.master.add_selected_packages_frame()
+        self.master.fill_selected_packages_frame()
         self.destroy()
 
     def upload_file(self):

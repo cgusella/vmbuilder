@@ -22,7 +22,7 @@ class TitleWidget(ctk.CTkFrame):
 
         title_label = ctk.CTkLabel(
             master=self,
-            text="Packer",
+            text=title,
             font=title_font
         )
         title_label.grid(
@@ -33,7 +33,7 @@ class TitleWidget(ctk.CTkFrame):
 
         subtitle_label = ctk.CTkLabel(
             master=self,
-            text="Configurations",
+            text=subtitle,
             font=subtitle_font
         )
         subtitle_label.grid(

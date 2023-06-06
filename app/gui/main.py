@@ -31,11 +31,7 @@ class MainFrame(ctk.CTkFrame):
         self.set_dimensions()
         self.set_menu_row_col_conf(rows=self.rows, columns=self.columns)
 
-        # add menu frame
-        self.menu_frame = MenuWidget(master=self)
-        self.menu_frame.grid(row=0, column=0, rowspan=self.rows, sticky='wens')
-        # self.menu_frame.grid_propagate(False)
-
+        self.add_lateral_menu()
         self.add_initial_message()
         self.pack(side="top", fill="both", expand=True)
 
@@ -71,7 +67,11 @@ class MainFrame(ctk.CTkFrame):
         for i in range(rows):
             self.rowconfigure(i, weight=1)
 
-    def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
+    def add_lateral_menu(self):
+        self.menu_frame = MenuWidget(master=self)
+        self.menu_frame.grid(row=0, column=0, rowspan=self.rows, sticky='wens')
+
+    def set_general_row_col_conf(self, frame: ctk.CTkFrame, rows: int, columns: int):
         for i in range(columns):
             frame.columnconfigure(i, weight=1)
 
@@ -138,7 +138,6 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
-        # self.initial_message_frame.destroy()
 
         self.vagrant_configs_frame = VagrantConfigsFrame(
             self,
@@ -203,7 +202,7 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
                 mb.showerror('Up Error', 'You must select just one project to up')
             else:
                 self.destroy()
-                self.__init__(self.master, self.local_vagrant_boxes, vbox_list=self.vbox_list)
+                self.__init__(self.master)
 
                 terminal_frame = ctk.CTkFrame(self)
                 terminal_frame.grid(
