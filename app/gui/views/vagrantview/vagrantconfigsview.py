@@ -1,13 +1,15 @@
-import constants
-import os
 import customtkinter as ctk
 from argumentparser.helper import get_local_vagrant_boxes
 from existencecontroller.controller import launch_vboxmanage_lst_command
+from gui.widgets.projectnamewidget import VagrantProjectNameWidget
+from gui.widgets.titlewidget import TitleWidget
+from gui.widgets.vagrantboxsetupwidget import VagrantBoxSetUpWidget
+from gui.widgets.vboxconfigswidget import VboxConfigsWidget
 from tkinter import messagebox as mb
 from tkinter import StringVar
 
 
-class VagrantConfigsFrame(ctk.CTkFrame):
+class VagrantConfigsView(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
         self.master = master
         self.provisions_configs = provisions_configs
@@ -20,16 +22,17 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             size=30,
             weight='bold'
         )
+        self.warning_font = ctk.CTkFont(family=self.master.family, size=11)
         self.font_std = ctk.CTkFont(family=self.master.family, size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_titles()
         self.add_project_name()
-        self.add_vbox_hostname_box()
+        self.add_vagrant_box_setup()
+        self.add_vbox_configs()
         self.add_connection_mode_frame()
-        self.add_credentials_frame()
-        self.add_empty_frame()
         self.add_set_provision_button()
+        self.render()
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -74,255 +77,41 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             frame.rowconfigure(i, weight=1)
 
     def add_titles(self):
-        title_frame = ctk.CTkFrame(self, fg_color='transparent')
-
-        self.set_general_row_col_conf(
-            frame=title_frame,
-            rows=2,
-            columns=1
-        )
-
-        title_frame.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            # sticky='wn'
-            sticky=self.sticky_frame
-        )
-
-        self.vagrant_label = ctk.CTkLabel(
-            master=title_frame,
-            text="Vagrant",
-            font=self.title_std
-        )
-        self.vagrant_label.grid(
-            row=0,
-            column=0,
-            sticky=self.sticky_title
-        )
-
-        self.conf_label = ctk.CTkLabel(
-            title_frame,
-            text="Configurations",
-            font=self.font_std
-        )
-        self.conf_label.grid(
-            row=1,
-            column=0,
-            sticky=self.sticky_title
+        self.title_frame = TitleWidget(
+            master=self,
+            title='Vagrant',
+            subtitle='Configurations'
         )
 
     def add_project_name(self):
-        self.project_name_frame = ctk.CTkFrame(self)
-
-        self.set_general_row_col_conf(
-            frame=self.project_name_frame,
-            rows=2,
-            columns=2
+        self.project_name_frame = VagrantProjectNameWidget(
+            master=self,
+            provisions_configs=self.provisions_configs
         )
 
-        self.project_name_frame.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame
+    def add_vagrant_box_setup(self):
+        self.vagrant_box_setup_frame = VagrantBoxSetUpWidget(
+            master=self,
+            provisions_configs=self.provisions_configs
         )
 
-        project_name_label = ctk.CTkLabel(
-            master=self.project_name_frame,
-            text="New Project Name:",
-            font=self.font_std
+    def add_vbox_configs(self):
+        self.vbox_configs_frame = VboxConfigsWidget(
+            master=self,
+            provisions_configs=self.provisions_configs
         )
-        project_name_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-
-        self.entry_project_name = ctk.CTkEntry(
-            master=self.project_name_frame,
-            height=self.entry_height_std,
-            width=self.entry_width_std,
-            font=self.font_std,
-            placeholder_text='Project name to be created'
-        )
-        if self.provisions_configs["configurations"]["project_name"] != "Project Name":
-            self.entry_project_name.insert(
-                0,
-                self.provisions_configs["configurations"]["project_name"]
-            )
-        self.entry_project_name.grid(
-            row=1,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-        self.entry_project_name.bind("<KeyRelease>", self._project_name_check)
-        self.entry_project_name.bind("<Configure>", self._project_name_check)
-
-    def _project_name_check(self, event):
-        project_name_typed = self.entry_project_name.get()
-        if project_name_typed not in os.listdir(f'{constants.VAGRANT_MACHINES_PATH}/'):
-            self.entry_project_name.configure(border_color=["#979DA2", "#565B5E"])
-        else:
-            self.entry_project_name.configure(border_color='red')
-
-    def add_vbox_hostname_box(self):
-        self.vbox_hostname_frame = ctk.CTkFrame(self)
-
-        self.set_general_row_col_conf(
-            frame=self.vbox_hostname_frame,
-            rows=4,
-            columns=2
-        )
-
-        self.vbox_hostname_frame.grid_propagate(False)
-        self.vbox_hostname_frame.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame,
-        )
-        vbox_name_label = ctk.CTkLabel(
-            master=self.vbox_hostname_frame,
-            text="Virtual box name:",
-            font=self.font_std
-        )
-        vbox_name_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-        self.entry_vbox_name = ctk.CTkEntry(
-            master=self.vbox_hostname_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Virtualbox name to be created'
-        )
-        if self.provisions_configs["configurations"]['vbox_name'] != "Virtualbox Name":
-            self.entry_vbox_name.insert(
-                0,
-                self.provisions_configs["configurations"]['vbox_name']
-            )
-        self.entry_vbox_name.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-        self.entry_vbox_name.bind("<KeyRelease>", self._vbox_name_check)
-        self.entry_vbox_name.bind("<Configure>", self._vbox_name_check)
-
-        hostname_label = ctk.CTkLabel(
-            master=self.vbox_hostname_frame,
-            text="Hostname:",
-            font=self.font_std
-        )
-        hostname_label.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-
-        self.entry_hostname = ctk.CTkEntry(
-            master=self.vbox_hostname_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Hostname for the new VM'
-        )
-        if self.provisions_configs["configurations"]['hostname'] != "Hostname":
-            self.entry_hostname.insert(
-                0,
-                self.provisions_configs["configurations"]['hostname']
-            )
-        self.entry_hostname.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-        vagrant_box_label = ctk.CTkLabel(
-            master=self.vbox_hostname_frame,
-            font=self.font_std,
-            text='Select or Insert Vagrant Box'
-        )
-        vagrant_box_label.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-
-        self.vagrant_box = ctk.StringVar(self)
-        self.vagrant_box.set(self.provisions_configs["configurations"]["image"])
-        vagrant_drop = ctk.CTkComboBox(
-            master=self.vbox_hostname_frame,
-            variable=self.vagrant_box,
-            values=self.local_vagrant_boxes.split("\n"),
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            dropdown_font=self.font_std,
-        )
-        vagrant_drop.grid(
-            row=5,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-
-    def _vbox_name_check(self, event):
-        vbox_name_typed = self.entry_vbox_name.get()
-        if vbox_name_typed not in self.vbox_list:
-            self.entry_vbox_name.configure(border_color=["#979DA2", "#565B5E"])
-        else:
-            self.entry_vbox_name.configure(border_color='red')
 
     def add_connection_mode_frame(self):
-        connection_mode_frame = ctk.CTkFrame(self)
+        self.connection_mode_frame = ctk.CTkFrame(self)
 
         self.set_general_row_col_conf(
-            frame=connection_mode_frame,
+            frame=self.connection_mode_frame,
             rows=2,
             columns=1
         )
 
-        connection_mode_frame.grid(
-            row=1,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame
-        )
-
         ssh_label = ctk.CTkLabel(
-            master=connection_mode_frame,
+            master=self.connection_mode_frame,
             text='Connection mode',
             font=self.font_std
         )
@@ -335,13 +124,14 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         )
 
         self.connection_mode_var = StringVar()
-        if self.provisions_configs["configurations"]["connection"] == 'key':
-            self.connection_mode_var.set('key')
-        elif self.provisions_configs["configurations"]["connection"] == 'password':
-            self.connection_mode_var.set('password')
+        self.connection_mode_var.set('key')
+        if self.provisions_configs["configurations"]["connection"]["default"]:
+            self.connection_mode_var.set(
+                self.provisions_configs["configurations"]["connection"]["default"]
+            )
 
         ssh_key = ctk.CTkRadioButton(
-            master=connection_mode_frame,
+            master=self.connection_mode_frame,
             text="ssh_key",
             variable=self.connection_mode_var,
             value='key',
@@ -356,7 +146,7 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         )
 
         password = ctk.CTkRadioButton(
-            master=connection_mode_frame,
+            master=self.connection_mode_frame,
             text="password",
             variable=self.connection_mode_var,
             value='password',
@@ -371,164 +161,20 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_entry
         )
 
-    def add_credentials_frame(self):
-        credentials_frame = ctk.CTkFrame(self)
-
-        self.set_general_row_col_conf(
-            frame=credentials_frame,
-            rows=6,
-            columns=1
-        )
-
-        credentials_frame.grid(
-            row=2,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame
-        )
-        
-        username_label = ctk.CTkLabel(
-            master=credentials_frame,
-            text="Username:",
-            font=self.font_std
-        )
-        username_label.grid(
-            row=0,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-
-        self.entry_default_username = ctk.CTkEntry(
-            master=credentials_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text="Existing user on the vagrant box"
-        )
-        if self.provisions_configs["credentials"]['username'] != "Username":
-            self.entry_default_username.insert(
-                0,
-                self.provisions_configs["credentials"]['username']
-            )
-        self.entry_default_username.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-
-        password_label = ctk.CTkLabel(
-            master=credentials_frame,
-            text="Password:",
-            font=self.font_std
-        )
-        password_label.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-        
-        self.entry_default_password = ctk.CTkEntry(
-            master=credentials_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text="Password of the previous user"
-        )
-        if self.provisions_configs["credentials"]['password'] != "Password":
-            self.entry_default_password.insert(
-                0,
-                self.provisions_configs["credentials"]['password']
-            )
-        self.entry_default_password.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-
-        extra_user_label = ctk.CTkLabel(
-            master=credentials_frame,
-            text="Extra user:",
-            font=self.font_std
-        )
-        extra_user_label.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
-        )
-
-        self.entry_extra_user = ctk.CTkEntry(
-            master=credentials_frame,
-            font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text="An extra user to be created"
-        )
-        if self.provisions_configs["credentials"]['extra_user']:
-            self.entry_extra_user.insert(
-                0,
-                self.provisions_configs["credentials"]['extra_user']
-            )
-        self.entry_extra_user.grid(
-            row=5,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_entry
-        )
-
-    def add_empty_frame(self):
-        empty_frame = ctk.CTkFrame(
-            self,
-            height=100
-        )
-        empty_frame.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame
-        )
-
     def add_set_provision_button(self):
-        set_provision_button_frame = ctk.CTkFrame(
+        self.set_provision_button_frame = ctk.CTkFrame(
             self,
             height=100,
-            # fg_color='transparent'
+            fg_color='transparent'
         )
 
         self.set_general_row_col_conf(
-            frame=set_provision_button_frame,
+            frame=self.set_provision_button_frame,
             rows=1,
             columns=1
         )
-
-        set_provision_button_frame.grid(
-            row=3,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
-            sticky=self.sticky_frame
-        )
-
         set_provision_button = ctk.CTkButton(
-            master=set_provision_button_frame,
+            master=self.set_provision_button_frame,
             text='Set Provisions',
             command=self._go_to_provision_page,
             font=self.font_std
@@ -543,27 +189,87 @@ class VagrantConfigsFrame(ctk.CTkFrame):
             sticky='se'
         )
 
+    def render(self):
+        self.title_frame.grid(
+            row=0,
+            column=0,
+            columnspan=2,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+        self.project_name_frame.grid(
+            row=1,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+        self.vagrant_box_setup_frame.grid(
+            row=2,
+            column=0,
+            rowspan=2,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame,
+        )
+        self.vbox_configs_frame.grid(
+            row=1,
+            column=1,
+            rowspan=2,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+        self.connection_mode_frame.grid(
+            row=4,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+        self.set_provision_button_frame.grid(
+            row=4,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+
     def _go_to_provision_page(self):
-        project_name = self.entry_project_name.get()
-        vbox_name = self.entry_vbox_name.get()
+        project_name = self.project_name_frame.project_name_entry.get()
+        vbox_name = self.vbox_configs_frame.vbox_name_entry.get()
         if not project_name:
             mb.showerror('Error', 'You must choose a name for the project!')
         elif not vbox_name:
             mb.showerror('Error', 'You must choose a name for the virtual box machine!')
-        elif not self.entry_default_username.get():
+        elif not self.vagrant_box_setup_frame.username_entry.get():
             mb.showerror('Error', 'You must specify the existing username of the vagrant box for vagrant to be able to connect to the machine!')
-        elif not self.entry_default_password.get():
+        elif not self.vagrant_box_setup_frame.password_entry.get():
             mb.showerror('Error', 'You must specify the password of the specified user for vagrant to be able to connect to the machine!')
-        elif self.vagrant_box.get() == 'Select Vagrant Box':
+        elif not self.vagrant_box_setup_frame.vagrant_box.get():
             mb.showerror('Error', 'You must choose a Vagrant box!')
         else:
-            self.provisions_configs["configurations"]["project_name"] = project_name
-            self.provisions_configs["configurations"]["vbox_name"] = self.entry_vbox_name.get()
-            self.provisions_configs["configurations"]["hostname"] = self.entry_hostname.get()
-            self.provisions_configs["credentials"]["username"] = self.entry_default_username.get()
-            self.provisions_configs["credentials"]["password"] = self.entry_default_password.get()
-            self.provisions_configs["credentials"]["extra_user"] = self.entry_extra_user.get()
-            self.provisions_configs["configurations"]["image"] = self.vagrant_box.get()
+            self.provisions_configs["configurations"]["project_name"]["default"] = project_name
+            self.provisions_configs["configurations"]["vbox_name"]["default"] = vbox_name
+            self.provisions_configs["configurations"]["hostname"]["default"] = self.vagrant_box_setup_frame.hostname_entry.get()
+            self.provisions_configs["credentials"]["username"] = self.vagrant_box_setup_frame.username_entry.get()
+            self.provisions_configs["credentials"]["password"] = self.vagrant_box_setup_frame.password_entry.get()
+            self.provisions_configs["credentials"]["extra_user"] = self.vagrant_box_setup_frame.extra_user_entry.get()
+            self.provisions_configs["configurations"]["image"]["default"] = self.vagrant_box_setup_frame.vagrant_box.get()
+            self.provisions_configs["configurations"]["cpus"]["default"] = self.vbox_configs_frame.cpus_value.get()
+            self.provisions_configs["configurations"]["memory"]["default"] = int(self.vbox_configs_frame.memory_slider.get())
+            self.provisions_configs["configurations"]["disk_size"]["default"] = self.vbox_configs_frame.disk_slider_value.get()
             self.destroy()
             self.master.add_vagrant_provisions_frame()
 
@@ -571,4 +277,4 @@ class VagrantConfigsFrame(ctk.CTkFrame):
         return self.provisions_configs
 
     def set_connection_mode(self):
-        self.provisions_configs["configurations"]["connection"] = self.connection_mode_var.get()
+        self.provisions_configs["configurations"]["connection"]["default"] = self.connection_mode_var.get()

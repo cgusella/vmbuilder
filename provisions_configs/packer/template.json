@@ -15,6 +15,10 @@
     "custom_scripts": []
   },
   "configurations": {
+    "provider": {
+      "description":"The project name",
+      "default":"Virtualbox"
+    },
     "project_name": {
       "description":"The project name",
       "default":""
@@ -23,7 +27,14 @@
       "description":"Vbox Name",
       "default":""
     },
-    "iso_file": "",
+    "disk_name":{
+      "description":"Disk Name",
+      "default":""
+    },
+    "iso_file":{
+      "description": "Iso file to be saved on the host",
+      "default": ""
+    },
     "iso_link":{
       "description":"Iso link",
       "default":""
@@ -34,15 +45,19 @@
     },
     "cpus":{
       "description":"Number of CPU cores for the machine",
-      "default":"2"
+      "default":""
     },
     "memory":{
       "description":"Memory value for the machine in MegaByte",
-      "default":"4096"
+      "default":""
     },
     "disk_size":{
       "description":"Disk size of the machine in MegaByte",
-      "default":"15000"
+      "default":""
+    },
+    "preseed_file":{
+      "description":"Selected preseed file",
+      "default":""
     },
     "guest_os_type":{
       "description":"The desired image for the packer",

@@ -70,6 +70,11 @@ class IsoWidget(ctk.CTkFrame):
             height=self.entry_height_std,
             placeholder_text='Iso File'
         )
+        if self.provisions_configs["configurations"]["iso_file"]["default"]:
+            self.iso_file_entry.insert(
+                0,
+                self.provisions_configs["configurations"]["iso_file"]["default"]
+            )
         self.iso_file_entry.grid(
             row=1,
             column=1,
@@ -91,22 +96,22 @@ class IsoWidget(ctk.CTkFrame):
             pady=self.pady_title
         )
 
-        checksum_subframe = ctk.CTkFrame(
+        self.checksum_subframe = ctk.CTkFrame(
             master=self,
             fg_color='transparent'
         )
-        checksum_subframe.grid(
+        self.checksum_subframe.grid(
             row=3,
             column=0,
             columnspan=2,
             sticky=self.sticky_frame
         )
-        self.checksum_types = ctk.CTkOptionMenu(
-            master=checksum_subframe,
+        self.checksum_algorithm = ctk.CTkOptionMenu(
+            master=self.checksum_subframe,
             font=self.font_std,
             values=['SHA-1', 'SHA-224', 'SHA-256', 'SHA-384', 'SHA-512', 'MD5']
         )
-        self.checksum_types.grid(
+        self.checksum_algorithm.grid(
             row=0,
             column=0,
             padx=self.padx_std,
@@ -114,7 +119,7 @@ class IsoWidget(ctk.CTkFrame):
             sticky=self.sticky_optionmenu
         )
         self.checksum_entry = ctk.CTkEntry(
-            master=checksum_subframe,
+            master=self.checksum_subframe,
             font=self.font_std,
             width=2*self.entry_width_std,
             height=self.entry_height_std,
@@ -127,3 +132,11 @@ class IsoWidget(ctk.CTkFrame):
             pady=self.pady_entry,
             sticky=self.sticky_entry
         )
+        if self.provisions_configs["configurations"]["checksum"]["default"]:
+            self.checksum_algorithm.set(
+                self.provisions_configs["configurations"]["checksum"]["default"].split(':')[0]
+            )
+            self.checksum_entry.insert(
+                0,
+                self.provisions_configs["configurations"]["checksum"]["default"].split(':')[1]
+            )

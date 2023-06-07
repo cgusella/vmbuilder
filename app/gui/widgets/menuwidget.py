@@ -1,8 +1,10 @@
 import constants
 import customtkinter as ctk
 import os
+import shutil
 from gui.views.utilsview import ScrollableCheckboxFrame
 from PIL import Image
+from tkinter import messagebox as mb
 
 
 class MenuWidget(ctk.CTkFrame):
@@ -120,7 +122,7 @@ class MenuWidget(ctk.CTkFrame):
             height=10,
             fg_color=['grey86', 'grey17'],
             hover_color=['grey76', 'grey7'],
-            command=lambda: self.master._delete_projects('packer')
+            command=lambda: self._delete_projects('packer')
         )
         packer_delete_button.grid(
             row=2,
@@ -227,7 +229,7 @@ class MenuWidget(ctk.CTkFrame):
             height=10,
             fg_color=['grey86', 'grey17'],
             hover_color=['grey76', 'grey7'],
-            command=lambda: self.master._delete_projects('vagrant')
+            command=lambda: self._delete_projects('vagrant')
         )
         delete_vagrant_button.grid(
             row=2,
@@ -324,3 +326,27 @@ class MenuWidget(ctk.CTkFrame):
             ctk.set_appearance_mode('light')
         elif self.switch_var.get() == 'off':
             ctk.set_appearance_mode('dark')
+
+    def _delete_projects(self, vm_type):
+        if vm_type == 'packer':
+            project_folder = constants.PACKER_MACHINES_PATH
+            projects = self.packer_projects.get()
+        elif vm_type == 'vagrant':
+            project_folder = constants.VAGRANT_MACHINES_PATH
+            projects = self.vagrant_projects.get()
+
+        if projects:
+            message = (
+                'This operation in irreversible.\n'
+                'You choose to delete the following projects:\n'
+            )
+            for project in projects:
+                message += f'\t- {project}\n'
+            yes = mb.askyesnocancel(
+                title='Delete Confirm',
+                message=message
+            )
+            if yes:
+                for project in projects:
+                    shutil.rmtree(f'{project_folder}/{project}')
+                self.master.add_lateral_menu()

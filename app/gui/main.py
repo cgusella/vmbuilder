@@ -3,18 +3,16 @@ import constants
 import customtkinter as ctk
 import json
 import os
-import shutil
 from gui.views.packerview.packerconfigsview import PackerConfigsFrame
-from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsFrame
-from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsPackagesFrame
+from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
+from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsView
 from gui.widgets.menuwidget import MenuWidget
 from tkinter import filedialog
 from tkinter import messagebox as mb
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-ctk.set_appearance_mode('light')
-# ctk.set_default_color_theme(f'{dir_path}/views/dark_blue.json')
+ctk.set_appearance_mode('system')
 
 
 class MainFrame(ctk.CTkFrame):
@@ -139,7 +137,7 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
 
-        self.vagrant_configs_frame = VagrantConfigsFrame(
+        self.vagrant_configs_frame = VagrantConfigsView(
             self,
             self.provisions_configs
         )
@@ -153,7 +151,7 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
 
     def add_vagrant_provisions_frame(self):
         self.vagrant_configs_frame.destroy()
-        vagrant_configs_view = VagrantProvisionsPackagesFrame(
+        vagrant_configs_view = VagrantProvisionsView(
             master=self,
             provisions_configs=self.provisions_configs
         )
@@ -171,29 +169,6 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
         )
         self.provisions_configs = json.loads(file_to_load.read())
         self.add_vagrant_configs(load=True)
-
-    def _delete_projects(self, vm_type):
-        if vm_type == 'packer':
-            project_folder = constants.PACKER_MACHINES_PATH
-            projects = self.packer_projects.get()
-        elif vm_type == 'vagrant':
-            project_folder = constants.VAGRANT_MACHINES_PATH
-            projects = self.vagrant_projects.get()
-
-        message = (
-            'This operation in irreversible.\n'
-            'You choose to delete the following projects:\n'
-        )
-        for project in projects:
-            message += f'\t- {project}\n'
-        yes = mb.askyesnocancel(
-            title='Delete Confirm',
-            message=message
-        )
-        if yes:
-            for project in projects:
-                shutil.rmtree(f'{project_folder}/{project}')
-            self.add_lateral_menu()
 
     def _up(self):
         project_name = self.vagrant_projects.get()
@@ -219,14 +194,19 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
                 os.chdir(f'{constants.VMBUILDER_PATH}')
 
     def _load_packer(self):
-        pass
+        file_to_load = filedialog.askopenfile(
+            initialdir=constants.PACKER_PROVS_CONFS_PATH
+        )
+        self.provisions_configs = json.loads(file_to_load.read())
+        self.add_packer_configs(load=True)
 
     def _build(self):
         pass
 
-    def add_packer_configs(self):
-        with open(f'{constants.PACKER_PROVS_CONFS_PATH}/template.json') as template_json:
-            self.provisions_configs = json.loads(template_json.read())
+    def add_packer_configs(self, load=False):
+        if not load:
+            with open(f'{constants.PACKER_PROVS_CONFS_PATH}/template.json') as template_json:
+                self.provisions_configs = json.loads(template_json.read())
         for operation in ('install', 'uninstall', 'config'):
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]

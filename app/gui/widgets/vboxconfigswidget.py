@@ -48,7 +48,7 @@ class VboxConfigsWidget(ctk.CTkFrame):
             pady=self.pady_title,
             sticky=self.sticky_label
         )
-        self.entry_vbox_name = ctk.CTkEntry(
+        self.vbox_name_entry = ctk.CTkEntry(
             master=self.vbox_subframe,
             font=self.font_std,
             width=self.entry_width_std,
@@ -56,19 +56,31 @@ class VboxConfigsWidget(ctk.CTkFrame):
             placeholder_text='Virtualbox name to be created'
         )
         if self.provisions_configs["configurations"]['vbox_name']["default"]:
-            self.entry_vbox_name.insert(
+            self.vbox_name_entry.insert(
                 0,
                 self.provisions_configs["configurations"]['vbox_name']["default"]
             )
-        self.entry_vbox_name.grid(
+        self.vbox_name_entry.grid(
             row=1,
             column=0,
             padx=self.padx_std,
             pady=self.pady_entry,
             sticky=self.sticky_entry
         )
-        self.entry_vbox_name.bind("<Configure>", self._vbox_name_check)
-        self.entry_vbox_name.bind("<KeyRelease>", self._vbox_name_check)
+        self.warning_label_vbox = ctk.CTkLabel(
+            master=self.vbox_subframe,
+            font=self.warning_font,
+            text=""
+        )
+        self.warning_label_vbox.grid(
+            row=2,
+            column=0,
+            padx=self.padx_std,
+            pady=0,
+            sticky=self.sticky_label
+        )
+        self.vbox_name_entry.bind("<Configure>", self._vbox_name_check)
+        self.vbox_name_entry.bind("<KeyRelease>", self._vbox_name_check)
         self.warning_label_vbox = ctk.CTkLabel(
             master=self.vbox_subframe,
             font=self.warning_font,
@@ -111,6 +123,10 @@ class VboxConfigsWidget(ctk.CTkFrame):
         )
         self.cpus_value = ctk.IntVar()
         self.cpus_value.set(2)
+        if self.provisions_configs["configurations"]["cpus"]["default"]:
+            self.cpus_value.set(
+                int(self.provisions_configs["configurations"]["cpus"]["default"])
+            )
         self.cpus_slider = ctk.CTkSlider(
             master=self.cpus_subframe,
             variable=self.cpus_value,
@@ -152,6 +168,10 @@ class VboxConfigsWidget(ctk.CTkFrame):
         )
         self.memory_var = ctk.IntVar()
         self.memory_var.set(8192)
+        if self.provisions_configs["configurations"]["memory"]["default"]:
+            self.memory_var.set(
+                int(self.provisions_configs["configurations"]["memory"]["default"])
+            )
         self.memory_slider = ctk.CTkSlider(
             master=self.memory_subframe,
             variable=self.memory_var,
@@ -240,6 +260,14 @@ class VboxConfigsWidget(ctk.CTkFrame):
             pady=self.pady_entry,
             sticky=self.sticky_entry
         )
+        if self.provisions_configs["configurations"]["disk_size"]["default"]:
+            self.disk_slider_value.set(
+                int(self.provisions_configs["configurations"]["disk_size"]["default"])
+            )
+            self.disk_entry.insert(
+                0,
+                self.disk_slider_value.get()
+            )
         self._show_disk_size_value(self.disk_slider_value.get())
         self.disk_entry.bind(
             '<KeyRelease>',
@@ -250,7 +278,7 @@ class VboxConfigsWidget(ctk.CTkFrame):
             self._set_disk_size_entry
         )
         self.disk_slider.bind(
-            '<Motion>',
+            '<B1-Motion>',
             self._set_disk_size_entry
         )
 
@@ -327,23 +355,15 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self._show_disk_size_value(int(self.disk_entry.get()))
 
     def _vbox_name_check(self, event):
-        vbox_name_typed = self.entry_vbox_name.get()
+        vbox_name_typed = self.vbox_name_entry.get()
         if vbox_name_typed not in self.vbox_list:
-            self.entry_vbox_name.configure(border_color=["#979DA2", "#565B5E"])
-            if self.warning_label_vbox.winfo_exists():
-                self.warning_label_vbox.destroy()
+            self.vbox_name_entry.configure(border_color=["#979DA2", "#565B5E"])
+            self.warning_label_vbox.configure(
+                text='',
+            )
         if vbox_name_typed in self.vbox_list:
-            self.warning_label_vbox = ctk.CTkLabel(
-                master=self.vbox_subframe,
-                text='A box with this name already exists',
-                text_color='red',
-                font=self.warning_font
+            self.vbox_name_entry.configure(border_color='red')
+            self.warning_label_vbox.configure(
+                text='A virtualbox with this name already exists',
+                text_color='red'
             )
-            self.warning_label_vbox.grid(
-                row=2,
-                column=0,
-                padx=self.padx_std,
-                pady=0,
-                sticky=self.sticky_label
-            )
-            self.entry_vbox_name.configure(border_color='red')

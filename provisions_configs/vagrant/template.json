@@ -1,7 +1,7 @@
 {
   "credentials": {
-    "username": "Username",
-    "password": "Password",
+    "username": "",
+    "password": "",
     "extra_user": ""
   },
   "provisions": {
@@ -15,12 +15,41 @@
     "custom_scripts": []
   },
   "configurations": {
-    "disk_size": "size_in_MB",
-    "provider": "virtualbox",
-    "project_name": "Project Name",
-    "vbox_name": "Virtualbox Name",
-    "hostname": "Hostname",
-    "image": "Select Vagrant Box",
-    "connection": "key"
+    "provider": {
+      "description":"Vagrant provider",
+      "default":"virtualbox"
+    },
+    "project_name": {
+      "description":"The project name",
+      "default":"name"
+    },
+    "vbox_name": {
+      "description":"Vbox name",
+      "default":""
+    },
+    "hostname": {
+      "description":"Hostname",
+      "default":""
+    },
+    "image": {
+      "description":"Vagrant image",
+      "default":""
+    },
+    "connection": {
+      "description":"Connection mode",
+      "default":""
+    },
+    "cpus":{
+      "description":"Number of CPU cores for the machine",
+      "default":""
+    },
+    "memory":{
+      "description":"Memory value for the machine in MegaByte",
+      "default":""
+    },
+    "disk_size":{
+      "description":"Disk size of the machine in MegaByte",
+      "default":""
+    }
   }
 }

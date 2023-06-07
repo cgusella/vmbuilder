@@ -1,7 +1,7 @@
 import constants
 import os
 import json
-from builder.vagrant import Vagrant
+from builder.packer import Packer
 from cli.provisionsreader import ProvisionConfigReader
 from builder.error import (
     NoFileToUploadError,
@@ -14,14 +14,14 @@ from tkinter import filedialog
 from tkinter import messagebox as mb
 
 
-class VagrantProvisionsView(ProvisionsFrame):
+class PackerProvisionsView(ProvisionsFrame):
 
     def __init__(self, master, provisions_configs):
         self.provisions_frame = super()
         self.provisions_frame.__init__(
             master=master,
             provisions_configs=provisions_configs,
-            title='Vagrant'
+            title='Packer'
         )
 
     def set_std_dimensions(self):
@@ -37,12 +37,12 @@ class VagrantProvisionsView(ProvisionsFrame):
         self.provisions_frame.add_bottom_button_frame()
 
     def set_configs(self):
-        from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-        vagrant_configs_view = VagrantConfigsView(
+        from gui.views.packerview.packerconfigsview import PackerConfigsFrame
+        packer_configs_view = PackerConfigsFrame(
             master=self.master,
             provisions_configs=self.provisions_configs
         )
-        vagrant_configs_view.grid(
+        packer_configs_view.grid(
             row=0,
             column=1,
             columnspan=self.master.columns-1,
@@ -57,7 +57,7 @@ class VagrantProvisionsView(ProvisionsFrame):
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
         dst = filedialog.asksaveasfile(
-            initialdir=constants.VAGRANT_PROVS_CONFS_PATH,
+            initialdir=constants.PACKER_PROVS_CONFS_PATH,
             initialfile=f'{project_name}.json',
             defaultextension='.json'
         )
@@ -66,8 +66,8 @@ class VagrantProvisionsView(ProvisionsFrame):
 
     def build(self):
         try:
-            project_name = self.provisions_configs["configurations"]["project_name"]["default"]
-            if project_name in os.listdir(constants.VAGRANT_MACHINES_PATH):
+            project_name = self.provisions_configs["configurations"]["project_name"]
+            if project_name in os.listdir(constants.PACKER_MACHINES_PATH):
                 mb.showwarning(
                     title='Project name duplicate',
                     message=(
@@ -75,7 +75,7 @@ class VagrantProvisionsView(ProvisionsFrame):
                         'If you build this project you will override the old one.'
                     )
                 )
-            vbox_name = self.provisions_configs["configurations"]["vbox_name"]["default"]
+            vbox_name = self.provisions_configs["configurations"]["vbox_name"]
             if vbox_name in self.vbox_list:
                 mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
             else:
@@ -89,16 +89,16 @@ class VagrantProvisionsView(ProvisionsFrame):
                 provisions_configs_reader.check_custom_script_existence()
                 provisions_configs_reader.check_update_upgrade_type()
                 provisions_configs_reader.check_if_clean_is_selected()
-                vagrant_builder = Vagrant(self.provisions_configs)
-                vagrant_builder.set_configs()
-                vagrant_builder.set_provisions()
-                vagrant_builder.set_credentials()
-                vagrant_builder.create_project_folder()
-                vagrant_builder.generate_main_file()
+                packer_builder = Packer(self.provisions_configs)
+                packer_builder.set_configs()
+                packer_builder.set_provisions()
+                packer_builder.set_credentials()
+                packer_builder.create_project_folder()
+                packer_builder.generate_main_file()
                 mb.showinfo(
                     title='Well done!',
                     message=(
-                        f'Your new "{self.provisions_configs["configurations"]["project_name"]["default"]}" machine '
+                        f'Your new "{self.provisions_configs["configurations"]["project_name"]}" machine '
                         'was succesfully created'
                     )
                 )
