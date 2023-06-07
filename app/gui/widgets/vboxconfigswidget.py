@@ -292,7 +292,6 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.slider_memory_label = ctk.CTkLabel(
             self.memory_subframe,
             text="",
-            width=400
         )
         self.slider_memory_label.grid(
             row=2,

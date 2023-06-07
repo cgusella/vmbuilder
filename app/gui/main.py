@@ -40,7 +40,6 @@ class MainFrame(ctk.CTkFrame):
         self.ipady = 10
         self.ipadx_button = 5
         self.ipady_button = 5
-        self.width_button_std = 100
         self.pad_left = (10, 5)
         self.pad_right = (5, 10)
         self.pad_five = (5, 5)

@@ -55,8 +55,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         self.ipadx_button = 5
         self.ipady_button = 5
         self.entry_height_std = 50
-        self.entry_width_std = 300
-        self.width_button_std = 100
+        self.width_button_std = 30
         self.padx_btn_right = (0, 5)
         self.padx_btn_left = (5, 0)
         self.sticky_title = 'wn'
@@ -104,6 +103,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             row=5,
             column=0,
             rowspan=2,
+            columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
@@ -111,7 +111,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             sticky=self.sticky_frame,
         )
         self.bottom_button_frame.grid(
-            row=5,
+            row=0,
             column=1,
             rowspan=2,
             sticky=self.sticky_frame,

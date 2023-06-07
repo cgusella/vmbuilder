@@ -14,28 +14,31 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             weight='bold'
         )
         self.label_font = ctk.CTkFont(family=family_font, size=18)
-        additional_scripts_label = ctk.CTkLabel(
+        self.additional_scripts_label = ctk.CTkLabel(
             master=self,
             text='Additional Scripts',
             font=title_widget_font
         )
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
 
-        padx_std = (20, 20)
-        pady_std = (10, 10)
-        pady_title = (10, 2)
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
+        self.pady_title = (10, 2)
         self.width_button_std = 100
-        sticky_title = 'wn'
-
-        additional_scripts_label.grid(
-            row=0,
-            column=0,
-            padx=padx_std,
-            pady=pady_title,
-            sticky=sticky_title
-        )
+        self.sticky_title = 'wn'
 
         # add radiobuttons
         self.radio_var = ctk.StringVar(self, value=None)
+        self.edit_upgrade_button = ctk.CTkButton(
+            master=self,
+            fg_color='transparent',
+            text='',
+            font=self.label_font,
+            width=self.width_button_std,
+            command=lambda: self._edit_additional_script(self.radio_var)
+        )
         if self.provisions_configs["provisions"]['update_upgrade']:
             self.radio_var.set('update_upgrade')
             self._add_edit_button()
@@ -51,13 +54,6 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             command=self._add_edit_button,
             font=self.label_font
         )
-        self.update_upgrade.grid(
-            row=1,
-            column=0,
-            padx=padx_std,
-            pady=pady_std,
-            sticky=sticky_title
-        )
 
         self.update_upgrade_full = ctk.CTkRadioButton(
             master=self,
@@ -67,14 +63,7 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             command=self._add_edit_button,
             font=self.label_font
         )
-        self.update_upgrade_full.grid(
-            row=2,
-            column=0,
-            padx=padx_std,
-            pady=pady_std,
-            sticky=sticky_title
-        )
-        self.update_upgrade_full = ctk.CTkRadioButton(
+        self.radio_none = ctk.CTkRadioButton(
             self,
             text="None",
             variable=self.radio_var,
@@ -82,20 +71,13 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             font=self.label_font,
             command=self._remove_edit_button
         )
-        self.update_upgrade_full.grid(
-            row=3,
-            column=0,
-            padx=padx_std,
-            pady=pady_std,
-            sticky=sticky_title
-        )
 
         # add checkbox for clean packages
         self.clean_var = ctk.StringVar()
         provisions = self.provisions_configs["provisions"]
         default_clean_var = 'clean_packages' if provisions["clean_packages"] else ''
         self.clean_var.set(default_clean_var)
-        clean_button = ctk.CTkCheckBox(
+        self.clean_button = ctk.CTkCheckBox(
             master=self,
             text="Clean packages",
             variable=self.clean_var,
@@ -106,12 +88,12 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             font=self.label_font,
             command=self._check_checkbox_clean_status
         )
-        clean_button.grid(
-            row=4,
-            column=0,
-            padx=padx_std,
-            pady=pady_std,
-            sticky=sticky_title
+        self.edit_clean_button = ctk.CTkButton(
+            master=self,
+            text='Edit',
+            font=self.label_font,
+            width=self.width_button_std,
+            command=lambda: self._edit_additional_script(self.clean_var)
         )
         if self.clean_var.get():
             self._add_edit_clean_button()
@@ -121,7 +103,7 @@ class AdditionalScriptWidget(ctk.CTkFrame):
         provisions = self.provisions_configs["provisions"]
         default_reboot_var = 'reboot' if provisions["reboot"] else ''
         self.reboot.set(default_reboot_var)
-        reboot_checkbox = ctk.CTkCheckBox(
+        self.reboot_checkbox = ctk.CTkCheckBox(
             master=self,
             text="Reboot",
             variable=self.reboot,
@@ -132,52 +114,6 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             font=self.label_font,
             command=self._check_checkbox_reboot_status
         )
-        reboot_checkbox.grid(
-            row=5,
-            column=0,
-            padx=padx_std,
-            pady=pady_std,
-            sticky=sticky_title
-        )
-        if self.reboot.get():
-            self._add_edit_reboot_button()
-
-    def _add_edit_button(self):
-        if self.radio_var.get() == 'update_upgrade':
-            self._remove_edit_button()
-            row = 1
-            self.provisions_configs["provisions"]['update_upgrade_full'] = False
-        elif self.radio_var.get() == 'update_upgrade_full':
-            self._remove_edit_button()
-            row = 2
-            self.provisions_configs["provisions"]['update_upgrade'] = False
-        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
-        self.edit_upgrade_button = ctk.CTkButton(
-            master=self,
-            text='Edit',
-            font=self.label_font,
-            width=self.width_button_std,
-            command=lambda: self._edit_additional_script(self.radio_var)
-        )
-        self.edit_upgrade_button.grid(row=row, column=1)
-
-    def _remove_edit_button(self):
-        try:
-            self.edit_upgrade_button.destroy()
-        except (AttributeError, ValueError):
-            pass
-
-    def _add_edit_clean_button(self):
-        self.edit_clean_button = ctk.CTkButton(
-            master=self,
-            text='Edit',
-            font=self.label_font,
-            width=self.width_button_std,
-            command=lambda: self._edit_additional_script(self.clean_var)
-        )
-        self.edit_clean_button.grid(row=4, column=1)
-
-    def _add_edit_reboot_button(self):
         self.edit_reboot_button = ctk.CTkButton(
             master=self,
             text='Edit',
@@ -185,7 +121,37 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._edit_additional_script(self.reboot)
         )
-        self.edit_reboot_button.grid(row=5, column=1)
+        if self.reboot.get():
+            self._add_edit_reboot_button()
+        self.render()
+
+    def _add_edit_button(self):
+        if self.radio_var.get() == 'update_upgrade':
+            column = 0
+            self.provisions_configs["provisions"]['update_upgrade_full'] = False
+        elif self.radio_var.get() == 'update_upgrade_full':
+            column = 1
+            self.provisions_configs["provisions"]['update_upgrade'] = False
+        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
+        self.edit_upgrade_button.configure(
+            fg_color=["#3a7ebf", "#1f538d"],
+            text='Edit',
+            state='normal'
+        )
+        self.edit_upgrade_button.grid(row=2, column=column)
+
+    def _remove_edit_button(self):
+        self.edit_upgrade_button.configure(
+            fg_color='transparent',
+            text='',
+            state='disabled'
+        )
+
+    def _add_edit_clean_button(self):
+        self.edit_clean_button.grid(row=2, column=3)
+
+    def _add_edit_reboot_button(self):
+        self.edit_reboot_button.grid(row=2, column=4)
 
     def _edit_additional_script(self, variable):
         SetUpScriptEdit(
@@ -209,3 +175,57 @@ class AdditionalScriptWidget(ctk.CTkFrame):
         else:
             self.provisions_configs["provisions"]["reboot"] = False
             self.edit_reboot_button.destroy()
+
+    def render(self):
+        self.additional_scripts_label.grid(
+            row=0,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_title,
+            sticky=self.sticky_title
+        )
+        self.update_upgrade.grid(
+            row=1,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_title
+        )
+        self.update_upgrade_full.grid(
+            row=1,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_title
+        )
+        self.radio_none.grid(
+            row=1,
+            column=2,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_title
+        )
+
+        self.clean_button.grid(
+            row=1,
+            column=3,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_title
+        )
+        self.reboot_checkbox.grid(
+            row=1,
+            column=4,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_title
+        )
+        empty_label = ctk.CTkLabel(
+            self,
+            text=''
+        )
+        empty_label.grid(
+            row=2,
+            column=1,
+            columnspan=5
+        )

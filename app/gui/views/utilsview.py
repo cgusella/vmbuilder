@@ -55,7 +55,10 @@ class SetUpScriptEdit(ctk.CTkToplevel):
             f'{constants.SETUP_SCRIPTS_PATH}/{self.operation}.sh', 'w'
         ) as file:
             file.write(self.open_text_box.get("1.0", "end"))
-        self.master.master.add_vagrant_provisions_frame()
+        self.master.__init__(
+            master=self.master.master,
+            provisions_configs=self.provisions_configs
+        )
         self.destroy()
 
 
@@ -202,7 +205,7 @@ class EditFileWindow(ctk.CTkToplevel):
     def save_file(self):
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
             file.write(self.open_text_box.get("1.0", "end"))
-        self.master.fill_selected_packages_frame()
+        self.master._add_selected_packages_to(self.operation)
         self.destroy()
 
     def remove_from_operation(self):

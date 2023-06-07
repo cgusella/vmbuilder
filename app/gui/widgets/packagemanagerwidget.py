@@ -203,35 +203,43 @@ class PackageManagerWidget(ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky=self.sticky_frame,
         )
-        for count, operation in enumerate(('install', 'uninstall', 'config')):
-            self.selected_packages_scrollable = ScrollableButtonFrame(
-                master=self.selected_packages_frame,
-                title=f'{operation.title()}',
-                values=sorted(
-                    self.provisions_configs["provisions"][f"packages_to_{operation}"]
-                ),
-            )
-            self.selected_packages_scrollable.grid(
-                row=0,
-                column=count,
-                padx=(3, 3),
-                pady=self.pady_std,
-                sticky=self.sticky_frame
-            )
-            # add clean button
-            clean_button = ctk.CTkButton(
-                master=self.selected_packages_frame,
-                font=self.label_font,
-                text='Clean',
-                command=lambda operation=(operation,): self._clean_packages(*operation)
-            )
-            clean_button.grid(
-                row=1,
-                column=count,
-                pady=self.pady_std,
-                ipadx=self.ipadx_button,
-                ipady=self.ipady_button
-            )
+        for operation in ('install', 'uninstall', 'config'):
+            self._add_selected_packages_to(operation)
+
+    def _add_selected_packages_to(self, operation: str):
+        column = {
+            'install': 0,
+            'uninstall': 1,
+            'config': 2
+        }
+        self.selected_packages_scrollable = ScrollableButtonFrame(
+            master=self.selected_packages_frame,
+            title=f'{operation.title()}',
+            values=sorted(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            ),
+        )
+        self.selected_packages_scrollable.grid(
+            row=0,
+            column=column[operation],
+            padx=(3, 3),
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+        # add clean button
+        clean_button = ctk.CTkButton(
+            master=self.selected_packages_frame,
+            font=self.label_font,
+            text='Clean',
+            command=lambda operation=(operation,): self._clean_packages(*operation)
+        )
+        clean_button.grid(
+            row=1,
+            column=column[operation],
+            pady=self.pady_std,
+            ipadx=self.ipadx_button,
+            ipady=self.ipady_button
+        )
 
     def _check_package_selected(self, event):
         if self.packages_scrollable.get():
@@ -242,7 +250,7 @@ class PackageManagerWidget(ctk.CTkFrame):
     def _add_to_operation(self, opearation: str):
         for package in self.packages_scrollable.get():
             self.provisions_configs["provisions"][f"packages_to_{opearation}"].add(package)
-        self.fill_selected_packages_frame()
+        self._add_selected_packages_to(opearation)
 
     def new_package_subframe(self):
         # add new package sub frame
@@ -385,4 +393,4 @@ class PackageManagerWidget(ctk.CTkFrame):
 
     def _clean_packages(self, operation: str):
         self.provisions_configs["provisions"][f"packages_to_{operation}"] = set()
-        self.fill_selected_packages_frame()
+        self._add_selected_packages_to(operation)

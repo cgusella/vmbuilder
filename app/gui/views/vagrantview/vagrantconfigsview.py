@@ -53,17 +53,14 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.sticky_horizontal = 'ew'
 
     def set_grid(self):
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=2)
         self.columnconfigure(1, weight=1)
 
-        # titles
         self.rowconfigure(0, weight=1)
-        # project name, connection mode
         self.rowconfigure(1, weight=1)
-        # vbox_host, # username_password,
         self.rowconfigure(2, weight=1)
-        # select vagrant box, set provision button
         self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
 
     def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
         # self.grid()
@@ -100,7 +97,9 @@ class VagrantConfigsView(ctk.CTkFrame):
 
     def add_connection_mode_frame(self):
         self.connection_mode_frame = ctk.CTkFrame(self)
-
+        self.connection_mode_frame.columnconfigure(0, weight=1)
+        self.connection_mode_frame.columnconfigure(1, weight=1)
+        self.connection_mode_frame.columnconfigure(2, weight=1)
         self.set_general_row_col_conf(
             frame=self.connection_mode_frame,
             rows=2,
@@ -135,11 +134,11 @@ class VagrantConfigsView(ctk.CTkFrame):
             font=self.font_std
         )
         ssh_key.grid(
-            row=1,
-            column=0,
+            row=0,
+            column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_entry
+            sticky=self.sticky_frame
         )
 
         password = ctk.CTkRadioButton(
@@ -151,11 +150,11 @@ class VagrantConfigsView(ctk.CTkFrame):
             font=self.font_std
         )
         password.grid(
-            row=2,
-            column=0,
+            row=0,
+            column=2,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_entry
+            sticky=self.sticky_frame
         )
 
     def add_set_provision_button(self):
@@ -191,12 +190,13 @@ class VagrantConfigsView(ctk.CTkFrame):
             row=0,
             column=0,
             columnspan=2,
+            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky=self.sticky_frame
         )
         self.project_name_frame.grid(
-            row=1,
+            row=2,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
@@ -205,7 +205,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.vagrant_box_setup_frame.grid(
-            row=2,
+            row=3,
             column=0,
             rowspan=2,
             padx=self.padx_std,
@@ -215,7 +215,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame,
         )
         self.vbox_configs_frame.grid(
-            row=1,
+            row=2,
             column=1,
             rowspan=3,
             padx=self.padx_std,
@@ -225,8 +225,9 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.connection_mode_frame.grid(
-            row=4,
+            row=7,
             column=0,
+            columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
@@ -234,8 +235,9 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.set_provision_button_frame.grid(
-            row=4,
+            row=0,
             column=1,
+            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
