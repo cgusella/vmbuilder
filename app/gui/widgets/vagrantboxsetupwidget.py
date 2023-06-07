@@ -6,6 +6,18 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
+        self.rowconfigure(5, weight=1)
+        self.rowconfigure(6, weight=1)
+        self.rowconfigure(7, weight=1)
+        self.rowconfigure(8, weight=1)
+        self.rowconfigure(9, weight=1)
+        self.height = 40
 
         # add hostname_label
         hostname_label = ctk.CTkLabel(
@@ -17,8 +29,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
         self.hostname_entry = ctk.CTkEntry(
             master=self,
             font=self.master.font_std,
-            width=self.master.entry_width_std,
-            height=self.master.entry_height_std,
+            height=self.height,
             placeholder_text='Hostname for the new VM'
         )
         if self.provisions_configs["configurations"]['hostname']["default"]:
@@ -37,10 +48,9 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
         vagrant_drop = ctk.CTkComboBox(
             master=self,
             variable=self.vagrant_box,
+            height=self.height,
             values=self.master.local_vagrant_boxes.split("\n"),
             font=self.master.font_std,
-            width=self.master.entry_width_std,
-            height=self.master.entry_height_std,
             dropdown_font=self.master.font_std,
         )
 
@@ -53,8 +63,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
         self.username_entry = ctk.CTkEntry(
             master=self,
             font=self.master.font_std,
-            width=self.master.entry_width_std,
-            height=self.master.entry_height_std,
+            height=self.height,
             placeholder_text="Existing user on the vagrant box"
         )
         if self.provisions_configs["credentials"]['username']:
@@ -71,8 +80,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
         self.password_entry = ctk.CTkEntry(
             master=self,
             font=self.master.font_std,
-            width=self.master.entry_width_std,
-            height=self.master.entry_height_std,
+            height=self.height,
             placeholder_text="Password of the previous user"
         )
         if self.provisions_configs["credentials"]['password']:
@@ -90,8 +98,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
         self.extra_user_entry = ctk.CTkEntry(
             master=self,
             font=self.master.font_std,
-            width=self.master.entry_width_std,
-            height=self.master.entry_height_std,
+            height=self.height,
             placeholder_text="An extra user to be created"
         )
         if self.provisions_configs["credentials"]['extra_user']:
@@ -113,7 +120,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
             column=0,
             padx=self.master.padx_std,
             pady=self.master.pady_entry,
-            sticky=self.master.sticky_entry
+            sticky=self.master.sticky_horizontal
         )
         vagrant_box_label.grid(
             row=2,
@@ -127,7 +134,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
             column=0,
             padx=self.master.padx_std,
             pady=self.master.pady_entry,
-            sticky=self.master.sticky_entry
+            sticky=self.master.sticky_horizontal
         )
         username_label.grid(
             row=4,
@@ -141,7 +148,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
             column=0,
             padx=self.master.padx_std,
             pady=self.master.pady_entry,
-            sticky=self.master.sticky_entry
+            sticky=self.master.sticky_horizontal
         )
         password_label.grid(
             row=6,
@@ -155,7 +162,7 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
             column=0,
             padx=self.master.padx_std,
             pady=self.master.pady_entry,
-            sticky=self.master.sticky_entry
+            sticky=self.master.sticky_horizontal
         )
         extra_user_label.grid(
             row=8,
@@ -169,5 +176,5 @@ class VagrantBoxSetUpWidget(ctk.CTkFrame):
             column=0,
             padx=self.master.padx_std,
             pady=self.master.pady_entry,
-            sticky=self.master.sticky_entry
+            sticky=self.master.sticky_horizontal
         )

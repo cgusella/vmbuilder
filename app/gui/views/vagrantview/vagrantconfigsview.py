@@ -43,8 +43,6 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.ipady_std = 10
         self.ipadx_button = 5
         self.ipady_button = 5
-        self.entry_height_std = 50
-        self.entry_width_std = 380
         self.sticky_title = 'wn'
         self.sticky_label = 'ws'
         self.sticky_entry = 'wn'

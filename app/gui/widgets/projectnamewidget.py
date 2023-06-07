@@ -20,10 +20,9 @@ class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
         self.pady_std = (10, 10)
         self.pady_title = (10, 2)
         self.pady_entry = (2, 10)
-        self.entry_height_std = 50
-        self.entry_width_std = 280
+        self.entry_height_std = 40
         self.sticky_label = 'w'
-        self.sticky_entry = 'w'
+        self.sticky_horizontal = 'we'
 
         project_name_label = ctk.CTkLabel(
             master=self,
@@ -42,7 +41,6 @@ class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
         self.project_name_entry = ctk.CTkEntry(
             master=self,
             height=self.entry_height_std,
-            width=self.entry_width_std,
             font=self.font_std,
             placeholder_text='Project name to be created'
         )
@@ -52,7 +50,7 @@ class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
             columnspan=2,
             padx=self.padx_std,
             pady=self.pady_entry,
-            sticky=self.sticky_entry
+            sticky=self.sticky_horizontal
         )
         self.project_name_entry.bind("<Configure>", self._project_name_check)
         self.project_name_entry.bind("<KeyRelease>", self._project_name_check)
@@ -95,7 +93,6 @@ class PackerProjectNameWidget(ProjectNameWidget):
                 0,
                 self.provisions_configs["configurations"]["project_name"]["default"]
             )
-        self._project_name_check()
 
     def _project_name_check(self, event):
         project_name_typed = self.project_name_entry.get()

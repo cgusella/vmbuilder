@@ -10,24 +10,25 @@ class VboxConfigsWidget(ctk.CTkFrame):
         ctk.CTkFrame.__init__(self, master)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.warning_font = ctk.CTkFont(family='Sans', size=11)
+        self.columnconfigure(0, weight=1)
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
         self.pady_title = (10, 2)
         self.pady_entry = (2, 10)
         self.ipadx_std = 10
         self.ipady_std = 10
-        self.entry_height_std = 50
-        self.entry_width_std = 380
+        self.entry_height_std = 40
         self.sticky_title = 'wn'
         self.sticky_label = 'w'
         self.sticky_entry = 'w'
         self.sticky_frame = 'wens'
+        self.sticky_horizontal = 'we'
 
         # vbox name
         self.vbox_subframe = ctk.CTkFrame(
-            self,
-            height=150
+            self
         )
+        self.vbox_subframe.columnconfigure(0, weight=1)
         self.vbox_subframe.grid(
             row=0,
             column=0,
@@ -51,7 +52,6 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.vbox_name_entry = ctk.CTkEntry(
             master=self.vbox_subframe,
             font=self.font_std,
-            width=self.entry_width_std,
             height=self.entry_height_std,
             placeholder_text='Virtualbox name to be created'
         )
@@ -65,7 +65,7 @@ class VboxConfigsWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_entry,
-            sticky=self.sticky_entry
+            sticky=self.sticky_horizontal
         )
         self.warning_label_vbox = ctk.CTkLabel(
             master=self.vbox_subframe,
@@ -101,6 +101,7 @@ class VboxConfigsWidget(ctk.CTkFrame):
 
         # cpus subframe
         self.cpus_subframe = ctk.CTkFrame(self)
+        self.cpus_subframe.columnconfigure(0, weight=1)
         self.cpus_subframe.grid(
             row=1,
             column=0,
@@ -133,13 +134,12 @@ class VboxConfigsWidget(ctk.CTkFrame):
             from_=1,
             to=8,
             number_of_steps=7,
-            width=self.entry_width_std,
             command=self._show_cpus_slider_value
         )
         self.cpus_slider.grid(
             row=1,
             column=0,
-            sticky=self.sticky_label,
+            sticky=self.sticky_horizontal,
             padx=self.padx_std,
             pady=self.pady_title
         )
@@ -147,6 +147,8 @@ class VboxConfigsWidget(ctk.CTkFrame):
 
         # add memory subframe
         self.memory_subframe = ctk.CTkFrame(self)
+        self.memory_subframe.columnconfigure(0, weight=1)
+        self.memory_subframe.columnconfigure(1, weight=0)
         self.memory_subframe.grid(
             row=3,
             column=0,
@@ -178,13 +180,12 @@ class VboxConfigsWidget(ctk.CTkFrame):
             from_=2,
             to=16384,
             number_of_steps=8191,
-            width=self.entry_width_std,
             command=self._show_memory_slider_value
         )
         self.memory_slider.grid(
             row=1,
             column=0,
-            sticky=self.sticky_label,
+            sticky=self.sticky_horizontal,
             padx=self.padx_std,
             pady=self.pady_title
         )
@@ -212,6 +213,8 @@ class VboxConfigsWidget(ctk.CTkFrame):
 
         # specify disk size
         self.disk_size_subframe = ctk.CTkFrame(self)
+        self.disk_size_subframe.columnconfigure(0, weight=1)
+        self.disk_size_subframe.columnconfigure(1, weight=0)
         self.disk_size_subframe.grid(
             row=4,
             column=0,
@@ -239,13 +242,12 @@ class VboxConfigsWidget(ctk.CTkFrame):
             from_=4,
             to=2048,
             number_of_steps=2044,
-            width=self.entry_width_std,
             command=self._show_disk_size_value
         )
         self.disk_slider.grid(
             row=1,
             column=0,
-            sticky=self.sticky_label,
+            sticky=self.sticky_horizontal,
             padx=self.padx_std,
             pady=self.pady_title
         )
