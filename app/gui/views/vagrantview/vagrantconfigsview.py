@@ -242,7 +242,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             pady=self.pady_std,
             ipadx=self.ipadx_std,
             ipady=self.ipady_std,
-            sticky=self.sticky_frame
+            sticky='ne'
         )
 
     def _go_to_provision_page(self):

@@ -19,6 +19,11 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             text='Additional Scripts',
             font=title_widget_font
         )
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+        self.columnconfigure(4, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
@@ -138,7 +143,10 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             text='Edit',
             state='normal'
         )
-        self.edit_upgrade_button.grid(row=2, column=column)
+        self.edit_upgrade_button.grid(
+            row=2,
+            column=column,
+        )
 
     def _remove_edit_button(self):
         self.edit_upgrade_button.configure(
@@ -148,10 +156,16 @@ class AdditionalScriptWidget(ctk.CTkFrame):
         )
 
     def _add_edit_clean_button(self):
-        self.edit_clean_button.grid(row=2, column=3)
+        self.edit_clean_button.grid(
+            row=2,
+            column=3,
+        )
 
     def _add_edit_reboot_button(self):
-        self.edit_reboot_button.grid(row=2, column=4)
+        self.edit_reboot_button.grid(
+            row=2,
+            column=4,
+        )
 
     def _edit_additional_script(self, variable):
         SetUpScriptEdit(
@@ -189,21 +203,18 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_title
         )
         self.update_upgrade_full.grid(
             row=1,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_title
         )
         self.radio_none.grid(
             row=1,
             column=2,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_title
         )
 
         self.clean_button.grid(
@@ -211,14 +222,12 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             column=3,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_title
         )
         self.reboot_checkbox.grid(
             row=1,
             column=4,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_title
         )
         empty_label = ctk.CTkLabel(
             self,

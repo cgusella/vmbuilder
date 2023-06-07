@@ -82,7 +82,6 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         self.title_frame.grid(
             row=0,
             column=0,
-            rowspan=2,
             columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
@@ -137,7 +136,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         )
         build_button.pack(
             side='right',
-            anchor='se',
+            anchor='ne',
             padx=self.pad_right,
             pady=self.pady_std,
             ipadx=self.ipadx_button,
@@ -152,7 +151,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         )
         save_button.pack(
             side='right',
-            anchor='se',
+            anchor='ne',
             padx=self.pad_equal,
             pady=self.pady_std,
             ipadx=self.ipadx_button,
@@ -167,7 +166,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         )
         set_configs_button.pack(
             side='right',
-            anchor='se',
+            anchor='ne',
             padx=self.pad_left,
             pady=self.pady_std,
             ipadx=self.ipadx_button,

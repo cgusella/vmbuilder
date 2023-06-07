@@ -43,6 +43,8 @@ class PackageManagerWidget(ctk.CTkFrame):
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
         # add frame title
         packages_label = ctk.CTkLabel(
@@ -58,9 +60,6 @@ class PackageManagerWidget(ctk.CTkFrame):
             pady=(10, 2),
             sticky='wn'
         )
-
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=3)
 
         # This frame has two different frame;
         # at left there is the package_manager_frame while
