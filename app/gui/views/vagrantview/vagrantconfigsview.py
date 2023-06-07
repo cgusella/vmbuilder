@@ -53,7 +53,6 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.sticky_horizontal = 'ew'
 
     def set_grid(self):
-        self.grid()
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
@@ -218,7 +217,7 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.vbox_configs_frame.grid(
             row=1,
             column=1,
-            rowspan=2,
+            rowspan=3,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
