@@ -124,15 +124,16 @@ class NicWidget(ctk.CTkFrame):
             "VBoxManage list bridgedifs | egrep '^Name|^DHCP|^IPAddress|^NetworkMask'",
             shell=True,
             capture_output=True
-        ).stdout.decode("ascii").split()
+        ).stdout.decode("ascii").split('\n')
         self.bridged_configs_dict = dict()
-        for count in range(int(len(bridged_configs_list)/8)):
-            index_start = 7*count+count+1
-            self.bridged_configs_dict[bridged_configs_list[index_start]] = {
-                bridged_configs_list[index_start+1][:-1]: bridged_configs_list[index_start+2],
-                bridged_configs_list[index_start+3][:-1]: bridged_configs_list[index_start+4],
-                bridged_configs_list[index_start+5][:-1]: bridged_configs_list[index_start+6],
-            }
+        for count in range(int(len(bridged_configs_list)/4)):
+            index_start = 4*count
+            self.bridged_configs_dict[''.join(bridged_configs_list[index_start].split()[1:])] = (
+                bridged_configs_list[index_start+1],
+                bridged_configs_list[index_start+2],
+                bridged_configs_list[index_start+3],
+            )
+        print(self.bridged_configs_dict)
         select_label = ctk.CTkLabel(
             master=self.config_adapter_frame,
             font=self.font_std,
@@ -200,13 +201,13 @@ class NicWidget(ctk.CTkFrame):
 
     def _show_bridged_info(self, nic):
         self.dhcp_label.configure(
-            text=f'DHCP: {self.bridged_configs_dict[nic]["DHCP"]}'
+            text=f'{self.bridged_configs_dict[nic][0]}'
         )
         self.ip_label.configure(
-            text=f'IPAddress: {self.bridged_configs_dict[nic]["IPAddress"]}'
+            text=f'{self.bridged_configs_dict[nic][1]}'
         )
         self.netmask_label.configure(
-            text=f'NetMask: {self.bridged_configs_dict[nic]["NetworkMask"]}'
+            text=f'{self.bridged_configs_dict[nic][2]}'
         )
 
     def _insert_hostonly(self):
