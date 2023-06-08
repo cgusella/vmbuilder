@@ -33,8 +33,8 @@ class PackerProvisionsView(ProvisionsFrame):
     def render(self):
         self.provisions_frame.render()
 
-    def add_bottom_button_frame(self):
-        self.provisions_frame.add_bottom_button_frame()
+    def add_main_button_frame(self):
+        self.provisions_frame.add_main_button_frame()
 
     def set_configs(self):
         from gui.views.packerview.packerconfigsview import PackerConfigsFrame

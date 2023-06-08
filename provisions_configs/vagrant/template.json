@@ -21,7 +21,7 @@
     },
     "project_name": {
       "description":"The project name",
-      "default":"name"
+      "default":""
     },
     "vbox_name": {
       "description":"Vbox name",

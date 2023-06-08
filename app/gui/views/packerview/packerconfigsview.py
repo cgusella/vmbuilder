@@ -174,7 +174,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
             f'{self.iso_frame.checksum_algorithm.get()}:{self.iso_frame.checksum_entry.get()}'
         )
         configs["preseed_file"]["default"] = self.preseed_files_option.get()
-        self.destroy()
         packer_provisions_view = PackerProvisionsView(
             self.master,
             self.provisions_configs

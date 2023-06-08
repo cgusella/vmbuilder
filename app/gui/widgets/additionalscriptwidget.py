@@ -125,6 +125,10 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._edit_additional_script(self.reboot)
         )
+        if self.provisions_configs["provisions"]['update_upgrade']:
+            self.radio_var.set('update_upgrade')
+        if self.provisions_configs["provisions"]['update_upgrade_full']:
+            self.radio_var.set('update_upgrade_full')
         self._check_checkbox_clean_status()
         self._check_checkbox_reboot_status()
         self.render()

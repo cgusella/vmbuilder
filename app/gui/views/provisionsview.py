@@ -39,7 +39,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             self,
             self.provisions_configs
         )
-        self.add_bottom_button_frame()
+        self.add_main_button_frame()
         self.render()
 
     def set_std_dimensions(self):
@@ -109,7 +109,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky=self.sticky_frame,
         )
-        self.bottom_button_frame.grid(
+        self.main_buttons_frame.grid(
             row=0,
             column=1,
             sticky=self.sticky_frame,
@@ -119,67 +119,6 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             ipady=self.ipady_std,
         )
 
-    def add_bottom_button_frame(self):
-        self.bottom_button_frame = ctk.CTkFrame(
-            self,
-            fg_color='transparent',
-        )
-        # The order here is important.
-        # Do not change the order between build, save, and set configs
-        build_button = ctk.CTkButton(
-            master=self.bottom_button_frame,
-            text='Build',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=self.build
-        )
-        build_button.pack(
-            side='right',
-            anchor='ne',
-            padx=self.pad_right,
-            pady=self.pady_std,
-            ipadx=self.ipadx_button,
-            ipady=self.ipady_button
-        )
-        save_button = ctk.CTkButton(
-            master=self.bottom_button_frame,
-            text='Save',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=self._save
-        )
-        save_button.pack(
-            side='right',
-            anchor='ne',
-            padx=self.pad_equal,
-            pady=self.pady_std,
-            ipadx=self.ipadx_button,
-            ipady=self.ipady_button
-        )
-        set_configs_button = ctk.CTkButton(
-            master=self.bottom_button_frame,
-            text='Set Configs',
-            font=self.font_std,
-            width=self.width_button_std,
-            command=self.set_configs
-        )
-        set_configs_button.pack(
-            side='right',
-            anchor='ne',
-            padx=self.pad_left,
-            pady=self.pady_std,
-            ipadx=self.ipadx_button,
-            ipady=self.ipady_button
-        )
-
     @abc.abstractmethod
-    def set_configs(self):
-        pass
-
-    @abc.abstractmethod
-    def _save(self):
-        pass
-
-    @abc.abstractmethod
-    def build(self):
+    def add_main_button_frame(self):
         pass

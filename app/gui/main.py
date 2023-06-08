@@ -18,6 +18,7 @@ ctk.set_appearance_mode('system')
 class MainFrame(ctk.CTkFrame):
 
     def __init__(self, master):
+        self.frame_name = 'main'
         ctk.CTkFrame.__init__(self, master)
         self.master = master
         self.rows = 4
@@ -166,8 +167,9 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
         file_to_load = filedialog.askopenfile(
             initialdir=constants.VAGRANT_PROVS_CONFS_PATH
         )
-        self.provisions_configs = json.loads(file_to_load.read())
-        self.add_vagrant_configs(load=True)
+        if file_to_load:
+            self.provisions_configs = json.loads(file_to_load.read())
+            self.add_vagrant_configs(load=True)
 
     def _up(self):
         project_name = self.vagrant_projects.get()
