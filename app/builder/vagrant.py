@@ -19,7 +19,7 @@ class Vagrant(Builder):
         self.machine_path: str = constants.VAGRANT_MACHINES_PATH
         self.vagrantfile_path = (
             f'{self.machine_path}/'
-            f'{self.provisions_configs["configurations"]["project_name"]}/'
+            f'{self.provisions_configs["configurations"]["project_name"]["default"]}/'
             'Vagrantfile'
         )
         self.configs: dict = dict()
@@ -45,8 +45,10 @@ class Vagrant(Builder):
             |
             - upload/
         """
-        project_folder = f'{self.machine_path}/{self.configs["project_name"]}'
+        project_folder = f'{self.machine_path}/{self.configs["project_name"]["default"]}'
         # create project folder
+        if os.path.exists(project_folder):
+            shutil.rmtree(project_folder)
         os.mkdir(project_folder)
 
         # create upload folder
@@ -71,7 +73,7 @@ class Vagrant(Builder):
             pass
         else:
             with open(
-                f'{self.machine_path}/{self.configs["project_name"]}/Vagrantfile',
+                f'{self.machine_path}/{self.configs["project_name"]["default"]}/Vagrantfile',
                 'a'
             ) as vagrantfile:
                 vagrantfile.write(f'\n\n\t\t{hash_number*"#"}\n')
@@ -99,7 +101,7 @@ class Vagrant(Builder):
                 try:
                     shutil.copyfile(
                         src=f'{constants.PACKAGES_PATH}/{package}/upload/{upload_file}',
-                        dst=f'{self.machine_path}/{self.configs["project_name"]}/upload/{upload_file}'
+                        dst=f'{self.machine_path}/{self.configs["project_name"]["default"]}/upload/{upload_file}'
                     )
                 except FileNotFoundError:
                     missing_upload_files += f'"{upload_file}" from "{package}"\n'
@@ -107,7 +109,7 @@ class Vagrant(Builder):
                     replace_text_in_file(
                         search_phrase="extra_user",
                         replace_with=self.credentials["extra_user"],
-                        file_path=f'{self.machine_path}/{self.configs["project_name"]}/upload/{upload_file}'
+                        file_path=f'{self.machine_path}/{self.configs["project_name"]["default"]}/upload/{upload_file}'
                     )
         if missing_upload_files:
             raise NoFileToUploadError(
@@ -118,6 +120,7 @@ class Vagrant(Builder):
 
     def _initialize_vagrantfile(self):
         """Add initial configurations to Vagrantfile"""
+        connection = 'true' if self.configs["connection"]["default"] == 'key' else 'false'
         with open(self.vagrantfile_path, 'w') as vagrantfile:
             vagrantfile.write(
                 '# -*- mode: ruby -*-\n'
@@ -125,16 +128,20 @@ class Vagrant(Builder):
             )
             vagrantfile.write(
                 'Vagrant.configure("2") do |config|\n'
-                f'\tconfig.vm.box = "{self.configs["image"]}"\n'
+                f'\tconfig.vm.box = "{self.configs["image"]["default"]}"\n'
                 f'\tconfig.ssh.username = "{self.credentials["username"]}"\n'
                 f'\tconfig.ssh.password = "{self.credentials["password"]}"\n'
-                f'\tconfig.ssh.insert_key = "{self.configs["connection"]}"\n'
-                f'\tconfig.vm.hostname = \"{self.configs["hostname"]}\"\n'
-                f'\tconfig.vm.define "{self.configs["hostname"]}"\n'
-                f'\tconfig.vm.provider :{self.configs["provider"]} do |vb|\n'
-                f'\t\tvb.name = "{self.configs["vbox_name"]}"\n'
+                f'\tconfig.ssh.insert_key = {connection}\n'
+                f'\tconfig.vm.hostname = \"{self.configs["hostname"]["default"]}\"\n'
+                f'\tconfig.vm.define "{self.configs["hostname"]["default"]}"\n'
+                f'\tconfig.vm.provider :{self.configs["provider"]["default"]} do |vb|\n'
+                f'\t\tvb.name = "{self.configs["vbox_name"]["default"]}"\n'
+                '\t\tvb.gui = true\n'
                 '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
+                f'\t\tvb.memory = {self.configs["memory"]["default"]}\n'
+                f'\t\tvb.cpus = {self.configs["cpus"]["default"]}\n'
                 '\tend\n'
+                f'\tconfig.vm.disk :disk, size: "{self.configs["disk_size"]["default"]}MB", name: "default", primary: true'
             )
 
     def generate_main_file(self):
@@ -192,6 +199,12 @@ class Vagrant(Builder):
                 title="CLEAN apt packages",
                 package=''
             )
+        if self.provisions['reboot']:
+            self._generate_provision_section(
+                src=f'{constants.SETUP_SCRIPTS_PATH}/reboot.sh',
+                title="REBOOT",
+                package=''
+            )
         if self.provisions['custom_scripts']:
             for script in self.provisions['custom_scripts']:
                 self._generate_provision_section(
@@ -207,8 +220,8 @@ class Vagrant(Builder):
             replace_text_in_file(
                 search_phrase='extra_user',
                 replace_with=self.credentials["extra_user"],
-                file_path=f'{self.machine_path}/{self.configs["project_name"]}/Vagrantfile'
+                file_path=f'{self.machine_path}/{self.configs["project_name"]["default"]}/Vagrantfile'
             )
 
     def delete_project(self):
-        shutil.rmtree(f'{self.machine_path}/{self.configs["project_name"]}')
+        shutil.rmtree(f'{self.machine_path}/{self.configs["project_name"]["default"]}')

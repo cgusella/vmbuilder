@@ -2,9 +2,11 @@
 import argparse
 import os
 import constants
+from typing import Union
 
 
-def make_package_folder(packages: str | list = ''):
+# def make_package_folder(packages: str | list = ''):
+def make_package_folder(packages: Union[str, list]):
     if not packages:
         parser = argparse.ArgumentParser()
         parser.add_argument(

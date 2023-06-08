@@ -62,9 +62,7 @@ def get_local_vagrant_boxes():
         capture_output=True
     ).stdout.decode("ascii")
     boxes = list()
-    if 'vagrant box add' in output:
-        boxes.append('No Box')
-    else:
+    if 'vagrant box add' not in output:
         boxes = output.strip().split('\n')
         boxes = [box.split(' ')[0] for box in boxes]
     return "\n".join(boxes)

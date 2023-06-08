@@ -1,7 +1,8 @@
 {
   "credentials": {
     "username": "default_user",
-    "password": "deafult_pass"
+    "password": "deafult_pass",
+    "extra_user": ""
   },
   "provisions": {
     "update_upgrade": false,
@@ -10,20 +11,53 @@
     "packages_to_uninstall": [],
     "packages_to_config": [],
     "clean_packages": false,
+    "reboot": false,
     "custom_scripts": []
   },
-  "virtual_machine_configs": {
+  "configurations": {
+    "provider": {
+      "description":"The project name",
+      "default":"Virtualbox"
+    },
+    "project_name": {
+      "description":"The project name",
+      "default":""
+    },
+    "vbox_name":{
+      "description":"Vbox Name",
+      "default":""
+    },
+    "disk_name":{
+      "description":"Disk Name",
+      "default":""
+    },
+    "iso_file":{
+      "description": "Iso file to be saved on the host",
+      "default": ""
+    },
+    "iso_link":{
+      "description":"Iso link",
+      "default":""
+    },
+    "checksum":{
+      "description":"Checksum of the chosen iso image",
+      "default":""
+    },
     "cpus":{
       "description":"Number of CPU cores for the machine",
-      "default":"2"
+      "default":""
     },
     "memory":{
       "description":"Memory value for the machine in MegaByte",
-      "default":"4096"
+      "default":""
     },
     "disk_size":{
       "description":"Disk size of the machine in MegaByte",
-      "default":"15000"
+      "default":""
+    },
+    "preseed_file":{
+      "description":"Selected preseed file",
+      "default":""
     },
     "guest_os_type":{
       "description":"The desired image for the packer",
