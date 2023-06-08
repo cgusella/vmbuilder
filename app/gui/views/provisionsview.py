@@ -88,7 +88,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             sticky=self.sticky_frame,
         )
         self.package_manager_frame.grid(
-            row=2,
+            row=1,
             column=0,
             rowspan=3,
             columnspan=2,
@@ -99,7 +99,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             sticky=self.sticky_frame,
         )
         self.additional_scripts_frame.grid(
-            row=5,
+            row=4,
             column=0,
             rowspan=2,
             columnspan=2,
@@ -112,7 +112,6 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         self.bottom_button_frame.grid(
             row=0,
             column=1,
-            rowspan=2,
             sticky=self.sticky_frame,
             padx=self.padx_std,
             pady=self.pady_std,

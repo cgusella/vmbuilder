@@ -30,7 +30,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
 
     def set_grid(self):
         self.columnconfigure(0, weight=1)
-        self.columnconfigure(2, weight=1)
+        self.columnconfigure(1, weight=1)
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -162,7 +162,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
 
     def _save_and_pass_to_provisions(self):
         configs = self.provisions_configs["configurations"]
-        configs["project_name"]["default"] = self.project_name_entry.get()
+        configs["project_name"]["default"] = self.project_name_frame.project_name_entry.get()
         configs["vbox_name"]["default"] = self.vbox_configs_frame.vbox_name_entry.get()
         configs["cpus"]["default"] = self.vbox_configs_frame.cpus_slider.get()
         configs["memory"]["default"] = self.vbox_configs_frame.memory_slider.get()
@@ -192,6 +192,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
             row=0,
             column=0,
             columnspan=2,
+            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky=self.sticky_frame
@@ -244,7 +245,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.set_packer_provisions_button.grid(
-            row=5,
+            row=0,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
