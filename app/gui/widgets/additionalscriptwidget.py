@@ -36,27 +36,12 @@ class AdditionalScriptWidget(ctk.CTkFrame):
 
         # add radiobuttons
         self.radio_var = ctk.StringVar(self, value=None)
-        self.edit_upgrade_button = ctk.CTkButton(
-            master=self,
-            fg_color='transparent',
-            text='',
-            font=self.label_font,
-            width=self.width_button_std,
-            command=lambda: self._edit_additional_script(self.radio_var)
-        )
-        if self.provisions_configs["provisions"]['update_upgrade']:
-            self.radio_var.set('update_upgrade')
-            self._add_edit_button()
-        if self.provisions_configs["provisions"]['update_upgrade_full']:
-            self.radio_var.set('update_upgrade_full')
-            self._add_edit_button()
-
         self.update_upgrade = ctk.CTkRadioButton(
             master=self,
             text="Update upgrade",
             variable=self.radio_var,
             value='update_upgrade',
-            command=self._add_edit_button,
+            command=self._active_update_upgrade_edit_button,
             font=self.label_font
         )
 
@@ -65,7 +50,7 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             text="Update upgrade full",
             variable=self.radio_var,
             value='update_upgrade_full',
-            command=self._add_edit_button,
+            command=self._active_update_upgrade_full_edit_button,
             font=self.label_font
         )
         self.radio_none = ctk.CTkRadioButton(
@@ -74,7 +59,23 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             variable=self.radio_var,
             value=None,
             font=self.label_font,
-            command=self._remove_edit_button
+            command=self._disable_both_edit_buttons
+        )
+        self.edit_update_upgrade_button = ctk.CTkButton(
+            master=self,
+            text='Edit',
+            font=self.label_font,
+            width=self.width_button_std,
+            state='disabled',
+            command=lambda: self._edit_additional_script(self.radio_var)
+        )
+        self.edit_update_upgrade_full_button = ctk.CTkButton(
+            master=self,
+            text='Edit',
+            font=self.label_font,
+            width=self.width_button_std,
+            state='disabled',
+            command=lambda: self._edit_additional_script(self.radio_var)
         )
 
         # add checkbox for clean packages
@@ -100,8 +101,6 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._edit_additional_script(self.clean_var)
         )
-        if self.clean_var.get():
-            self._add_edit_clean_button()
 
         # add checkbox for reboot
         self.reboot = ctk.StringVar()
@@ -126,45 +125,36 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             width=self.width_button_std,
             command=lambda: self._edit_additional_script(self.reboot)
         )
-        if self.reboot.get():
-            self._add_edit_reboot_button()
+        self._check_checkbox_clean_status()
+        self._check_checkbox_reboot_status()
         self.render()
 
-    def _add_edit_button(self):
-        if self.radio_var.get() == 'update_upgrade':
-            column = 0
-            self.provisions_configs["provisions"]['update_upgrade_full'] = False
-        elif self.radio_var.get() == 'update_upgrade_full':
-            column = 1
-            self.provisions_configs["provisions"]['update_upgrade'] = False
-        self.provisions_configs["provisions"][f'{self.radio_var.get()}'] = True
-        self.edit_upgrade_button.configure(
-            fg_color=["#3a7ebf", "#1f538d"],
-            text='Edit',
+    def _active_update_upgrade_edit_button(self):
+        self.provisions_configs["provisions"]['update_upgrade_full'] = False
+        self.provisions_configs["provisions"]['update_upgrade'] = True
+        self.edit_update_upgrade_button.configure(
             state='normal'
         )
-        self.edit_upgrade_button.grid(
-            row=2,
-            column=column,
-        )
-
-    def _remove_edit_button(self):
-        self.edit_upgrade_button.configure(
-            fg_color='transparent',
-            text='',
+        self.edit_update_upgrade_full_button.configure(
             state='disabled'
         )
 
-    def _add_edit_clean_button(self):
-        self.edit_clean_button.grid(
-            row=2,
-            column=3,
+    def _active_update_upgrade_full_edit_button(self):
+        self.provisions_configs["provisions"]['update_upgrade'] = False
+        self.provisions_configs["provisions"]['update_upgrade_full'] = True
+        self.edit_update_upgrade_button.configure(
+            state='disabled'
+        )
+        self.edit_update_upgrade_full_button.configure(
+            state='normal'
         )
 
-    def _add_edit_reboot_button(self):
-        self.edit_reboot_button.grid(
-            row=2,
-            column=4,
+    def _disable_both_edit_buttons(self):
+        self.edit_update_upgrade_button.configure(
+            state='disabled'
+        )
+        self.edit_update_upgrade_full_button.configure(
+            state='disabled'
         )
 
     def _edit_additional_script(self, variable):
@@ -177,18 +167,26 @@ class AdditionalScriptWidget(ctk.CTkFrame):
     def _check_checkbox_clean_status(self):
         if self.clean_var.get():
             self.provisions_configs["provisions"]["clean_packages"] = True
-            self._add_edit_clean_button()
+            self.edit_clean_button.configure(
+                state='normal'
+            )
         else:
             self.provisions_configs["provisions"]["clean_packages"] = False
-            self.edit_clean_button.destroy()
+            self.edit_clean_button.configure(
+                state='disabled'
+            )
 
     def _check_checkbox_reboot_status(self):
         if self.reboot.get():
             self.provisions_configs["provisions"]["reboot"] = True
-            self._add_edit_reboot_button()
+            self.edit_reboot_button.configure(
+                state='normal'
+            )
         else:
             self.provisions_configs["provisions"]["reboot"] = False
-            self.edit_reboot_button.destroy()
+            self.edit_reboot_button.configure(
+                state='disabled'
+            )
 
     def render(self):
         self.additional_scripts_label.grid(
@@ -229,12 +227,20 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             padx=self.padx_std,
             pady=self.pady_std,
         )
-        empty_label = ctk.CTkLabel(
-            self,
-            text=''
+
+        self.edit_update_upgrade_button.grid(
+            row=2,
+            column=0,
         )
-        empty_label.grid(
+        self.edit_update_upgrade_full_button.grid(
             row=2,
             column=1,
-            columnspan=5
+        )
+        self.edit_clean_button.grid(
+            row=2,
+            column=3,
+        )
+        self.edit_reboot_button.grid(
+            row=2,
+            column=4,
         )
