@@ -76,21 +76,21 @@ class BridgedWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='we'
+            sticky='w'
         )
         self.ip_label.grid(
             row=3,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='we'
+            sticky='w'
         )
         self.netmask_label.grid(
             row=4,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='we'
+            sticky='w'
         )
 
     def set_std_dimensions(self):

@@ -1,18 +1,22 @@
 import constants
 import customtkinter as ctk
 import os
+from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.widgets.vboxconfigswidget import VboxConfigsWidget
 from gui.widgets.isowidget import IsoWidget
 from gui.widgets.titlewidget import TitleWidget
 from gui.widgets.projectnamewidget import PackerProjectNameWidget
 from gui.views.packerview.packerprovisionsview import PackerProvisionsView
+from gui.widgets.buttonswidget.packermainbuttonswidget import PackerMainButtons
 
 
 class PackerConfigsFrame(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs: dict):
+        self.frame_name = 'configs'
         self.master = master
         self.provisions_configs = provisions_configs
+        self.vbox_list = launch_vboxmanage_lst_command()
         ctk.CTkFrame.__init__(self, master)
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
                                      weight='bold')
@@ -25,7 +29,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.add_preseed_frame()
         self.add_iso_frame()
         self.add_vbox_configs()
-        self.add_set_provisions_button()
+        self.add_main_buttons()
         self.render()
 
     def set_grid(self):
@@ -151,13 +155,11 @@ class PackerConfigsFrame(ctk.CTkFrame):
             provisions_configs=self.provisions_configs
         )
 
-    def add_set_provisions_button(self):
-        self.set_packer_provisions_button = ctk.CTkButton(
-            self,
-            text='Set Provisions',
-            width=self.width_button_std,
-            font=self.font_std,
-            command=self._save_and_pass_to_provisions
+    def add_main_buttons(self):
+        self.set_main_buttons_frame = PackerMainButtons(
+            master=self,
+            provisions_configs=self.provisions_configs,
+            wanted_buttons='provisions'
         )
 
     def _save_and_pass_to_provisions(self):
@@ -243,7 +245,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky=self.sticky_frame
         )
-        self.set_packer_provisions_button.grid(
+        self.set_main_buttons_frame.grid(
             row=0,
             column=1,
             padx=self.padx_std,

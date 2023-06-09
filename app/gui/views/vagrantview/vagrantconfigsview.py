@@ -5,7 +5,7 @@ from gui.widgets.projectnamewidget import VagrantProjectNameWidget
 from gui.widgets.titlewidget import TitleWidget
 from gui.widgets.vagrantboxsetupwidget import VagrantBoxSetUpWidget
 from gui.widgets.vboxconfigswidget import VboxConfigsWidget
-from gui.widgets.mainbuttonswidget import VagrantMainButtons
+from gui.widgets.buttonswidget.vagrantmainbuttonswidget import VagrantMainButtons
 from tkinter import StringVar
 
 

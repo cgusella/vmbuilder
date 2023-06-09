@@ -1,5 +1,5 @@
 from gui.views.provisionsview import ProvisionsFrame
-from gui.widgets.mainbuttonswidget import VagrantMainButtons
+from gui.widgets.buttonswidget.vagrantmainbuttonswidget import VagrantMainButtons
 
 
 class VagrantProvisionsView(ProvisionsFrame):
