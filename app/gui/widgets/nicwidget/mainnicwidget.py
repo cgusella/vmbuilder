@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
+from gui.widgets.nicwidget.hostonlywidget import HostOnlyWidget
 
 
 class NicWidget(ctk.CTkFrame):
@@ -63,6 +64,7 @@ class NicWidget(ctk.CTkFrame):
             values=['host-only', 'bridged', 'internal', 'nat-network', 'nat'],
             command=self._add_config_adapter_frame
         )
+        self.nic_type.set('Select one')
         self.nic_type.grid(
             row=1,
             column=0,
@@ -119,7 +121,10 @@ class NicWidget(ctk.CTkFrame):
         )
 
     def _insert_hostonly(self):
-        pass
+        self.config_adapter_frame = HostOnlyWidget(
+            self,
+            self.provisions_configs
+        )
 
     def _insert_internal(self):
         pass

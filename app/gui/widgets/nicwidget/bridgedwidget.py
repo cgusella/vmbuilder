@@ -2,6 +2,19 @@ import customtkinter as ctk
 import subprocess
 
 
+def get_bridged_infos() -> list:
+    bridged_infos = subprocess.run(
+        (
+            "VBoxManage list bridgedifs | egrep "
+            "'^Name|^DHCP|^IPAddress|^NetworkMask"
+            "|^HardwareAddress|^Status'"
+        ),
+        shell=True,
+        capture_output=True
+    ).stdout.decode("ascii").split('\n')
+    return bridged_infos
+
+
 class BridgedWidget(ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs):
@@ -15,30 +28,26 @@ class BridgedWidget(ctk.CTkFrame):
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
         self.rowconfigure(4, weight=1)
-        bridged_configs_list = subprocess.run(
-            "VBoxManage list bridgedifs | egrep '^Name|^DHCP|^IPAddress|^NetworkMask'",
-            shell=True,
-            capture_output=True
-        ).stdout.decode("ascii").split('\n')
+        self.rowconfigure(5, weight=1)
+        self.rowconfigure(6, weight=1)
+        bridged_configs_list = get_bridged_infos()
         self.bridged_configs_dict = dict()
-        for count in range(int(len(bridged_configs_list)/4)):
-            index_start = 4*count
-            self.bridged_configs_dict[''.join(bridged_configs_list[index_start].split()[1:])] = (
+        number_of_items = 6
+        for count in range(int(len(bridged_configs_list)/number_of_items)):
+            index_start = number_of_items*count
+            self.bridged_configs_dict[
+                    ''.join(bridged_configs_list[index_start].split()[1:])
+                ] = (
                 bridged_configs_list[index_start+1],  # dhcp
                 bridged_configs_list[index_start+2],  # ipaddress
                 bridged_configs_list[index_start+3],  # netmask
+                bridged_configs_list[index_start+4],  # macaddress
+                bridged_configs_list[index_start+5],  # status
             )
-        select_label = ctk.CTkLabel(
+        self.select_label = ctk.CTkLabel(
             master=self,
             font=self.font_std,
             text='Select among these bridges'
-        )
-        select_label.grid(
-            row=0,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
         )
         self.available_bridged_nics = ctk.CTkOptionMenu(
             master=self,
@@ -62,8 +71,27 @@ class BridgedWidget(ctk.CTkFrame):
             font=self.font_std,
             text=''
         )
+        self.macaddress_label = ctk.CTkLabel(
+            master=self,
+            font=self.font_std,
+            text=''
+        )
+        self.status_label = ctk.CTkLabel(
+            master=self,
+            font=self.font_std,
+            text=''
+        )
         self._show_bridged_info(self.available_bridged_nics.get())
-        # render config frame
+        self.render()
+
+    def render(self):
+        self.select_label.grid(
+            row=0,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wn'
+        )
         self.available_bridged_nics.grid(
             row=1,
             column=0,
@@ -92,6 +120,20 @@ class BridgedWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky='w'
         )
+        self.macaddress_label.grid(
+            row=5,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='w'
+        )
+        self.status_label.grid(
+            row=6,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='w'
+        )
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -106,4 +148,10 @@ class BridgedWidget(ctk.CTkFrame):
         )
         self.netmask_label.configure(
             text=f'{self.bridged_configs_dict[nic][2]}'
+        )
+        self.macaddress_label.configure(
+            text=f'{self.bridged_configs_dict[nic][3]}'
+        )
+        self.status_label.configure(
+            text=f'{self.bridged_configs_dict[nic][4]}'
         )
