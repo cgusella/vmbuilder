@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from gui.widgets.titlewidget import TitleWidget
-from gui.widgets.nicwidget import NicWidget
+from gui.widgets.nicwidget.mainnicwidget import NicWidget
 
 
 class VagrantNetworkView(ctk.CTkFrame):
@@ -19,20 +19,7 @@ class VagrantNetworkView(ctk.CTkFrame):
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
-        self.pady_title = (10, 2)
-        self.pady_entry = (2, 10)
-        self.ipadx_std = 10
-        self.ipady_std = 10
-        self.ipadx_button = 5
-        self.ipady_button = 5
-        self.sticky_title = 'wn'
-        self.sticky_label = 'ws'
-        self.sticky_entry = 'wn'
-        self.sticky_up = 'wen'
         self.sticky_frame = 'wens'
-        self.sticky_optionmenu = 'w'
-        self.sticky_warningmsg = 'e'
-        self.sticky_horizontal = 'ew'
 
     def set_grid(self):
         self.columnconfigure(0, weight=2)

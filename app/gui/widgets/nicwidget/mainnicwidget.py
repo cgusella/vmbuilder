@@ -1,5 +1,5 @@
 import customtkinter as ctk
-import subprocess
+from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
 
 
 class NicWidget(ctk.CTkFrame):
@@ -78,7 +78,7 @@ class NicWidget(ctk.CTkFrame):
                 state='normal'
             )
             try:
-                self.available_bridged_nics.configure(
+                self.config_adapter_frame.available_bridged_nics.configure(
                     state='normal'
                 )
             except AttributeError:
@@ -88,7 +88,7 @@ class NicWidget(ctk.CTkFrame):
                 state='disabled'
             )
             try:
-                self.available_bridged_nics.configure(
+                self.config_adapter_frame.available_bridged_nics.configure(
                     state='disabled'
                 )
             except AttributeError:
@@ -99,13 +99,6 @@ class NicWidget(ctk.CTkFrame):
 
     def add_config_adapter_frame(self):
         self.config_adapter_frame = ctk.CTkFrame(self)
-        self.config_adapter_frame.columnconfigure(0, weight=1)
-        self.config_adapter_frame.rowconfigure(0, weight=1)
-        self.config_adapter_frame.rowconfigure(1, weight=1)
-        self.config_adapter_frame.rowconfigure(2, weight=1)
-        self.config_adapter_frame.rowconfigure(3, weight=1)
-        self.config_adapter_frame.rowconfigure(4, weight=1)
-
         selected_nic_type = self.nic_type.get()
         if selected_nic_type == 'bridged':
             self._insert_bridged()
@@ -120,94 +113,9 @@ class NicWidget(ctk.CTkFrame):
         self.render()
 
     def _insert_bridged(self):
-        bridged_configs_list = subprocess.run(
-            "VBoxManage list bridgedifs | egrep '^Name|^DHCP|^IPAddress|^NetworkMask'",
-            shell=True,
-            capture_output=True
-        ).stdout.decode("ascii").split('\n')
-        self.bridged_configs_dict = dict()
-        for count in range(int(len(bridged_configs_list)/4)):
-            index_start = 4*count
-            self.bridged_configs_dict[''.join(bridged_configs_list[index_start].split()[1:])] = (
-                bridged_configs_list[index_start+1],
-                bridged_configs_list[index_start+2],
-                bridged_configs_list[index_start+3],
-            )
-        print(self.bridged_configs_dict)
-        select_label = ctk.CTkLabel(
-            master=self.config_adapter_frame,
-            font=self.font_std,
-            text='Select among these bridges'
-        )
-        select_label.grid(
-            row=0,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        self.available_bridged_nics = ctk.CTkOptionMenu(
-            master=self.config_adapter_frame,
-            font=self.font_std,
-            values=list(self.bridged_configs_dict.keys()),
-            command=self._show_bridged_info,
-            state='normal'
-        )
-        self.dhcp_label = ctk.CTkLabel(
-            master=self.config_adapter_frame,
-            font=self.font_std,
-            text=''
-        )
-        self.ip_label = ctk.CTkLabel(
-            master=self.config_adapter_frame,
-            font=self.font_std,
-            text=''
-        )
-        self.netmask_label = ctk.CTkLabel(
-            master=self.config_adapter_frame,
-            font=self.font_std,
-            text=''
-        )
-        self._show_bridged_info(self.available_bridged_nics.get())
-        # render config frame
-        self.available_bridged_nics.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        self.dhcp_label.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
-        )
-        self.ip_label.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
-        )
-        self.netmask_label.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
-        )
-
-    def _show_bridged_info(self, nic):
-        self.dhcp_label.configure(
-            text=f'{self.bridged_configs_dict[nic][0]}'
-        )
-        self.ip_label.configure(
-            text=f'{self.bridged_configs_dict[nic][1]}'
-        )
-        self.netmask_label.configure(
-            text=f'{self.bridged_configs_dict[nic][2]}'
+        self.config_adapter_frame = BridgedWidget(
+            self,
+            self.provisions_configs
         )
 
     def _insert_hostonly(self):
