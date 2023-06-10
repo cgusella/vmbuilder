@@ -85,12 +85,37 @@ class NicWidget(ctk.CTkFrame):
                 )
             except AttributeError:
                 pass
+            try:
+                self.config_adapter_frame.available_hostonly_networks.configure(
+                    state='normal'
+                )
+                self.config_adapter_frame.add_hostonly_network_button.configure(
+                    state='normal'
+                )
+                self.config_adapter_frame._active_disactive_delete_update()
+            except AttributeError:
+                pass
         else:
             self.nic_type.configure(
                 state='disabled'
             )
             try:
                 self.config_adapter_frame.available_bridged_nics.configure(
+                    state='disabled'
+                )
+            except AttributeError:
+                pass
+            try:
+                self.config_adapter_frame.available_hostonly_networks.configure(
+                    state='disabled'
+                )
+                self.config_adapter_frame.add_hostonly_network_button.configure(
+                    state='disabled'
+                )
+                self.config_adapter_frame.delete_hostonly_network_button.configure(
+                    state='disabled'
+                )
+                self.config_adapter_frame.update_button.configure(
                     state='disabled'
                 )
             except AttributeError:
