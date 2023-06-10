@@ -50,7 +50,7 @@ class HostOnlyWidget(ctk.CTkFrame):
         self.rowconfigure(6, weight=1)
         self.rowconfigure(7, weight=1)
         self.grid_propagate(False)
-        self.hostonly_configs_dict = get_hostonly_infos()
+        hostonly_configs_dict = get_hostonly_infos()
 
         self.select_label = ctk.CTkLabel(
             master=self,
@@ -60,8 +60,8 @@ class HostOnlyWidget(ctk.CTkFrame):
         self.available_hostonly_networks = ctk.CTkOptionMenu(
             master=self,
             font=self.font_std,
-            values=list(self.hostonly_configs_dict.keys()),
-            command=self._show_hostonly_info,
+            values=list(hostonly_configs_dict.keys()),
+            command=self._show_network_values,
             state='normal'
         )
         self.available_hostonly_networks.set('Select')
@@ -85,41 +85,24 @@ class HostOnlyWidget(ctk.CTkFrame):
             command=self._update_selected_hostonly
         )
         self.dummy_frame = ctk.CTkFrame(self, fg_color='transparent')
-        self._show_hostonly_info(self.available_hostonly_networks.get())
 
-    def initialize_main_labels(self):
+        self._render_select_among()
+
+        # add network labels
         self.dhcp_label = ctk.CTkLabel(
             self,
             font=self.font_std,
             text='DHCP:'
-        )
-        self.dhcp_switch_var = ctk.StringVar()
-        self.dhcp_state_switch = ctk.CTkSwitch(
-            master=self,
-            text='',
-            font=ctk.CTkFont(family='Sans', size=14),
-            variable=self.dhcp_switch_var,
-            onvalue='on',
-            offvalue='off',
-            command=self._configure_dhcp
         )
         self.ip_label = ctk.CTkLabel(
             self,
             font=self.font_std,
             text='IP Address:'
         )
-        self.ip_entry = ctk.CTkEntry(
-            self,
-            font=self.font_std,
-        )
         self.netmask_label = ctk.CTkLabel(
             self,
             font=self.font_std,
             text='Netmask:'
-        )
-        self.netmask_entry = ctk.CTkEntry(
-            self,
-            font=self.font_std
         )
         self.macaddress_label = ctk.CTkLabel(
             self,
@@ -136,6 +119,55 @@ class HostOnlyWidget(ctk.CTkFrame):
             font=self.font_std,
             text='Status:'
         )
+        self._render_info()
+
+    def _show_network_values(self, network):
+        hostonly_configs_dict = get_hostonly_infos()
+        self.dhcp_switch_var = ctk.StringVar()
+        self.dhcp_state_switch = ctk.CTkSwitch(
+            master=self,
+            text='',
+            font=ctk.CTkFont(family='Sans', size=14),
+            variable=self.dhcp_switch_var,
+            onvalue='on',
+            offvalue='off',
+            command=self._configure_dhcp
+        )
+        self.dhcp_state_switch.grid(
+            row=2,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wn'
+        )
+        # read dhcp state
+        dhcp_state = hostonly_configs_dict[network][0].split()[1]
+        dhcp_switch_value = 'on' if dhcp_state == 'Enabled' else 'off'
+        self.dhcp_switch_var.set(dhcp_switch_value)
+        self._configure_dhcp()
+
+        self.ip_entry = ctk.CTkEntry(
+            self,
+            font=self.font_std,
+        )
+        self.ip_entry.grid(
+            row=3,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wn'
+        )
+        self.netmask_entry = ctk.CTkEntry(
+            self,
+            font=self.font_std
+        )
+        self.netmask_entry.grid(
+            row=4,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wn'
+        )
         self.status_switch_var = ctk.StringVar()
         self.status_state_switch = ctk.CTkSwitch(
             master=self,
@@ -146,15 +178,38 @@ class HostOnlyWidget(ctk.CTkFrame):
             offvalue='off',
             command=self._configure_status_text
         )
+        self.status_state_switch.grid(
+            row=6,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wn'
+        )
+        # read status network
+        status_state = hostonly_configs_dict[network][4].split()[1]
+        status_switch_value = 'on' if status_state == 'Up' else 'off'
+        self.status_switch_var.set(status_switch_value)
+        self._configure_status_text()
+        self._active_disactive_delete_update()
+
+        # insert ip network
+        self.ip_entry.insert(
+            0,
+            f'{hostonly_configs_dict[network][1].split()[1]}'
+        )
+        # insert netmask network
+        self.netmask_entry.insert(
+            0,
+            f'{hostonly_configs_dict[network][2].split()[1]}'
+        )
+        # insert macaddress network
+        self.macaddress_value_label.configure(
+            text=f'{hostonly_configs_dict[network][3].split()[1]}'
+        )
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
-
-    def render(self):
-        self._render_select_among()
-        self._render_info()
-        self._render_dummy_frame()
 
     def _render_select_among(self):
         self.select_label.grid(
@@ -192,18 +247,28 @@ class HostOnlyWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky='wn'
         )
+        self._active_disactive_delete_update()
+
+    def _active_disactive_delete_update(self):
+        if self.available_hostonly_networks.get() == 'Select':
+            self.delete_hostonly_network_button.configure(
+                state='disabled'
+            )
+            self.update_button.configure(
+                state='disabled'
+            )
+        else:
+            self.delete_hostonly_network_button.configure(
+                state='normal'
+            )
+            self.update_button.configure(
+                state='normal'
+            )
 
     def _render_info(self):
         self.dhcp_label.grid(
             row=2,
             column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        self.dhcp_state_switch.grid(
-            row=2,
-            column=1,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
@@ -215,23 +280,9 @@ class HostOnlyWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky='wn'
         )
-        self.ip_entry.grid(
-            row=3,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
         self.netmask_label.grid(
             row=4,
             column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        self.netmask_entry.grid(
-            row=4,
-            column=1,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
@@ -253,13 +304,6 @@ class HostOnlyWidget(ctk.CTkFrame):
         self.status_label.grid(
             row=6,
             column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        self.status_state_switch.grid(
-            row=6,
-            column=1,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
@@ -444,7 +488,7 @@ class HostOnlyWidget(ctk.CTkFrame):
             output
         )
         self.set_available_hostonly_networks()
-        self._show_hostonly_info(self.available_hostonly_networks.get())
+        self._show_network_values(self.available_hostonly_networks.get())
 
     def _delete_hostonly_network(self):
         selected_network = self.available_hostonly_networks.get()
@@ -471,8 +515,8 @@ class HostOnlyWidget(ctk.CTkFrame):
             self._show_hostonly_info(self.available_hostonly_networks.get())
 
     def set_available_hostonly_networks(self):
-        self.hostonly_configs_dict = get_hostonly_infos()
-        values = list(self.hostonly_configs_dict.keys())
+        hostonly_configs_dict = get_hostonly_infos()
+        values = list(hostonly_configs_dict.keys())
         self.available_hostonly_networks.configure(
             values=values,
             state='normal'
@@ -534,37 +578,3 @@ class HostOnlyWidget(ctk.CTkFrame):
             'Update network'
             f'The network {selected_network} has been updated'
         )
-
-    def _show_hostonly_info(self, network):
-        if self.available_hostonly_networks.get() == 'Select':
-            self._render_select_among()
-            self._render_dummy_frame()
-        else:
-            self.initialize_main_labels()
-            # read dhcp state
-            dhcp_state = self.hostonly_configs_dict[network][0].split()[1]
-            dhcp_switch_value = 'on' if dhcp_state == 'Enabled' else 'off'
-            self.dhcp_switch_var.set(dhcp_switch_value)
-            self._configure_dhcp()
-
-            # read status network
-            status_state = self.hostonly_configs_dict[network][4].split()[1]
-            status_switch_value = 'Up' if status_state == 'Up' else 'Down'
-            self.status_switch_var.set(status_switch_value)
-            self._configure_status_text()
-
-            # insert ip network
-            self.ip_entry.insert(
-                0,
-                f'{self.hostonly_configs_dict[network][1].split()[1]}'
-            )
-            # insert netmask network
-            self.netmask_entry.insert(
-                0,
-                f'{self.hostonly_configs_dict[network][2].split()[1]}'
-            )
-            # insert macaddress network
-            self.macaddress_value_label.configure(
-                text=f'{self.hostonly_configs_dict[network][3].split()[1]}'
-            )
-            self.render()
