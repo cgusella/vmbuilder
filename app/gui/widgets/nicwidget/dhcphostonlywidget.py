@@ -50,27 +50,6 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
         self.rowconfigure(6, weight=1)
         self.rowconfigure(7, weight=1)
         self.grid_propagate(False)
-
-        self.select_label = ctk.CTkLabel(
-            master=self,
-            font=self.font_std,
-            text='Select among these networks'
-        )
-
-        self.enable_update_dhcp_button = ctk.CTkButton(
-            self,
-            font=self.font_std,
-            text='Enable',
-            state='disabled'
-        )
-        self.delete_dhcp_button = ctk.CTkButton(
-            self,
-            font=self.font_std,
-            text='Delete',
-            command=self._delete_dhcp
-        )
-
-        self._render_select_among()
         self.initialize_dhcp_info_labels()
         self.render_dhcp_info_labels()
 
@@ -83,6 +62,18 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             master=self,
             text='DHCP configs',
             font=self.title_font_std
+        )
+        self.enable_update_dhcp_button = ctk.CTkButton(
+            self,
+            font=self.font_std,
+            text='Enable',
+            state='disabled'
+        )
+        self.delete_dhcp_button = ctk.CTkButton(
+            self,
+            font=self.font_std,
+            text='Delete',
+            command=self._delete_dhcp
         )
         self.lower_ip_label = ctk.CTkLabel(
             master=self,
@@ -267,15 +258,7 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             message=f'The DHCP configs has been updated for the {self.selected_dhcp} network.'
         )
 
-    def _render_select_among(self):
-        self.select_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
+    def render_dhcp_info_labels(self):
         self.enable_update_dhcp_button.grid(
             row=1,
             column=0,
@@ -291,7 +274,6 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             sticky='wn'
         )
 
-    def render_dhcp_info_labels(self):
         self.dhcp_configs_title_label.grid(
             row=0,
             column=0,
