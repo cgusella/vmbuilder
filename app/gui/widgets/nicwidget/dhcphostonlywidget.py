@@ -73,6 +73,7 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             self,
             font=self.font_std,
             text='Delete',
+            state='disabled',
             command=self._delete_dhcp
         )
         self.lower_ip_label = ctk.CTkLabel(
@@ -121,6 +122,7 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
         self.initialize_dhcp_info_labels()
         self.render_dhcp_info_labels()
         self.set_enable_or_update_button()
+        # fill the entries with the information from dhcp server
         try:
             dhcp_infos = get_dhcp_infos()[selected_dhcp]
             self.lower_ip_entry.insert(
@@ -139,7 +141,13 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
                 0,
                 dhcp_infos[3].split()[-1]
             )
+            self.delete_dhcp_button.configure(
+                state='normal'
+            )
         except KeyError:
+            # self.delete_dhcp_button.configure(
+            #     state='disabled'
+            # )
             pass
 
     def set_enable_or_update_button(self):
@@ -213,6 +221,7 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
                 title='Enable DHCP',
                 message=f'The DHCP server has been enabled for the {self.selected_dhcp} network.'
             )
+        self._show_dhcp_values(selected_dhcp=self.selected_dhcp)
         self.set_enable_or_update_button()
 
     def _update_selected_dhcp(self):
