@@ -31,7 +31,7 @@ def get_dhcp_infos() -> dict:
     return dhcp_configs_dict
 
 
-class DHCPWidget(ctk.CTkFrame):
+class DHCPHostOnlyWidget(ctk.CTkFrame):
 
     def __init__(self, master, provisions_cofigs):
         self.provisions_configs = provisions_cofigs

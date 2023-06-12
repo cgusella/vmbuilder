@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
 from gui.widgets.nicwidget.hostonlywidget import HostOnlyWidget
-from gui.widgets.nicwidget.dhcpwidget import DHCPWidget
+from gui.widgets.nicwidget.dhcphostonlywidget import DHCPHostOnlyWidget
 
 
 class NicWidget(ctk.CTkFrame):
@@ -152,7 +152,7 @@ class NicWidget(ctk.CTkFrame):
             self.config_adapter_frame,
             self.provisions_configs
         )
-        self.dhcp_frame = DHCPWidget(
+        self.dhcp_frame = DHCPHostOnlyWidget(
             self.config_adapter_frame,
             self.provisions_configs
         )
