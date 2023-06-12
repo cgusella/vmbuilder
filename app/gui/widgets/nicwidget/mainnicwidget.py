@@ -93,6 +93,13 @@ class NicWidget(ctk.CTkFrame):
                 self.hostonly_frame.add_hostonly_network_button.configure(
                     state='normal'
                 )
+                if self.hostonly_frame.available_hostonly_networks.get() != "Select":
+                    self.dhcp_frame.enable_update_dhcp_button.configure(
+                        state='normal'
+                    )
+                    self.dhcp_frame.delete_dhcp_button.configure(
+                        state='normal'
+                    )
                 self.hostonly_frame._active_disactive_delete_update()
             except AttributeError:
                 pass
@@ -114,6 +121,12 @@ class NicWidget(ctk.CTkFrame):
                     state='disabled'
                 )
                 self.hostonly_frame.delete_hostonly_network_button.configure(
+                    state='disabled'
+                )
+                self.dhcp_frame.enable_update_dhcp_button.configure(
+                    state='disabled'
+                )
+                self.dhcp_frame.delete_dhcp_button.configure(
                     state='disabled'
                 )
             except AttributeError:
