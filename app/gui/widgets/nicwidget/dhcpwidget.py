@@ -16,6 +16,9 @@ def get_dhcp_infos() -> dict:
     dhcp_configs_dict = dict()
     for count in range(int(len(dhcp_infos)/number_of_items)):
         index_start = number_of_items*count
+        # if dhcp server is not a part of hostonlyif, ignore it
+        if 'HostInterfaceNetworking' not in dhcp_infos[index_start]:
+            continue
         dhcp_configs_dict[
                 ''.join(dhcp_infos[index_start].split()[1:]).split('-')[-1]
             ] = (
