@@ -51,8 +51,8 @@ class HostOnlyWidget(ctk.CTkFrame):
 
         self.select_label = ctk.CTkLabel(
             master=self,
-            font=self.font_std,
-            text='Select among these networks'
+            font=self.title_font_std,
+            text='HostOnly Adapters'
         )
         self.available_hostonly_networks = ctk.CTkOptionMenu(
             master=self,
@@ -178,7 +178,7 @@ class HostOnlyWidget(ctk.CTkFrame):
             columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='wens'
         )
         self.available_hostonly_networks.grid(
             row=1,
