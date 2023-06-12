@@ -175,10 +175,10 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
 
     def _delete_dhcp(self):
         delete = mb.askyesno(
-            title='Delete Network',
+            title='Delete DHCP',
             message=(
-                'You confirm to delete the '
-                f'"{self.selected_dhcp}" network?'
+                'Are you sure you want to delete '
+                f'DHCP server from the "{self.selected_dhcp}" network?'
             )
         )
         if delete:
@@ -187,10 +187,10 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
                 shell=True,
             )
             mb.showinfo(
-                title='Delete Network',
+                title='Delete DHCP',
                 message=(
-                    f'The network "{self.selected_dhcp}" '
-                    'is deleted.'
+                    'The DHCP server has been deleted '
+                    f'from "{self.selected_dhcp}" network.'
                 )
             )
             self._show_dhcp_values(self.selected_dhcp)
@@ -203,7 +203,7 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
         if not all((lower_ip, upper_ip, server_ip, server_netmask)):
             mb.showerror(
                 'Enable error',
-                'To enable a dhcp you have to fill all required fields'
+                'To enable a DHCP server, you need to fill all the required fields.'
             )
         else:
             subprocess.run(
@@ -219,8 +219,8 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
                 shell=True
             )
             mb.showinfo(
-                title='Update network',
-                message=f'The network {self.selected_dhcp} has been enabled'
+                title='Enable DHCP',
+                message=f'The DHCP server has been enabled for the {self.selected_dhcp} network.'
             )
         self.set_enable_or_update_button()
 
@@ -251,8 +251,8 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             shell=True
         )
         mb.showinfo(
-            title='Update network',
-            message=f'The network {self.selected_dhcp} has been updated'
+            title='Update DHCP',
+            message=f'The DHCP configs has been updated for the {self.selected_dhcp} network.'
         )
 
     def _render_select_among(self):
