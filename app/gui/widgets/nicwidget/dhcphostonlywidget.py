@@ -243,13 +243,25 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             ),
             shell=True
         )
-        subprocess.run(
+        # get the status of the network adapter
+        hostonly_network_status = subprocess.run(
             (
-                'VBoxManage dhcpserver restart '
-                f'--network=HostInterfaceNetworking-{self.selected_dhcp}'
+                "VBoxManage list hostonlyifs | grep "
+                f"HostInterfaceNetworking-{self.selected_dhcp} "
+                "-B1"
             ),
-            shell=True
-        )
+            shell=True,
+            capture_output=True
+        ).stdout.decode("ascii").split('\n')[0].split()[-1]
+        # reset the dhcpserver after update only if its status is up
+        if hostonly_network_status.lower() == 'up':
+            subprocess.run(
+                (
+                    'VBoxManage dhcpserver restart '
+                    f'--network=HostInterfaceNetworking-{self.selected_dhcp}'
+                ),
+                shell=True
+            )
         mb.showinfo(
             title='Update DHCP',
             message=f'The DHCP configs has been updated for the {self.selected_dhcp} network.'
