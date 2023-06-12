@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
 from gui.widgets.nicwidget.hostonlywidget import HostOnlyWidget
+from gui.widgets.nicwidget.dhcpwidget import DHCPWidget
 
 
 class NicWidget(ctk.CTkFrame):
@@ -86,13 +87,13 @@ class NicWidget(ctk.CTkFrame):
             except AttributeError:
                 pass
             try:
-                self.config_adapter_frame.available_hostonly_networks.configure(
+                self.hostonly_frame.available_hostonly_networks.configure(
                     state='normal'
                 )
-                self.config_adapter_frame.add_hostonly_network_button.configure(
+                self.hostonly_frame.add_hostonly_network_button.configure(
                     state='normal'
                 )
-                self.config_adapter_frame._active_disactive_delete_update()
+                self.hostonly_frame._active_disactive_delete_update()
             except AttributeError:
                 pass
         else:
@@ -106,16 +107,13 @@ class NicWidget(ctk.CTkFrame):
             except AttributeError:
                 pass
             try:
-                self.config_adapter_frame.available_hostonly_networks.configure(
+                self.hostonly_frame.available_hostonly_networks.configure(
                     state='disabled'
                 )
-                self.config_adapter_frame.add_hostonly_network_button.configure(
+                self.hostonly_frame.add_hostonly_network_button.configure(
                     state='disabled'
                 )
-                self.config_adapter_frame.delete_hostonly_network_button.configure(
-                    state='disabled'
-                )
-                self.config_adapter_frame.update_button.configure(
+                self.hostonly_frame.delete_hostonly_network_button.configure(
                     state='disabled'
                 )
             except AttributeError:
@@ -146,9 +144,31 @@ class NicWidget(ctk.CTkFrame):
         )
 
     def _insert_hostonly(self):
-        self.config_adapter_frame = HostOnlyWidget(
-            self,
+        self.config_adapter_frame = ctk.CTkFrame(self)
+        self.config_adapter_frame.columnconfigure(0, weight=1)
+        self.config_adapter_frame.columnconfigure(1, weight=1)
+        self.config_adapter_frame.rowconfigure(0, weight=1)
+        self.hostonly_frame = HostOnlyWidget(
+            self.config_adapter_frame,
             self.provisions_configs
+        )
+        self.dhcp_frame = DHCPWidget(
+            self.config_adapter_frame,
+            self.provisions_configs
+        )
+        self.hostonly_frame.grid(
+            row=0,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+        self.dhcp_frame.grid(
+            row=0,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
         )
 
     def _insert_internal(self):

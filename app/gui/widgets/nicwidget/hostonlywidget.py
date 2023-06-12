@@ -7,24 +7,23 @@ def get_hostonly_infos() -> dict:
     hostonly_infos = subprocess.run(
         (
             "VBoxManage list hostonlyifs | egrep "
-            "'^Name|^DHCP|^IPAddress|^NetworkMask"
+            "'^Name|^IPAddress|^NetworkMask"
             "|^HardwareAddress|^Status'"
         ),
         shell=True,
         capture_output=True
     ).stdout.decode("ascii").split('\n')
-    number_of_items = 6
+    number_of_items = 5
     hostonly_configs_dict = dict()
     for count in range(int(len(hostonly_infos)/number_of_items)):
         index_start = number_of_items*count
         hostonly_configs_dict[
                 ''.join(hostonly_infos[index_start].split()[1:])
             ] = (
-            hostonly_infos[index_start+1],  # dhcp
-            hostonly_infos[index_start+2],  # ipaddress
-            hostonly_infos[index_start+3],  # netmask
-            hostonly_infos[index_start+4],  # macaddress
-            hostonly_infos[index_start+5],  # status
+            hostonly_infos[index_start+1],  # ipaddress
+            hostonly_infos[index_start+2],  # netmask
+            hostonly_infos[index_start+3],  # macaddress
+            hostonly_infos[index_start+4],  # status
         )
     return hostonly_configs_dict
 
@@ -39,8 +38,6 @@ class HostOnlyWidget(ctk.CTkFrame):
         self.set_std_dimensions()
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
-        self.columnconfigure(3, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
@@ -78,22 +75,9 @@ class HostOnlyWidget(ctk.CTkFrame):
             text='Delete',
             command=self._delete_hostonly_network
         )
-        self.update_button = ctk.CTkButton(
-            self,
-            font=self.font_std,
-            text='Update',
-            command=self._update_selected_hostonly
-        )
-        self.dummy_frame = ctk.CTkFrame(self, fg_color='transparent')
-
         self._render_select_among()
 
         # add network labels
-        self.dhcp_label = ctk.CTkLabel(
-            self,
-            font=self.font_std,
-            text='DHCP:'
-        )
         self.ip_label = ctk.CTkLabel(
             self,
             font=self.font_std,
@@ -109,11 +93,6 @@ class HostOnlyWidget(ctk.CTkFrame):
             font=self.font_std,
             text='Mac Address:'
         )
-        self.macaddress_value_label = ctk.CTkLabel(
-            self,
-            font=self.font_std,
-            text=''
-        )
         self.status_label = ctk.CTkLabel(
             self,
             font=self.font_std,
@@ -123,51 +102,45 @@ class HostOnlyWidget(ctk.CTkFrame):
 
     def _show_network_values(self, network):
         hostonly_configs_dict = get_hostonly_infos()
-        self.dhcp_switch_var = ctk.StringVar()
-        self.dhcp_state_switch = ctk.CTkSwitch(
-            master=self,
-            text='',
-            font=ctk.CTkFont(family='Sans', size=14),
-            variable=self.dhcp_switch_var,
-            onvalue='on',
-            offvalue='off',
-            command=self._configure_dhcp
-        )
-        self.dhcp_state_switch.grid(
-            row=2,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        # read dhcp state
-        dhcp_state = hostonly_configs_dict[network][0].split()[1]
-        dhcp_switch_value = 'on' if dhcp_state == 'Enabled' else 'off'
-        self.dhcp_switch_var.set(dhcp_switch_value)
-        self._configure_dhcp()
-
-        self.ip_entry = ctk.CTkEntry(
+        self.ip_value_label = ctk.CTkLabel(
             self,
             font=self.font_std,
+            text=f'{hostonly_configs_dict[network][0].split()[1]}',
         )
-        self.ip_entry.grid(
+        self.ip_value_label.grid(
             row=3,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
         )
-        self.netmask_entry = ctk.CTkEntry(
+        self.netmask_value_label = ctk.CTkLabel(
             self,
-            font=self.font_std
+            font=self.font_std,
+            text=f'{hostonly_configs_dict[network][1].split()[1]}'
         )
-        self.netmask_entry.grid(
+        self.netmask_value_label.grid(
             row=4,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
         )
+
+        # insert macaddress network
+        self.macaddress_value_label = ctk.CTkLabel(
+            self,
+            font=self.font_std,
+            text=f'{hostonly_configs_dict[network][2].split()[1]}'
+        )
+        self.macaddress_value_label.grid(
+            row=5,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wn'
+        )
+
         self.status_switch_var = ctk.StringVar()
         self.status_state_switch = ctk.CTkSwitch(
             master=self,
@@ -186,26 +159,13 @@ class HostOnlyWidget(ctk.CTkFrame):
             sticky='wn'
         )
         # read status network
-        status_state = hostonly_configs_dict[network][4].split()[1]
+        status_state = hostonly_configs_dict[network][3].split()[1]
         status_switch_value = 'on' if status_state == 'Up' else 'off'
         self.status_switch_var.set(status_switch_value)
         self._configure_status_text()
         self._active_disactive_delete_update()
-
-        # insert ip network
-        self.ip_entry.insert(
-            0,
-            f'{hostonly_configs_dict[network][1].split()[1]}'
-        )
-        # insert netmask network
-        self.netmask_entry.insert(
-            0,
-            f'{hostonly_configs_dict[network][2].split()[1]}'
-        )
-        # insert macaddress network
-        self.macaddress_value_label.configure(
-            text=f'{hostonly_configs_dict[network][3].split()[1]}'
-        )
+        mainnicwidget_class = self.master.master
+        mainnicwidget_class.dhcp_frame._show_dhcp_values(network)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -215,6 +175,7 @@ class HostOnlyWidget(ctk.CTkFrame):
         self.select_label.grid(
             row=0,
             column=0,
+            columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
@@ -234,15 +195,8 @@ class HostOnlyWidget(ctk.CTkFrame):
             sticky='wn'
         )
         self.delete_hostonly_network_button.grid(
-            row=1,
-            column=2,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
-        self.update_button.grid(
-            row=1,
-            column=3,
+            row=7,
+            column=0,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky='wn'
@@ -254,25 +208,12 @@ class HostOnlyWidget(ctk.CTkFrame):
             self.delete_hostonly_network_button.configure(
                 state='disabled'
             )
-            self.update_button.configure(
-                state='disabled'
-            )
         else:
             self.delete_hostonly_network_button.configure(
                 state='normal'
             )
-            self.update_button.configure(
-                state='normal'
-            )
 
     def _render_info(self):
-        self.dhcp_label.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
         self.ip_label.grid(
             row=3,
             column=0,
@@ -294,13 +235,6 @@ class HostOnlyWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky='wn'
         )
-        self.macaddress_value_label.grid(
-            row=5,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wn'
-        )
         self.status_label.grid(
             row=6,
             column=0,
@@ -309,172 +243,26 @@ class HostOnlyWidget(ctk.CTkFrame):
             sticky='wn'
         )
 
-    def _render_dummy_frame(self):
-        self.dummy_frame.grid(
-            row=2,
-            column=2,
-            columnspan=2,
-            rowspan=5,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-
-    def _configure_dhcp(self):
-        dhcp_switch_value = self.dhcp_switch_var.get()
-        if dhcp_switch_value == 'on':
-            self.dhcp_state_switch.configure(
-                text='Enabled'
-            )
-            self._add_dhcp_configs_frame()
-        elif dhcp_switch_value == 'off':
-            try:
-                self.dhcp_configs_frame.destroy()
-            except AttributeError:
-                pass
-            self.dhcp_state_switch.configure(
-                text='Disabled'
-            )
+    # def _configure_dhcp(self):
+    #     dhcp_switch_value = self.dhcp_switch_var.get()
+    #     if dhcp_switch_value == 'on':
+    #         self.dhcp_state_switch.configure(
+    #             text='Enabled'
+    #         )
+    #         self._add_dhcp_configs_frame()
+    #     elif dhcp_switch_value == 'off':
+    #         try:
+    #             self.dhcp_configs_frame.destroy()
+    #         except AttributeError:
+    #             pass
+    #         self.dhcp_state_switch.configure(
+    #             text='Disabled'
+    #         )
 
     def _configure_status_text(self):
         text = 'Up' if self.status_switch_var.get() == 'on' else 'Down'
         self.status_state_switch.configure(
             text=text
-        )
-
-    def _add_dhcp_configs_frame(self):
-        self.dhcp_configs_frame = ctk.CTkFrame(self)
-        self.dhcp_configs_frame.columnconfigure(0, weight=1)
-        self.dhcp_configs_frame.columnconfigure(1, weight=1)
-        self.dhcp_configs_frame.rowconfigure(0, weight=1)
-        self.dhcp_configs_frame.rowconfigure(1, weight=1)
-        self.dhcp_configs_frame.rowconfigure(2, weight=1)
-        self.dhcp_configs_frame.rowconfigure(3, weight=1)
-        self.dhcp_configs_frame.rowconfigure(4, weight=1)
-        self.dhcp_configs_frame.rowconfigure(5, weight=1)
-        self.dhcp_configs_frame.rowconfigure(6, weight=1)
-        self.dhcp_configs_frame.rowconfigure(7, weight=1)
-        self.dhcp_configs_frame.grid_propagate(False)
-
-        self.dhcp_configs_title_label = ctk.CTkLabel(
-            master=self.dhcp_configs_frame,
-            text='DHCP configs',
-            font=self.title_font_std
-        )
-        lower_ip_label = ctk.CTkLabel(
-            master=self.dhcp_configs_frame,
-            text='Lower IP',
-            font=self.font_std
-        )
-        self.lower_ip_entry = ctk.CTkEntry(
-            master=self.dhcp_configs_frame,
-            font=self.font_std,
-            placeholder_text='Insert Lower IP'
-        )
-        upper_ip_label = ctk.CTkLabel(
-            master=self.dhcp_configs_frame,
-            text='Upper IP',
-            font=self.font_std
-        )
-        self.upper_ip_entry = ctk.CTkEntry(
-            master=self.dhcp_configs_frame,
-            font=self.font_std,
-            placeholder_text='Insert Upper IP'
-        )
-        server_ip_label = ctk.CTkLabel(
-            master=self.dhcp_configs_frame,
-            text='Server IP',
-            font=self.font_std
-        )
-        self.server_ip_entry = ctk.CTkEntry(
-            master=self.dhcp_configs_frame,
-            font=self.font_std,
-            placeholder_text='Insert Server IP'
-        )
-        server_netmask_label = ctk.CTkLabel(
-            master=self.dhcp_configs_frame,
-            text='Server Netmask',
-            font=self.font_std
-        )
-        self.server_netmask_entry = ctk.CTkEntry(
-            master=self.dhcp_configs_frame,
-            font=self.font_std,
-            placeholder_text='Insert Server Netmask'
-        )
-        # render subframe
-        self.dhcp_configs_title_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        lower_ip_label.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        upper_ip_label.grid(
-            row=1,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.lower_ip_entry.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.upper_ip_entry.grid(
-            row=2,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        server_ip_label.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        server_netmask_label.grid(
-            row=3,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.server_ip_entry.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.server_netmask_entry.grid(
-            row=4,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        # render into main frame
-        self.dhcp_configs_frame.grid(
-            row=2,
-            column=2,
-            columnspan=2,
-            rowspan=5,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
         )
 
     def _add_hostonly_network(self):
@@ -512,7 +300,7 @@ class HostOnlyWidget(ctk.CTkFrame):
                 )
             )
             self.set_available_hostonly_networks()
-            self._show_hostonly_info(self.available_hostonly_networks.get())
+            self._show_network_values(self.available_hostonly_networks.get())
 
     def set_available_hostonly_networks(self):
         hostonly_configs_dict = get_hostonly_infos()
@@ -528,53 +316,3 @@ class HostOnlyWidget(ctk.CTkFrame):
             self.available_hostonly_networks.configure(
                 state='disabled'
             )
-
-    def _update_selected_hostonly(self):
-        selected_network = self.available_hostonly_networks.get()
-        dhcp_value = self.dhcp_switch_var.get()
-        ip_addrss = self.ip_entry.get()
-        netmask = self.netmask_entry.get()
-        status = self.status_switch_var.get()
-        if dhcp_value == 'on':
-            lower_ip = self.lower_ip_entry.get()
-            upper_ip = self.upper_ip_entry.get()
-            server_ip = self.server_ip_entry.get()
-            server_netmask = self.server_netmask_entry.get()
-            subprocess.run(
-                (
-                    'VBoxManage dhcpserver modify '
-                    f'--ifname "{selected_network}" '
-                    f'--enable --ip "{server_ip}" '
-                    f'--netmask "{server_netmask}" '
-                    f'--lowerip "{lower_ip}" '
-                    f'--upperip "{upper_ip}"'
-                ),
-                shell=True
-            )
-        subprocess.run(
-            (
-                f'VBoxManage hostonlyif ipconfig "{selected_network}" '
-                f'--ip "{ip_addrss}" --netmask "{netmask}"'
-            ),
-            shell=True
-        )
-        # if status == 'on':
-        #     subprocess.run(
-        #         (
-        #             f'VBoxManage hostonlyif set "{selected_network}" '
-        #             '--status on'
-        #         ),
-        #         shell=True
-        #     )
-        # elif status == 'off':
-        #     subprocess.run(
-        #         (
-        #             f'VBoxManage hostonlyif set "{selected_network}" '
-        #             '--status off'
-        #         ),
-        #         shell=True
-        #     )
-        mb.showinfo(
-            'Update network'
-            f'The network {selected_network} has been updated'
-        )
