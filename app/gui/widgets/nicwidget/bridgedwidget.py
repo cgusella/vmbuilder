@@ -17,8 +17,9 @@ def get_bridged_infos() -> list:
 
 class BridgedWidget(ctk.CTkFrame):
 
-    def __init__(self, master, provisions_configs):
+    def __init__(self, master, provisions_configs, num_tab):
         self.provisions_configs = provisions_configs
+        self.num_tab = num_tab
         ctk.CTkFrame.__init__(self, master)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_std_dimensions()
@@ -81,8 +82,16 @@ class BridgedWidget(ctk.CTkFrame):
             font=self.font_std,
             text=''
         )
+        self._show_info_if_in_provisions_configs()
         self._show_bridged_info(self.available_bridged_nics.get())
         self.render()
+
+    def _show_info_if_in_provisions_configs(self):
+        network_info = self.provisions_configs["configurations"]["networks"]
+        if network_info[f"nic_{self.num_tab}"]["enable"] and network_info[f"nic_{self.num_tab}"]["nic_type"] == 'bridged':
+            self.available_bridged_nics.set(
+                network_info[f"nic_{self.num_tab}"]["settings"]["bridge"]
+            )
 
     def render(self):
         self.select_label.grid(
@@ -155,3 +164,17 @@ class BridgedWidget(ctk.CTkFrame):
         self.status_label.configure(
             text=f'{self.bridged_configs_dict[nic][4]}'
         )
+        self.save_in_provisions_configs()
+
+    def save_in_provisions_configs(self):
+        network_set_up = self.provisions_configs["configurations"]["networks"]
+        network_set_up[f"nic_{self.num_tab}"]["enable"] = True
+        network_set_up[f"nic_{self.num_tab}"]["nic_type"] = "bridged"
+        network_set_up[f"nic_{self.num_tab}"]["settings"] = {
+            "bridge": self.available_bridged_nics.get(),
+            "dhcp": self.bridged_configs_dict[self.available_bridged_nics.get()][0].split()[-1],
+            "ipaddress": self.bridged_configs_dict[self.available_bridged_nics.get()][1].split()[-1],
+            "netmask": self.bridged_configs_dict[self.available_bridged_nics.get()][2].split()[-1],
+            "macaddress": self.bridged_configs_dict[self.available_bridged_nics.get()][3].split()[-1],
+            "status": self.bridged_configs_dict[self.available_bridged_nics.get()][4].split()[-1]
+        }

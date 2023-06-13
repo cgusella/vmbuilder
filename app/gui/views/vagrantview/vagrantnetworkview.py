@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from gui.widgets.titlewidget import TitleWidget
 from gui.widgets.nicwidget.mainnicwidget import NicWidget
+from gui.widgets.buttonswidget.vagrantmainbuttonswidget import VagrantMainButtons
 
 
 class VagrantNetworkView(ctk.CTkFrame):
@@ -25,7 +26,7 @@ class VagrantNetworkView(ctk.CTkFrame):
         self.columnconfigure(0, weight=2)
         self.columnconfigure(1, weight=1)
 
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
@@ -49,25 +50,29 @@ class VagrantNetworkView(ctk.CTkFrame):
         self.nic_tab_4 = self.nic_tabs.add('nic 4')
         self.nic_widget_1 = NicWidget(
             master=self.nic_tab_1,
-            provisions_configs=self.provisons_configs
+            provisions_configs=self.provisons_configs,
+            num_tab=1
         )
         self.nic_tab_1.columnconfigure(0, weight=1)
         self.nic_tab_1.rowconfigure(0, weight=1)
         self.nic_widget_2 = NicWidget(
             master=self.nic_tab_2,
-            provisions_configs=self.provisons_configs
+            provisions_configs=self.provisons_configs,
+            num_tab=2
         )
         self.nic_tab_2.columnconfigure(0, weight=1)
         self.nic_tab_2.rowconfigure(0, weight=1)
         self.nic_widget_3 = NicWidget(
             master=self.nic_tab_3,
-            provisions_configs=self.provisons_configs
+            provisions_configs=self.provisons_configs,
+            num_tab=3
         )
         self.nic_tab_3.columnconfigure(0, weight=1)
         self.nic_tab_3.rowconfigure(0, weight=1)
         self.nic_widget_4 = NicWidget(
             master=self.nic_tab_4,
-            provisions_configs=self.provisons_configs
+            provisions_configs=self.provisons_configs,
+            num_tab=4
         )
         self.nic_tab_4.columnconfigure(0, weight=1)
         self.nic_tab_4.rowconfigure(0, weight=1)
@@ -77,7 +82,11 @@ class VagrantNetworkView(ctk.CTkFrame):
         self.nic_widget_4.grid(row=0, column=0, sticky=self.sticky_frame)
 
     def add_main_buttons(self):
-        pass
+        self.main_buttons = VagrantMainButtons(
+            master=self,
+            provisions_configs=self.provisons_configs,
+            wanted_buttons=['configs', 'provisions']
+        )
 
     def render(self):
         self.title_frame.grid(
@@ -92,9 +101,17 @@ class VagrantNetworkView(ctk.CTkFrame):
             row=1,
             column=0,
             columnspan=2,
-            rowspan=7,
+            rowspan=6,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky=self.sticky_frame
         )
         self.nic_tabs.grid_propagate(False)
+        self.main_buttons.grid(
+            row=0,
+            column=1,
+            columnspan=2,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )

@@ -30,8 +30,9 @@ def get_hostonly_infos() -> dict:
 
 class HostOnlyWidget(ctk.CTkFrame):
 
-    def __init__(self, master, provisions_cofigs):
+    def __init__(self, master, provisions_cofigs, num_tab):
         self.provisions_configs = provisions_cofigs
+        self.num_tab = num_tab
         ctk.CTkFrame.__init__(self, master)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.title_font_std = ctk.CTkFont(family='Sans', size=18, weight='bold')
@@ -99,6 +100,17 @@ class HostOnlyWidget(ctk.CTkFrame):
             text='Status:'
         )
         self._render_info()
+        self._show_info_if_in_provisions_configs()
+
+    def _show_info_if_in_provisions_configs(self):
+        network_info = self.provisions_configs["configurations"]["networks"]
+        if network_info[f"nic_{self.num_tab}"]["enable"] and network_info[f"nic_{self.num_tab}"]["nic_type"] == 'host-only':
+            self.available_hostonly_networks.set(
+                network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
+            )
+            self._show_network_values(
+                network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
+            )
 
     def _show_network_values(self, network):
         hostonly_configs_dict = get_hostonly_infos()
@@ -166,6 +178,7 @@ class HostOnlyWidget(ctk.CTkFrame):
         self._active_disactive_delete_update()
         mainnicwidget_class = self.master.master
         mainnicwidget_class.dhcp_frame._show_dhcp_values(network)
+        self.save_in_provisions_configs(network, hostonly_configs_dict[network])
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -243,22 +256,6 @@ class HostOnlyWidget(ctk.CTkFrame):
             sticky='wn'
         )
 
-    # def _configure_dhcp(self):
-    #     dhcp_switch_value = self.dhcp_switch_var.get()
-    #     if dhcp_switch_value == 'on':
-    #         self.dhcp_state_switch.configure(
-    #             text='Enabled'
-    #         )
-    #         self._add_dhcp_configs_frame()
-    #     elif dhcp_switch_value == 'off':
-    #         try:
-    #             self.dhcp_configs_frame.destroy()
-    #         except AttributeError:
-    #             pass
-    #         self.dhcp_state_switch.configure(
-    #             text='Disabled'
-    #         )
-
     def _configure_status_text(self):
         text = 'Up' if self.status_switch_var.get() == 'on' else 'Down'
         self.status_state_switch.configure(
@@ -322,3 +319,15 @@ class HostOnlyWidget(ctk.CTkFrame):
             self.available_hostonly_networks.configure(
                 state='disabled'
             )
+
+    def save_in_provisions_configs(self, hostonly_name, hostonly_info):
+        network_set_up = self.provisions_configs["configurations"]["networks"]
+        network_set_up[f"nic_{self.num_tab}"]["enable"] = True
+        network_set_up[f"nic_{self.num_tab}"]["nic_type"] = "host-only"
+        network_set_up[f"nic_{self.num_tab}"]["settings"] = {
+            "hostonly": hostonly_name,
+            "ipaddress": hostonly_info[0].split()[-1],
+            "netmask": hostonly_info[1].split()[-1],
+            "macaddress": hostonly_info[2].split()[-1],
+            "status": hostonly_info[3].split()[-1]
+        }

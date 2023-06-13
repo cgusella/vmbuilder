@@ -33,8 +33,9 @@ def get_dhcp_infos() -> dict:
 
 class DHCPHostOnlyWidget(ctk.CTkFrame):
 
-    def __init__(self, master, provisions_cofigs):
+    def __init__(self, master, provisions_cofigs, num_tab):
         self.provisions_configs = provisions_cofigs
+        self.num_tab = num_tab
         ctk.CTkFrame.__init__(self, master)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.title_font_std = ctk.CTkFont(family='Sans', size=18, weight='bold')

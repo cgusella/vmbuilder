@@ -6,8 +6,9 @@ from gui.widgets.nicwidget.dhcphostonlywidget import DHCPHostOnlyWidget
 
 class NicWidget(ctk.CTkFrame):
 
-    def __init__(self, master, provisions_configs):
+    def __init__(self, master, provisions_configs, num_tab: int):
         self.provisions_configs = provisions_configs
+        self.num_tab = num_tab
         ctk.CTkFrame.__init__(self, master)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_std_dimensions()
@@ -73,6 +74,7 @@ class NicWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky=self.sticky_optionmenu
         )
+        self._show_nic_info_if_in_provisions_configs()
         self._check_nic_type_optionmenu()
 
     def _check_nic_type_optionmenu(self):
@@ -131,6 +133,21 @@ class NicWidget(ctk.CTkFrame):
                 )
             except AttributeError:
                 pass
+            self.provisions_configs["configurations"]["networks"][f"nic_{self.num_tab}"] = {
+                "enable": False,
+                "nic_type": "",
+                "settings": {}
+            }
+
+    def _show_nic_info_if_in_provisions_configs(self):
+        network_info = self.provisions_configs["configurations"]["networks"]
+        if network_info[f"nic_{self.num_tab}"]["enable"]:
+            self.enable_checkbox.select()
+            self.nic_type.set(
+                network_info[f"nic_{self.num_tab}"]["nic_type"]
+            )
+            self.nic_type.configure(state='normal')
+            self.add_config_adapter_frame()
 
     def _add_config_adapter_frame(self, nic_type_value):
         self.add_config_adapter_frame()
@@ -153,7 +170,8 @@ class NicWidget(ctk.CTkFrame):
     def _insert_bridged(self):
         self.config_adapter_frame = BridgedWidget(
             self,
-            self.provisions_configs
+            self.provisions_configs,
+            self.num_tab
         )
 
     def _insert_hostonly(self):
@@ -161,13 +179,18 @@ class NicWidget(ctk.CTkFrame):
         self.config_adapter_frame.columnconfigure(0, weight=1)
         self.config_adapter_frame.columnconfigure(1, weight=1)
         self.config_adapter_frame.rowconfigure(0, weight=1)
-        self.hostonly_frame = HostOnlyWidget(
-            self.config_adapter_frame,
-            self.provisions_configs
-        )
+
+        # HostOnlyWidget uses methods in DHCPHostOnlyWidget,
+        # so do not invert their initialization order
         self.dhcp_frame = DHCPHostOnlyWidget(
             self.config_adapter_frame,
-            self.provisions_configs
+            self.provisions_configs,
+            self.num_tab
+        )
+        self.hostonly_frame = HostOnlyWidget(
+            self.config_adapter_frame,
+            self.provisions_configs,
+            self.num_tab
         )
         self.hostonly_frame.grid(
             row=0,
