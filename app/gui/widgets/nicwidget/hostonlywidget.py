@@ -292,6 +292,7 @@ class HostOnlyWidget(ctk.CTkFrame):
                 f'VBoxManage hostonlyif remove "{selected_network}"',
                 shell=True,
             )
+            # consider also deleting the probable dhcp connected to the hostonly adapter
             subprocess.run(
                 'VBoxManage dhcpserver remove '
                 f'--network=HostInterfaceNetworking-{selected_network}',
