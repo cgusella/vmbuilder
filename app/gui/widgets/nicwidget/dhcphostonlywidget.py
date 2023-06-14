@@ -31,11 +31,12 @@ def get_dhcp_infos() -> dict:
     return dhcp_configs_dict
 
 
-class DHCPHostOnlyWidget(ctk.CTkFrame):
+class DHCPWidget(ctk.CTkFrame):
 
-    def __init__(self, master, provisions_cofigs, num_tab):
+    def __init__(self, master, provisions_cofigs, num_tab, nic_type):
         self.provisions_configs = provisions_cofigs
         self.num_tab = num_tab
+        self.nic_type = nic_type
         ctk.CTkFrame.__init__(self, master)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.title_font_std = ctk.CTkFont(family='Sans', size=18, weight='bold')
@@ -226,7 +227,10 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
         self.set_enable_or_update_button()
 
     def _update_selected_dhcp(self):
-
+        if self.nic_type == 'hostonly':
+            network = f'HostInterfaceNetworking-{self.selected_dhcp}'
+        elif self.nic_type == 'natnetwork':
+            network = self.selected_dhcp
         lower_ip = self.lower_ip_entry.get()
         upper_ip = self.upper_ip_entry.get()
         server_ip = self.server_ip_entry.get()
@@ -235,7 +239,7 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
         subprocess.run(
             (
                 'VBoxManage dhcpserver modify '
-                f'--network=HostInterfaceNetworking-{self.selected_dhcp} '
+                f'--network={network} '
                 f'--server-ip={server_ip} '
                 f'--netmask={server_netmask} '
                 f'--lower-ip={lower_ip} '
@@ -244,16 +248,17 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             ),
             shell=True
         )
-        # get the status of the network adapter
-        hostonly_network_status = subprocess.run(
-            (
-                "VBoxManage list hostonlyifs | grep "
-                f"HostInterfaceNetworking-{self.selected_dhcp} "
-                "-B1"
-            ),
-            shell=True,
-            capture_output=True
-        ).stdout.decode("ascii").split('\n')[0].split()[-1]
+        if self.nic_type == 'hostonly':
+            # get the status of the network adapter
+            hostonly_network_status = subprocess.run(
+                (
+                    "VBoxManage list hostonlyifs | grep "
+                    f"HostInterfaceNetworking-{self.selected_dhcp} "
+                    "-B1"
+                ),
+                shell=True,
+                capture_output=True
+            ).stdout.decode("ascii").split('\n')[0].split()[-1]
         # reset the dhcpserver after update only if its status is up
         if hostonly_network_status.lower() == 'up':
             subprocess.run(
@@ -274,14 +279,14 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self.delete_dhcp_button.grid(
             row=1,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
 
         self.dhcp_configs_title_label.grid(
@@ -311,14 +316,14 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wens'
+            sticky='we'
         )
         self.upper_ip_entry.grid(
             row=3,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wens'
+            sticky='we'
         )
         self.server_ip_label.grid(
             row=4,
@@ -339,12 +344,12 @@ class DHCPHostOnlyWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wens'
+            sticky='we'
         )
         self.server_netmask_entry.grid(
             row=5,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wens'
+            sticky='we'
         )

@@ -104,13 +104,13 @@ class HostOnlyWidget(ctk.CTkFrame):
 
     def _show_info_if_in_provisions_configs(self):
         network_info = self.provisions_configs["configurations"]["networks"]
-        if network_info[f"nic_{self.num_tab}"]["nic_type"] == 'host-only':
-            if network_info[f"nic_{self.num_tab}"]["settings"]:
+        if network_info[f"nic{self.num_tab}"]["nic_type"] == 'hostonly':
+            if network_info[f"nic{self.num_tab}"]["settings"]:
                 self.available_hostonly_networks.set(
-                    network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
+                    network_info[f"nic{self.num_tab}"]["settings"]["hostonly"]
                 )
                 self._show_network_values(
-                    network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
+                    network_info[f"nic{self.num_tab}"]["settings"]["hostonly"]
                 )
 
     def _show_network_values(self, network):
@@ -125,7 +125,7 @@ class HostOnlyWidget(ctk.CTkFrame):
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self.netmask_value_label = ctk.CTkLabel(
             self,
@@ -137,7 +137,7 @@ class HostOnlyWidget(ctk.CTkFrame):
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
 
         # insert macaddress network
@@ -151,7 +151,7 @@ class HostOnlyWidget(ctk.CTkFrame):
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
 
         self.status_switch_var = ctk.StringVar()
@@ -169,7 +169,7 @@ class HostOnlyWidget(ctk.CTkFrame):
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         # read status network
         status_state = hostonly_configs_dict[network][3].split()[1]
@@ -199,21 +199,21 @@ class HostOnlyWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='we'
         )
         self.add_hostonly_network_button.grid(
             row=1,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self.delete_hostonly_network_button.grid(
             row=7,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self._active_disactive_delete_update()
 
@@ -233,28 +233,28 @@ class HostOnlyWidget(ctk.CTkFrame):
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self.netmask_label.grid(
             row=4,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self.macaddress_label.grid(
             row=5,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
         self.status_label.grid(
             row=6,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky='wn'
+            sticky='w'
         )
 
     def _configure_status_text(self):
@@ -323,9 +323,9 @@ class HostOnlyWidget(ctk.CTkFrame):
 
     def save_in_provisions_configs(self, hostonly_name, hostonly_info):
         network_set_up = self.provisions_configs["configurations"]["networks"]
-        network_set_up[f"nic_{self.num_tab}"]["enable"] = True
-        network_set_up[f"nic_{self.num_tab}"]["nic_type"] = "host-only"
-        network_set_up[f"nic_{self.num_tab}"]["settings"] = {
+        network_set_up[f"nic{self.num_tab}"]["enable"] = True
+        network_set_up[f"nic{self.num_tab}"]["nic_type"] = "hostonly"
+        network_set_up[f"nic{self.num_tab}"]["settings"] = {
             "hostonly": hostonly_name,
             "ipaddress": hostonly_info[0].split()[-1],
             "netmask": hostonly_info[1].split()[-1],

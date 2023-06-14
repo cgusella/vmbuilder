@@ -1,6 +1,5 @@
 import customtkinter as ctk
 from argumentparser.helper import get_local_vagrant_boxes
-from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.widgets.projectnamewidget import VagrantProjectNameWidget
 from gui.widgets.titlewidget import TitleWidget
 from gui.widgets.vagrantboxsetupwidget import VagrantBoxSetUpWidget
@@ -14,7 +13,6 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.frame_name = 'configs'
         self.master = master
         self.provisions_configs = provisions_configs
-        self.vbox_list = launch_vboxmanage_lst_command()
         self.local_vagrant_boxes = get_local_vagrant_boxes()
 
         ctk.CTkFrame.__init__(self, master)

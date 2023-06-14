@@ -1,7 +1,6 @@
 import constants
 import customtkinter as ctk
 import os
-from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.widgets.vboxconfigswidget import VboxConfigsWidget
 from gui.widgets.isowidget import IsoWidget
 from gui.widgets.titlewidget import TitleWidget
@@ -16,7 +15,6 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.frame_name = 'configs'
         self.master = master
         self.provisions_configs = provisions_configs
-        self.vbox_list = launch_vboxmanage_lst_command()
         ctk.CTkFrame.__init__(self, master)
         self.title_std = ctk.CTkFont(family=self.master.family, size=30,
                                      weight='bold')

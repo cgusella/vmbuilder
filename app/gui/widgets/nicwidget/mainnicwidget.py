@@ -1,7 +1,8 @@
 import customtkinter as ctk
 from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
 from gui.widgets.nicwidget.hostonlywidget import HostOnlyWidget
-from gui.widgets.nicwidget.dhcphostonlywidget import DHCPHostOnlyWidget
+from gui.widgets.nicwidget.dhcphostonlywidget import DHCPWidget
+from gui.widgets.nicwidget.natnetworkwidget import NatNetworkWidget
 
 
 class NicWidget(ctk.CTkFrame):
@@ -63,7 +64,7 @@ class NicWidget(ctk.CTkFrame):
             master=self.enable_adapter_type_frame,
             font=self.font_std,
             state='disabled',
-            values=['host-only', 'bridged', 'internal', 'nat-network', 'nat'],
+            values=['hostonly', 'bridged', 'internal', 'natnetwork', 'nat'],
             command=self._add_config_adapter_frame
         )
         self.nic_type.set('Select one')
@@ -74,7 +75,7 @@ class NicWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky=self.sticky_optionmenu
         )
-        self.network_info = self.provisions_configs["configurations"]["networks"][f"nic_{self.num_tab}"]
+        self.network_info = self.provisions_configs["configurations"]["networks"][f"nic{self.num_tab}"]
         if self.network_info["enable"] or self.network_info["settings"]:
             self._show_nic_info_if_in_provisions_configs()
         self._check_nic_type_optionmenu()
@@ -135,7 +136,7 @@ class NicWidget(ctk.CTkFrame):
                 )
             except AttributeError:
                 pass
-            self.provisions_configs["configurations"]["networks"][f"nic_{self.num_tab}"]["enable"] = False
+            self.provisions_configs["configurations"]["networks"][f"nic{self.num_tab}"]["enable"] = False
 
     def _show_nic_info_if_in_provisions_configs(self):
         if self.network_info["enable"]:
@@ -156,11 +157,11 @@ class NicWidget(ctk.CTkFrame):
         selected_nic_type = self.nic_type.get()
         if selected_nic_type == 'bridged':
             self._insert_bridged()
-        elif selected_nic_type == 'host-only':
+        elif selected_nic_type == 'hostonly':
             self._insert_hostonly()
         elif selected_nic_type == 'internal':
             self._insert_internal()
-        elif selected_nic_type == 'nat-network':
+        elif selected_nic_type == 'natnetwork':
             self._insert_natnetwork()
         elif selected_nic_type == 'nat':
             self._insert_nat()
@@ -181,10 +182,11 @@ class NicWidget(ctk.CTkFrame):
 
         # HostOnlyWidget uses methods in DHCPHostOnlyWidget,
         # so do not invert their initialization order
-        self.dhcp_frame = DHCPHostOnlyWidget(
+        self.dhcp_frame = DHCPWidget(
             self.config_adapter_frame,
             self.provisions_configs,
-            self.num_tab
+            self.num_tab,
+            nic_type='hostonly'
         )
         self.hostonly_frame = HostOnlyWidget(
             self.config_adapter_frame,
@@ -211,7 +213,39 @@ class NicWidget(ctk.CTkFrame):
         pass
 
     def _insert_natnetwork(self):
-        pass
+        self.config_adapter_frame = ctk.CTkFrame(self)
+        self.config_adapter_frame.columnconfigure(0, weight=1)
+        self.config_adapter_frame.columnconfigure(1, weight=1)
+        self.config_adapter_frame.rowconfigure(0, weight=1)
+
+        # HostOnlyWidget uses methods in DHCPHostOnlyWidget,
+        # so do not invert their initialization order
+        self.dhcp_frame = DHCPWidget(
+            self.config_adapter_frame,
+            self.provisions_configs,
+            self.num_tab,
+            nic_type='natnetwork'
+        )
+        self.natnetwork_frame = NatNetworkWidget(
+            self.config_adapter_frame,
+            self.provisions_configs,
+            self.num_tab
+        )
+        self.natnetwork_frame.grid(
+            row=0,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+        self.dhcp_frame.grid(
+            row=0,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+        self._check_nic_type_optionmenu()
 
     def _insert_nat(self):
         pass

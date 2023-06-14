@@ -1,5 +1,6 @@
 import abc
 import customtkinter as ctk
+from existencecontroller.controller import launch_vboxmanage_lst_command
 
 
 class MainButtonsWidget(abc.ABC, ctk.CTkFrame):
@@ -7,6 +8,7 @@ class MainButtonsWidget(abc.ABC, ctk.CTkFrame):
     def __init__(self, master, provisions_configs, wanted_buttons: list):
         self.provisions_configs = provisions_configs
         self.master = master
+        self.vbox_list = launch_vboxmanage_lst_command()
         ctk.CTkFrame.__init__(self, master, fg_color='transparent')
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_std_dimensions()

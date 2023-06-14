@@ -3,14 +3,12 @@ import customtkinter as ctk
 from gui.widgets.additionalscriptwidget import AdditionalScriptWidget
 from gui.widgets.packagemanagerwidget import PackageManagerWidget
 from gui.widgets.titlewidget import TitleWidget
-from existencecontroller.controller import launch_vboxmanage_lst_command
 
 
 class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
 
     def __init__(self, master, provisions_configs, title):
         self.provisions_configs = provisions_configs
-        self.vbox_list = launch_vboxmanage_lst_command()
         ctk.CTkFrame.__init__(self, master)
         self.family = 'Sans'
         self.title_std = ctk.CTkFont(

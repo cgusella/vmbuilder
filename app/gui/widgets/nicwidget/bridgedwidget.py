@@ -88,9 +88,9 @@ class BridgedWidget(ctk.CTkFrame):
 
     def _show_info_if_in_provisions_configs(self):
         network_info = self.provisions_configs["configurations"]["networks"]
-        if network_info[f"nic_{self.num_tab}"]["enable"] and network_info[f"nic_{self.num_tab}"]["nic_type"] == 'bridged':
+        if network_info[f"nic{self.num_tab}"]["enable"] and network_info[f"nic{self.num_tab}"]["nic_type"] == 'bridged':
             self.available_bridged_nics.set(
-                network_info[f"nic_{self.num_tab}"]["settings"]["bridge"]
+                network_info[f"nic{self.num_tab}"]["settings"]["bridge"]
             )
 
     def render(self):
@@ -168,9 +168,9 @@ class BridgedWidget(ctk.CTkFrame):
 
     def save_in_provisions_configs(self):
         network_set_up = self.provisions_configs["configurations"]["networks"]
-        network_set_up[f"nic_{self.num_tab}"]["enable"] = True
-        network_set_up[f"nic_{self.num_tab}"]["nic_type"] = "bridged"
-        network_set_up[f"nic_{self.num_tab}"]["settings"] = {
+        network_set_up[f"nic{self.num_tab}"]["enable"] = True
+        network_set_up[f"nic{self.num_tab}"]["nic_type"] = "bridged"
+        network_set_up[f"nic{self.num_tab}"]["settings"] = {
             "bridge": self.available_bridged_nics.get(),
             "dhcp": self.bridged_configs_dict[self.available_bridged_nics.get()][0].split()[-1],
             "ipaddress": self.bridged_configs_dict[self.available_bridged_nics.get()][1].split()[-1],

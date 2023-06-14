@@ -144,7 +144,7 @@ class VagrantMainButtons(MainButtonsWidget):
                     )
                 )
             vbox_name = self.provisions_configs["configurations"]["vbox_name"]["default"]
-            if vbox_name in self.master.vbox_list:
+            if vbox_name in self.vbox_list:
                 mb.showerror('Error', f'A box with the name "{vbox_name}" already exists!')
             else:
                 provisions_configs_reader = ProvisionConfigReader(

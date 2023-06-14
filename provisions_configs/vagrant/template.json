@@ -53,22 +53,22 @@
     },
     "networks": {
       "description": "Network setup for virtual machine",
-      "nic_1": {
+      "nic1": {
         "enable": false,
         "nic_type": "",
         "settings": {}
       },
-      "nic_2": {
+      "nic2": {
         "enable": false,
         "nic_type": "",
         "settings": {}
       },
-      "nic_3": {
+      "nic3": {
         "enable": false,
         "nic_type": "",
         "settings": {}
       },
-      "nic_4": {
+      "nic4": {
         "enable": false,
         "nic_type": "",
         "settings": {}
