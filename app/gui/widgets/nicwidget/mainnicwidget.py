@@ -74,7 +74,9 @@ class NicWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky=self.sticky_optionmenu
         )
-        self._show_nic_info_if_in_provisions_configs()
+        self.network_info = self.provisions_configs["configurations"]["networks"][f"nic_{self.num_tab}"]
+        if self.network_info["enable"] or self.network_info["settings"]:
+            self._show_nic_info_if_in_provisions_configs()
         self._check_nic_type_optionmenu()
 
     def _check_nic_type_optionmenu(self):
@@ -133,21 +135,18 @@ class NicWidget(ctk.CTkFrame):
                 )
             except AttributeError:
                 pass
-            self.provisions_configs["configurations"]["networks"][f"nic_{self.num_tab}"] = {
-                "enable": False,
-                "nic_type": "",
-                "settings": {}
-            }
+            self.provisions_configs["configurations"]["networks"][f"nic_{self.num_tab}"]["enable"] = False
 
     def _show_nic_info_if_in_provisions_configs(self):
-        network_info = self.provisions_configs["configurations"]["networks"]
-        if network_info[f"nic_{self.num_tab}"]["enable"]:
+        if self.network_info["enable"]:
             self.enable_checkbox.select()
-            self.nic_type.set(
-                network_info[f"nic_{self.num_tab}"]["nic_type"]
-            )
-            self.nic_type.configure(state='normal')
-            self.add_config_adapter_frame()
+        else:
+            self.enable_checkbox.deselect()
+        self.nic_type.set(
+            self.network_info["nic_type"]
+        )
+        self.nic_type.configure(state='normal')
+        self.add_config_adapter_frame()
 
     def _add_config_adapter_frame(self, nic_type_value):
         self.add_config_adapter_frame()
@@ -206,6 +205,7 @@ class NicWidget(ctk.CTkFrame):
             pady=self.pady_std,
             sticky=self.sticky_frame
         )
+        self._check_nic_type_optionmenu()
 
     def _insert_internal(self):
         pass

@@ -104,13 +104,14 @@ class HostOnlyWidget(ctk.CTkFrame):
 
     def _show_info_if_in_provisions_configs(self):
         network_info = self.provisions_configs["configurations"]["networks"]
-        if network_info[f"nic_{self.num_tab}"]["enable"] and network_info[f"nic_{self.num_tab}"]["nic_type"] == 'host-only':
-            self.available_hostonly_networks.set(
-                network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
-            )
-            self._show_network_values(
-                network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
-            )
+        if network_info[f"nic_{self.num_tab}"]["nic_type"] == 'host-only':
+            if network_info[f"nic_{self.num_tab}"]["settings"]:
+                self.available_hostonly_networks.set(
+                    network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
+                )
+                self._show_network_values(
+                    network_info[f"nic_{self.num_tab}"]["settings"]["hostonly"]
+                )
 
     def _show_network_values(self, network):
         hostonly_configs_dict = get_hostonly_infos()
@@ -217,7 +218,7 @@ class HostOnlyWidget(ctk.CTkFrame):
         self._active_disactive_delete_update()
 
     def _active_disactive_delete_update(self):
-        if self.available_hostonly_networks.get() == 'Select':
+        if self.available_hostonly_networks.cget("state") == 'disabled':
             self.delete_hostonly_network_button.configure(
                 state='disabled'
             )
