@@ -52,7 +52,6 @@
       "default":""
     },
     "networks": {
-      "description": "Network setup for virtual machine",
       "nic1": {
         "enable": false,
         "nic_type": "",

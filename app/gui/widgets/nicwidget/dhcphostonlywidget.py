@@ -207,10 +207,15 @@ class DHCPWidget(ctk.CTkFrame):
                 'To enable a DHCP server, you need to fill all the required fields.'
             )
         else:
+            if self.nic_type == 'hostonly':
+                network_name = f'HostInterfaceNetworking-{self.selected_dhcp} '
+            else:
+                network_name = {self.selected_dhcp}
+
             subprocess.run(
                 (
                     'VBoxManage dhcpserver add '
-                    f'--network=HostInterfaceNetworking-{self.selected_dhcp} '
+                    f'--network={network_name} '
                     f'--server-ip={server_ip} '
                     f'--netmask={server_netmask} '
                     f'--lower-ip={lower_ip} '
@@ -259,15 +264,42 @@ class DHCPWidget(ctk.CTkFrame):
                 shell=True,
                 capture_output=True
             ).stdout.decode("ascii").split('\n')[0].split()[-1]
-        # reset the dhcpserver after update only if its status is up
-        if hostonly_network_status.lower() == 'up':
-            subprocess.run(
+            # reset the dhcpserver after update only if its status is up
+            if hostonly_network_status.lower() == 'up':
+                subprocess.run(
+                    (
+                        'VBoxManage dhcpserver restart '
+                        f'--network=HostInterfaceNetworking-{self.selected_dhcp}'
+                    ),
+                    shell=True
+                )
+        elif self.nic_type == 'natnetwork':
+            natnetwork_status = subprocess.run(
                 (
-                    'VBoxManage dhcpserver restart '
-                    f'--network=HostInterfaceNetworking-{self.selected_dhcp}'
+                    "VBoxManage list natnetworks | egrep "
+                    f"{self.selected_dhcp} "
+                    "-A6 | tail -1"
                 ),
-                shell=True
-            )
+                shell=True,
+                capture_output=True
+            ).stdout.decode("ascii").split()[-1]
+
+            # reset the dhcpserver after update only if its status is up
+            if natnetwork_status.lower() == 'yes':
+                subprocess.run(
+                    (
+                        'VBoxManage natnetwork stop '
+                        f'--netname {self.selected_dhcp}'
+                    ),
+                    shell=True
+                )
+                subprocess.run(
+                    (
+                        'VBoxManage natnetwork start '
+                        f'--netname {self.selected_dhcp}'
+                    ),
+                    shell=True
+                )
         mb.showinfo(
             title='Update DHCP',
             message=f'The DHCP configs has been updated for the {self.selected_dhcp} network.'
