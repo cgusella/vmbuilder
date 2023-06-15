@@ -1,8 +1,7 @@
 import constants
 import customtkinter as ctk
-import shutil
 from builder.helper import is_empty_script
-from tkinter import filedialog
+from gui.widgets.buttonswidget.editscriptbuttons import EditScriptButtonsWidget
 
 
 class SetUpScriptEdit(ctk.CTkToplevel):
@@ -152,6 +151,11 @@ class EditFileWindow(ctk.CTkToplevel):
         self.geometry(
             '1200x600'
         )
+        self.set_std_dimensions()
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
         self.title('Edit File')
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         file_label = ctk.CTkLabel(
@@ -159,7 +163,7 @@ class EditFileWindow(ctk.CTkToplevel):
             text=f'You are modifying "{operation}.sh"\nfrom package "{package}"',
             font=self.font_std
         )
-        file_label.grid(row=1, column=0, columnspan=3)
+        file_label.grid(row=0, column=0, columnspan=3)
         self.open_text_box = ctk.CTkTextbox(
             self,
             width=1100,
@@ -169,63 +173,25 @@ class EditFileWindow(ctk.CTkToplevel):
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
             text = file.read()
         self.open_text_box.insert('end', text)
-        self.open_text_box.grid(row=2, column=0, columnspan=3)
-
-        if self.operation == 'config':
-            upload_button = ctk.CTkButton(
-                self,
-                text='Upload',
-                font=self.font_std,
-                command=self.upload_file
-            )
-            upload_button.grid(row=3, column=0)
-            save_button = ctk.CTkButton(
-                self,
-                text='Save',
-                font=self.font_std,
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=2)
-        else:
-            save_button = ctk.CTkButton(
-                self,
-                text='Save',
-                font=self.font_std,
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=1)
-        remove_button = ctk.CTkButton(
+        self.open_text_box.grid(
+            row=1,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+        )
+        self.bottom_buttons = EditScriptButtonsWidget(
             self,
-            text=f'Remove from {operation}',
-            font=self.font_std,
-            command=self.remove_from_operation
+            package=self.package,
+            operation=self.operation,
+            provisions_configs=self.provisions_configs
         )
-        remove_button.grid(row=4, column=1)
-
-    def save_file(self):
-        with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
-            file.write(self.open_text_box.get("1.0", "end"))
-        self.master._add_selected_packages_to(self.operation)
-        self.destroy()
-
-    def remove_from_operation(self):
-        self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        self.master.fill_selected_packages_frame()
-        self.destroy()
-
-    def upload_file(self):
-        filename = filedialog.askopenfilename(
-            initialdir=f"{constants.VMBUILDER_PATH}",
-            title="Select a File",
-            filetypes=(
-                ("Text files",
-                 "*.txt*"),
-                ("all files",
-                 "*.*")
-            )
+        self.bottom_buttons.grid(
+            row=2,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
         )
-        shutil.copy(
-            src=filename,
-            dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
-        )
-        self.destroy()
+
+    def set_std_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
