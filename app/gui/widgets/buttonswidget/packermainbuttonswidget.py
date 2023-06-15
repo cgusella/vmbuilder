@@ -65,6 +65,13 @@ class PackerMainButtons(MainButtonsWidget):
         self.provisions_configs["configurations"]["cpus"]["default"] = self.master.vbox_configs_frame.cpus_value.get()
         self.provisions_configs["configurations"]["memory"]["default"] = int(self.master.vbox_configs_frame.memory_slider.get())
         self.provisions_configs["configurations"]["disk_size"]["default"] = self.master.vbox_configs_frame.disk_slider_value.get()
+        self.provisions_configs["configurations"]["disk_name"]["default"] = self.master.disk_name_entry.get()
+        self.provisions_configs["configurations"]["iso_file"]["default"] = self.master.iso_frame.iso_file_entry.get()
+        self.provisions_configs["configurations"]["iso_link"]["default"] = self.master.iso_frame.iso_link_entry.get()
+        self.provisions_configs["configurations"]["iso_checksum"]["default"] = (
+            f'{self.master.iso_frame.iso_checksum_algorithm.get()}:{self.master.iso_frame.iso_checksum_entry.get()}'
+        )
+        self.provisions_configs["configurations"]["preseed_file"]["default"] = self.master.preseed_files_option.get()
 
     def _save(self):
         if self.master.frame_name == 'configs':

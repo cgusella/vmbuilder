@@ -39,7 +39,7 @@
       "description":"Iso link",
       "default":""
     },
-    "checksum":{
+    "iso_checksum":{
       "description":"Checksum of the chosen iso image",
       "default":""
     },

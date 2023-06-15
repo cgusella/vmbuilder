@@ -83,12 +83,12 @@ class IsoWidget(ctk.CTkFrame):
             pady=self.pady_entry
         )
 
-        checksum_label = ctk.CTkLabel(
+        iso_checksum_label = ctk.CTkLabel(
             master=self,
             text='Insert Checksum',
             font=self.font_std
         )
-        checksum_label.grid(
+        iso_checksum_label.grid(
             row=2,
             column=0,
             sticky=self.sticky_label,
@@ -96,47 +96,47 @@ class IsoWidget(ctk.CTkFrame):
             pady=self.pady_title
         )
 
-        self.checksum_subframe = ctk.CTkFrame(
+        self.iso_checksum_subframe = ctk.CTkFrame(
             master=self,
             fg_color='transparent'
         )
-        self.checksum_subframe.grid(
+        self.iso_checksum_subframe.grid(
             row=3,
             column=0,
             columnspan=2,
             sticky=self.sticky_frame
         )
-        self.checksum_algorithm = ctk.CTkOptionMenu(
-            master=self.checksum_subframe,
+        self.iso_checksum_algorithm = ctk.CTkOptionMenu(
+            master=self.iso_checksum_subframe,
             font=self.font_std,
             values=['SHA-1', 'SHA-224', 'SHA-256', 'SHA-384', 'SHA-512', 'MD5']
         )
-        self.checksum_algorithm.grid(
+        self.iso_checksum_algorithm.grid(
             row=0,
             column=0,
             padx=self.padx_std,
             pady=self.pady_entry,
             sticky=self.sticky_optionmenu
         )
-        self.checksum_entry = ctk.CTkEntry(
-            master=self.checksum_subframe,
+        self.iso_checksum_entry = ctk.CTkEntry(
+            master=self.iso_checksum_subframe,
             font=self.font_std,
             width=2*self.entry_width_std,
             height=self.entry_height_std,
             placeholder_text='Checksum'
         )
-        self.checksum_entry.grid(
+        self.iso_checksum_entry.grid(
             row=0,
             column=1,
             padx=self.padx_std,
             pady=self.pady_entry,
             sticky=self.sticky_entry
         )
-        if self.provisions_configs["configurations"]["checksum"]["default"]:
-            self.checksum_algorithm.set(
-                self.provisions_configs["configurations"]["checksum"]["default"].split(':')[0]
+        if self.provisions_configs["configurations"]["iso_checksum"]["default"]:
+            self.iso_checksum_algorithm.set(
+                self.provisions_configs["configurations"]["iso_checksum"]["default"].split(':')[0]
             )
-            self.checksum_entry.insert(
+            self.iso_checksum_entry.insert(
                 0,
-                self.provisions_configs["configurations"]["checksum"]["default"].split(':')[1]
+                self.provisions_configs["configurations"]["iso_checksum"]["default"].split(':')[1]
             )
