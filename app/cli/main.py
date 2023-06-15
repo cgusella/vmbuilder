@@ -5,10 +5,11 @@ from argumentparser.customparser import CustomArgumentParser
 from cli.provisionsreader import ProvisionConfigReader
 from builder.packer import Packer
 from builder.vagrant import Vagrant
+from builder.builder import Builder
 from existencecontroller.controller import VagrantController, PackerController
 
 
-def get_project_class(namespace: Namespace, json_file: dict):
+def get_project_class(namespace: Namespace, json_file: dict) -> Builder:
     project_type = namespace.vm_type
     if project_type == 'vagrant':
         return Vagrant(
@@ -44,10 +45,7 @@ def main():
     json_file = controller.get_json_with_flags_values()
 
     # read selected json
-    provisions_configs_reader = ProvisionConfigReader(
-        json_file,
-        namespace.vm_type
-    )
+    provisions_configs_reader = ProvisionConfigReader(json_file)
     provisions_configs_reader.check_packages_existence_for()
 
     provisions_configs_reader.check_package_upload_files_existence()

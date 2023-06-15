@@ -1,19 +1,18 @@
 import customtkinter as ctk
 from argumentparser.helper import get_local_vagrant_boxes
-from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.widgets.projectnamewidget import VagrantProjectNameWidget
 from gui.widgets.titlewidget import TitleWidget
 from gui.widgets.vagrantboxsetupwidget import VagrantBoxSetUpWidget
 from gui.widgets.vboxconfigswidget import VboxConfigsWidget
-from tkinter import messagebox as mb
+from gui.widgets.buttonswidget.vagrantmainbuttonswidget import VagrantMainButtons
 from tkinter import StringVar
 
 
 class VagrantConfigsView(ctk.CTkFrame):
     def __init__(self, master, provisions_configs):
+        self.frame_name = 'configs'
         self.master = master
         self.provisions_configs = provisions_configs
-        self.vbox_list = launch_vboxmanage_lst_command()
         self.local_vagrant_boxes = get_local_vagrant_boxes()
 
         ctk.CTkFrame.__init__(self, master)
@@ -31,7 +30,7 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.add_vagrant_box_setup()
         self.add_vbox_configs()
         self.add_connection_mode_frame()
-        self.add_set_provision_button()
+        self.add_main_buttons()
         self.render()
 
     def set_std_dimensions(self):
@@ -157,32 +156,11 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
 
-    def add_set_provision_button(self):
-        self.set_provision_button_frame = ctk.CTkFrame(
-            self,
-            height=100,
-            fg_color='transparent'
-        )
-
-        self.set_general_row_col_conf(
-            frame=self.set_provision_button_frame,
-            rows=1,
-            columns=1
-        )
-        set_provision_button = ctk.CTkButton(
-            master=self.set_provision_button_frame,
-            text='Set Provisions',
-            command=self._go_to_provision_page,
-            font=self.font_std
-        )
-        set_provision_button.grid(
-            row=0,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_button,
-            ipady=self.ipady_button,
-            sticky='se'
+    def add_main_buttons(self):
+        self.main_button_frame = VagrantMainButtons(
+            master=self,
+            provisions_configs=self.provisions_configs,
+            wanted_buttons=['provisions', 'networks']
         )
 
     def render(self):
@@ -234,7 +212,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky=self.sticky_frame
         )
-        self.set_provision_button_frame.grid(
+        self.main_button_frame.grid(
             row=0,
             column=1,
             rowspan=2,
@@ -244,33 +222,6 @@ class VagrantConfigsView(ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky='ne'
         )
-
-    def _go_to_provision_page(self):
-        project_name = self.project_name_frame.project_name_entry.get()
-        vbox_name = self.vbox_configs_frame.vbox_name_entry.get()
-        if not project_name:
-            mb.showerror('Error', 'You must choose a name for the project!')
-        elif not vbox_name:
-            mb.showerror('Error', 'You must choose a name for the virtual box machine!')
-        elif not self.vagrant_box_setup_frame.username_entry.get():
-            mb.showerror('Error', 'You must specify the existing username of the vagrant box for vagrant to be able to connect to the machine!')
-        elif not self.vagrant_box_setup_frame.password_entry.get():
-            mb.showerror('Error', 'You must specify the password of the specified user for vagrant to be able to connect to the machine!')
-        elif not self.vagrant_box_setup_frame.vagrant_box.get():
-            mb.showerror('Error', 'You must choose a Vagrant box!')
-        else:
-            self.provisions_configs["configurations"]["project_name"]["default"] = project_name
-            self.provisions_configs["configurations"]["vbox_name"]["default"] = vbox_name
-            self.provisions_configs["configurations"]["hostname"]["default"] = self.vagrant_box_setup_frame.hostname_entry.get()
-            self.provisions_configs["credentials"]["username"] = self.vagrant_box_setup_frame.username_entry.get()
-            self.provisions_configs["credentials"]["password"] = self.vagrant_box_setup_frame.password_entry.get()
-            self.provisions_configs["credentials"]["extra_user"] = self.vagrant_box_setup_frame.extra_user_entry.get()
-            self.provisions_configs["configurations"]["image"]["default"] = self.vagrant_box_setup_frame.vagrant_box.get()
-            self.provisions_configs["configurations"]["cpus"]["default"] = self.vbox_configs_frame.cpus_value.get()
-            self.provisions_configs["configurations"]["memory"]["default"] = int(self.vbox_configs_frame.memory_slider.get())
-            self.provisions_configs["configurations"]["disk_size"]["default"] = self.vbox_configs_frame.disk_slider_value.get()
-            self.destroy()
-            self.master.add_vagrant_provisions_frame()
 
     def get_vagrant_configs(self):
         return self.provisions_configs

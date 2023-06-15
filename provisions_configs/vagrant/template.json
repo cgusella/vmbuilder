@@ -21,7 +21,7 @@
     },
     "project_name": {
       "description":"The project name",
-      "default":"name"
+      "default":""
     },
     "vbox_name": {
       "description":"Vbox name",
@@ -50,6 +50,28 @@
     "disk_size":{
       "description":"Disk size of the machine in MegaByte",
       "default":""
+    },
+    "networks": {
+      "nic1": {
+        "enable": false,
+        "nic_type": "",
+        "settings": {}
+      },
+      "nic2": {
+        "enable": false,
+        "nic_type": "",
+        "settings": {}
+      },
+      "nic3": {
+        "enable": false,
+        "nic_type": "",
+        "settings": {}
+      },
+      "nic4": {
+        "enable": false,
+        "nic_type": "",
+        "settings": {}
+      }
     }
   }
 }

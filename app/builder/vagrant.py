@@ -140,9 +140,40 @@ class Vagrant(Builder):
                 '\t\tvb.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]\n'
                 f'\t\tvb.memory = {self.configs["memory"]["default"]}\n'
                 f'\t\tvb.cpus = {self.configs["cpus"]["default"]}\n'
+            )
+            for nic in self.configs["networks"]:
+                # we do not touch nic1 since it is reserved for vagrant
+                if nic == 'nic1':
+                    continue
+                # check if nic is enabled
+                if self.configs["networks"][nic]["enable"]:
+                    # check if nic is hostonly type
+                    if self.configs["networks"][nic]["nic_type"] == 'hostonly':
+                        vagrantfile.write(
+                            f'\t\tvb.customize ["modifyvm", :id, "--{nic}", "{self.configs["networks"][nic]["nic_type"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--hostonlyadapter{nic[-1]}", "{self.configs["networks"][nic]["settings"]["hostonly"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--cableconnected{nic[-1]}", "on"]\n'
+                        )
+                    # check if nic is bridged type
+                    if self.configs["networks"][nic]["nic_type"] == 'bridged':
+                        vagrantfile.write(
+                            f'\t\tvb.customize ["modifyvm", :id, "--{nic}", "{self.configs["networks"][nic]["nic_type"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--bridgeadapter{nic[-1]}", "{self.configs["networks"][nic]["settings"]["bridge"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--cableconnected{nic[-1]}", "on"]\n'
+                        )
+                    # check if nic is natnetwork type
+                    if self.configs["networks"][nic]["nic_type"] == 'natnetwork':
+                        vagrantfile.write(
+                            f'\t\tvb.customize ["modifyvm", :id, "--{nic}", "{self.configs["networks"][nic]["nic_type"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--intnet{nic[-1]}", "{self.configs["networks"][nic]["settings"]["natnetwork"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--cableconnected{nic[-1]}", "on"]\n'
+                        )
+            vagrantfile.write(
                 '\tend\n'
                 f'\tconfig.vm.disk :disk, size: "{self.configs["disk_size"]["default"]}MB", name: "default", primary: true'
             )
+
+    # def _write_network_settings()
 
     def generate_main_file(self):
         """

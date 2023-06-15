@@ -1,8 +1,6 @@
 import constants
-import json
 import os
 import shutil
-from argparse import Namespace
 from builder.builder import Builder
 from builder.helper import (
     replace_text_in_file,
@@ -12,8 +10,7 @@ from io import TextIOWrapper
 
 
 class Packer(Builder):
-    def __init__(self, namespace: Namespace, json_file: dict) -> None:
-        self.arguments: Namespace = namespace
+    def __init__(self, json_file: dict) -> None:
         self.machines_path: str = constants.PACKER_MACHINES_PATH
         self.provisions_configs = json_file
         self.configs: dict = dict()
@@ -22,7 +19,7 @@ class Packer(Builder):
 
     def set_configs(self):
         """Set configs attribute"""
-        self.configs = self.provisions_configs["virtual_machine_configs"].copy()
+        self.configs = self.provisions_configs["configurations"].copy()
 
     def set_provisions(self):
         """Set provisions attribute"""
@@ -41,12 +38,14 @@ class Packer(Builder):
                 |
                 - chosen_preseed_file
         """
-        project_folder = f'{self.machines_path}/{self.arguments.name}'
+        project_folder = f'{self.machines_path}/{self.configs["project_name"]["default"]}'
+        if os.path.exists(project_folder):
+            shutil.rmtree(project_folder)
         os.makedirs(f'{project_folder}/http')
 
         shutil.copyfile(
-            src=f'{constants.PACKER_PRESEEDS_PATH}/{self.arguments.preseed}',
-            dst=f'{project_folder}/http/{self.arguments.preseed}'
+            src=f'{constants.PACKER_PRESEEDS_PATH}/{self.configs["preseed_file"]["default"]}',
+            dst=f'{project_folder}/http/{self.configs["preseed_file"]["default"]}'
         )
 
     def _generate_packer_variable(self, variable: str):
@@ -71,7 +70,7 @@ class Packer(Builder):
 
     def _generate_vars_file(self):
         """Generate vars file"""
-        with open(f'{constants.PACKER_MACHINES_PATH}/{self.arguments.name}/vars.pkr.hcl', 'w') as vars_file:
+        with open(f'{constants.PACKER_MACHINES_PATH}/{self.configs["project_name"]["default"]}/vars.pkr.hcl', 'w') as vars_file:
             for var in self.configs:
                 if not isinstance(self.configs[var], dict):
                     continue
@@ -85,7 +84,7 @@ class Packer(Builder):
                     with open(f'{constants.PACKER_PRESEEDS_PATH}/boot_command.txt') as boot_command:
                         lines = boot_command.readlines()
                     for count, line in enumerate(lines):
-                        lines[count] = line.replace('preseed-file', self.arguments.preseed)
+                        lines[count] = line.replace('preseed-file', self.configs["preseed_file"]["default"])
                     self.configs[var]["default"] = ''.join(lines)
                 description = self.configs[var]["description"]
                 variable_value = self.configs[var]["default"]
@@ -101,17 +100,6 @@ class Packer(Builder):
                     variable_type=variable_type,
                     value=variable_value
                     )
-            terminal_values = vars(self.arguments)
-            for terminal_value in terminal_values:
-                if terminal_value in {'iso_file', 'iso_link', 'iso_checksum', 'vm_name'}:
-                    variable_value = terminal_values.get(terminal_value)
-                    self.write_variable_directive(
-                        variable_file=vars_file,
-                        variable_name=terminal_value,
-                        description="",
-                        variable_type="string",
-                        value=variable_value
-                        )
 
     def _add_locals_block(self, main_file: TextIOWrapper):
         """
@@ -133,7 +121,9 @@ class Packer(Builder):
             if not isinstance(self.configs[var], dict):
                 continue
             space = (30 - len(var)) * ' '
-            if var in ['start_retry_timeout', 'iso_file']:
+            if var in ['start_retry_timeout', 'iso_file', 'project_name',
+                       'iso_link', 'vbox_name', 'disk_name', 'provider',
+                       'preseed_file']:
                 continue
             elif var == 'boot_command':
                 main_file.write(f'  {var}{space}= [ var.{var} ]\n')
@@ -158,9 +148,6 @@ class Packer(Builder):
             '    "${var.iso_link}",\n'
             '  ]\n'
         )
-
-        # write iso_checksum
-        main_file.write('  iso_checksum= "${var.iso_checksum}"\n')
 
         main_file.write(
             '  vboxmanage = [\n'
@@ -248,22 +235,22 @@ class Packer(Builder):
         """
         Replace in preseed file the default user and password
         """
-        project_folder = f'{self.machines_path}/{self.arguments.name}'
+        project_folder = f'{self.machines_path}/{self.configs["project_name"]["default"]}'
         replace_text_in_file(
             search_phrase="default_user",
             replace_with=self.credentials['username'],
-            file_path=f'{project_folder}/http/{self.arguments.preseed}'
+            file_path=f'{project_folder}/http/{self.configs["preseed_file"]["default"]}'
         )
         replace_text_in_file(
             search_phrase="default_pass",
             replace_with=self.credentials['password'],
-            file_path=f'{project_folder}/http/{self.arguments.preseed}'
+            file_path=f'{project_folder}/http/{self.configs["preseed_file"]["default"]}'
         )
 
     def generate_main_file(self):
         """Generate main and vars files for packer"""
         self._generate_vars_file()
-        with open(f'{constants.PACKER_MACHINES_PATH}/{self.arguments.name}/main.pkr.hcl', 'w') as main_file:
+        with open(f'{constants.PACKER_MACHINES_PATH}/{self.configs["project_name"]["default"]}/main.pkr.hcl', 'w') as main_file:
             self._add_locals_block(main_file=main_file)
             self._add_source_block(main_file=main_file)
             self._add_build_block(main_file=main_file)
@@ -312,15 +299,15 @@ class Packer(Builder):
         )
         if variable_type == 'bool' or variable_name == 'boot_command':
             variable_file.write(
-                f'\t\tdefault\t= {value}\n'
+                f'\tdefault\t= {value}\n'
             )
         else:
             variable_file.write(
-                f'\t\tdefault\t= "{value}"\n'
+                f'\tdefault\t= "{value}"\n'
             )
         variable_file.write(
             '}\n\n'
         )
 
     def delete_project(self):
-        shutil.rmtree(f'{self.machines_path}/{self.arguments.name}')
+        shutil.rmtree(f'{self.machines_path}/{self.configs["project_name"]["default"]}')
