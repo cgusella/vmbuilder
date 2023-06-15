@@ -17,8 +17,8 @@ def get_dhcp_infos() -> dict:
     for count in range(int(len(dhcp_infos)/number_of_items)):
         index_start = number_of_items*count
         # if dhcp server is not a part of hostonlyif, ignore it
-        if 'HostInterfaceNetworking' not in dhcp_infos[index_start]:
-            continue
+        # if 'HostInterfaceNetworking' not in dhcp_infos[index_start]:
+        #     continue
         dhcp_configs_dict[
                 ''.join(dhcp_infos[index_start].split()[1:]).split('-')[-1]
             ] = (
@@ -210,7 +210,7 @@ class DHCPWidget(ctk.CTkFrame):
             if self.nic_type == 'hostonly':
                 network_name = f'HostInterfaceNetworking-{self.selected_dhcp} '
             else:
-                network_name = {self.selected_dhcp}
+                network_name = self.selected_dhcp
 
             subprocess.run(
                 (
@@ -232,6 +232,7 @@ class DHCPWidget(ctk.CTkFrame):
         self.set_enable_or_update_button()
 
     def _update_selected_dhcp(self):
+        print(self.selected_dhcp)
         if self.nic_type == 'hostonly':
             network = f'HostInterfaceNetworking-{self.selected_dhcp}'
         elif self.nic_type == 'natnetwork':

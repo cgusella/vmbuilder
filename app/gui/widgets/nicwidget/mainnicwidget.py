@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
 from gui.widgets.nicwidget.hostonlywidget import HostOnlyWidget
-from gui.widgets.nicwidget.dhcphostonlywidget import DHCPWidget
+from gui.widgets.nicwidget.dhcpwidget import DHCPWidget
 from gui.widgets.nicwidget.natnetworkwidget import NatNetworkWidget
 
 
