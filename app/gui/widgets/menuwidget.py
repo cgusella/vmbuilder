@@ -95,7 +95,7 @@ class MenuWidget(GuiStandard):
             height=10,
             fg_color=['grey86', 'grey17'],
             hover_color=['grey76', 'grey7'],
-            command=lambda: self._delete_projects('packer')
+            command=self._delete_packer_projects
         )
         self.packer_load_button = ctk.CTkButton(
             master=self.packer_menu_frame,
@@ -142,7 +142,7 @@ class MenuWidget(GuiStandard):
             height=10,
             fg_color=['grey86', 'grey17'],
             hover_color=['grey76', 'grey7'],
-            command=lambda: self._delete_projects('vagrant')
+            command=self._delete_vagrant_projects
         )
         self.load_vagrant_button = ctk.CTkButton(
             master=self.vagrant_menu_frame,
@@ -344,13 +344,38 @@ class MenuWidget(GuiStandard):
         elif self.switch_var.get() == 'off':
             ctk.set_appearance_mode('dark')
 
-    def _delete_projects(self, vm_type):
-        if vm_type == 'packer':
-            project_folder = constants.PACKER_MACHINES_PATH
-            projects = self.packer_projects.get()
-        elif vm_type == 'vagrant':
-            project_folder = constants.VAGRANT_MACHINES_PATH
-            projects = self.vagrant_projects.get()
+    def _delete_vagrant_projects(self):
+        projects = self.vagrant_projects.get()
+        if projects:
+            message = (
+                'This operation in irreversible.\n'
+                'You choose to delete the following projects:\n'
+            )
+            for project in projects:
+                message += f'\t- {project}\n'
+            yes = mb.askyesnocancel(
+                title='Delete Confirm',
+                message=message
+            )
+            if yes:
+                for project in projects:
+                    shutil.rmtree(f'{constants.VAGRANT_MACHINES_PATH}/{project}')
+                self.vagrant_projects.clean()
+                self.vagrant_projects.set_values(
+                    sorted(
+                        [
+                            folder for folder in os.listdir(
+                                f'{constants.VAGRANT_MACHINES_PATH}'
+                            )
+                            if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
+                        ]
+                    )
+                )
+                self.vagrant_projects.add_checkboxes()
+
+    def _delete_packer_projects(self):
+        project_folder = constants.PACKER_MACHINES_PATH
+        projects = self.packer_projects.get()
 
         if projects:
             message = (
@@ -366,7 +391,18 @@ class MenuWidget(GuiStandard):
             if yes:
                 for project in projects:
                     shutil.rmtree(f'{project_folder}/{project}')
-                self.master.add_lateral_menu()
+                self.packer_projects.clean()
+                self.packer_projects.set_values(
+                    sorted(
+                        [
+                            folder for folder in os.listdir(
+                                f'{constants.PACKER_MACHINES_PATH}'
+                            )
+                            if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
+                        ]
+                    )
+                )
+                self.packer_projects.add_checkboxes()
 
     def _load_vagrant(self):
         file_to_load = filedialog.askopenfile(

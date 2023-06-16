@@ -62,27 +62,32 @@ class SetUpScriptEdit(ctk.CTkToplevel):
 
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values, command = None):
+    def __init__(self, master, title, values, command=None):
         self.font_std = ctk.CTkFont(family='Sans', size=16)
+        self.command = command
         super().__init__(
             master,
             label_text=title,
             label_font=self.font_std,
         )
         self.grid_columnconfigure(0, weight=1)
-        self.values = values
-        self.checkboxes = []
+        self.set_values(values)
+        self.add_checkboxes()
 
+    def set_values(self, values):
+        self.values = values
+
+    def add_checkboxes(self):
+        self.checkboxes = []
         for count, value in enumerate(self.values):
             checkbox = ctk.CTkCheckBox(
                 self,
                 text=value,
                 font=self.font_std,
-                # command=lambda: master._active_deactive_operation_buttons(self.get())
             )
-            if command:
+            if self.command:
                 checkbox.configure(
-                    command=command
+                    command=self.command
                 )
             checkbox.grid(
                 row=count,
@@ -107,6 +112,10 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
             if checkbox.get() == 1:
                 checked_checkboxes.append(checkbox.cget("text"))
         return checked_checkboxes
+
+    def clean(self):
+        for checkbox in self.checkboxes:
+            checkbox.destroy()
 
 
 class ScrollableButtonFrame(ctk.CTkScrollableFrame):
