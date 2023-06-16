@@ -55,13 +55,13 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.columnconfigure(0, weight=2)
         self.columnconfigure(1, weight=1)
 
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
+        self.rowconfigure(4, weight=0)
 
-    def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
+    def set_general_row_col_conf(self, frame: ctk.CTkFrame, rows: int, columns: int):
         # self.grid()
         for i in range(columns):
             frame.columnconfigure(i, weight=1)
@@ -137,7 +137,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_frame
+            sticky=self.sticky_label
         )
 
         password = ctk.CTkRadioButton(
@@ -153,7 +153,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             column=2,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_frame
+            sticky=self.sticky_label
         )
 
     def add_main_buttons(self):
@@ -168,13 +168,12 @@ class VagrantConfigsView(ctk.CTkFrame):
             row=0,
             column=0,
             columnspan=2,
-            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky=self.sticky_frame
         )
         self.project_name_frame.grid(
-            row=2,
+            row=1,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
@@ -183,7 +182,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.vagrant_box_setup_frame.grid(
-            row=3,
+            row=2,
             column=0,
             rowspan=2,
             padx=self.padx_std,
@@ -193,7 +192,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame,
         )
         self.vbox_configs_frame.grid(
-            row=2,
+            row=1,
             column=1,
             rowspan=3,
             padx=self.padx_std,
@@ -203,7 +202,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.connection_mode_frame.grid(
-            row=7,
+            row=4,
             column=0,
             columnspan=2,
             padx=self.padx_std,
@@ -215,7 +214,6 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.main_button_frame.grid(
             row=0,
             column=1,
-            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,

@@ -10,7 +10,7 @@ class NicWidget(ctk.CTkFrame):
     def __init__(self, master, provisions_configs, num_tab: int):
         self.provisions_configs = provisions_configs
         self.num_tab = num_tab
-        ctk.CTkFrame.__init__(self, master)
+        ctk.CTkFrame.__init__(self, master, fg_color='transparent')
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_std_dimensions()
         self.set_grid()

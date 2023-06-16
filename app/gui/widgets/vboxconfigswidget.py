@@ -17,6 +17,8 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.rowconfigure(3, weight=1)
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
+        self.pady_up = (10, 0)
+        self.pady_down = (0, 10)
         self.pady_title = (10, 2)
         self.pady_entry = (2, 10)
         self.ipadx_std = 10
@@ -33,12 +35,15 @@ class VboxConfigsWidget(ctk.CTkFrame):
             self
         )
         self.vbox_subframe.columnconfigure(0, weight=1)
+        self.vbox_subframe.rowconfigure(0, weight=1)
+        self.vbox_subframe.rowconfigure(1, weight=1)
+        self.vbox_subframe.rowconfigure(2, weight=1)
         self.vbox_subframe.grid(
             row=0,
             column=0,
             sticky=self.sticky_frame,
             padx=self.padx_std,
-            pady=self.pady_std
+            pady=self.pady_up
         )
         vbox_name_label = ctk.CTkLabel(
             master=self.vbox_subframe,
@@ -106,12 +111,15 @@ class VboxConfigsWidget(ctk.CTkFrame):
         # cpus subframe
         self.cpus_subframe = ctk.CTkFrame(self)
         self.cpus_subframe.columnconfigure(0, weight=1)
+        self.cpus_subframe.rowconfigure(0, weight=1)
+        self.cpus_subframe.rowconfigure(1, weight=1)
+        self.cpus_subframe.rowconfigure(2, weight=1)
         self.cpus_subframe.grid(
             row=1,
             column=0,
             sticky=self.sticky_frame,
             padx=self.padx_std,
-            pady=self.pady_std
+            pady=self.pady_up
 
         )
         cpus_label = ctk.CTkLabel(
@@ -153,12 +161,15 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.memory_subframe = ctk.CTkFrame(self)
         self.memory_subframe.columnconfigure(0, weight=1)
         self.memory_subframe.columnconfigure(1, weight=0)
+        self.memory_subframe.rowconfigure(0, weight=1)
+        self.memory_subframe.rowconfigure(1, weight=1)
+        self.memory_subframe.rowconfigure(2, weight=1)
         self.memory_subframe.grid(
-            row=3,
+            row=2,
             column=0,
             sticky=self.sticky_frame,
             padx=self.padx_std,
-            pady=self.pady_std
+            pady=self.pady_up
         )
         memory_label = ctk.CTkLabel(
             master=self.memory_subframe,
@@ -219,8 +230,11 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.disk_size_subframe = ctk.CTkFrame(self)
         self.disk_size_subframe.columnconfigure(0, weight=1)
         self.disk_size_subframe.columnconfigure(1, weight=0)
+        self.disk_size_subframe.rowconfigure(0, weight=1)
+        self.disk_size_subframe.rowconfigure(1, weight=1)
+        self.disk_size_subframe.rowconfigure(2, weight=1)
         self.disk_size_subframe.grid(
-            row=4,
+            row=3,
             column=0,
             sticky=self.sticky_frame,
             padx=self.padx_std,
@@ -296,6 +310,7 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.slider_memory_label.grid(
             row=2,
             column=0,
+            columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std
         )
@@ -317,6 +332,7 @@ class VboxConfigsWidget(ctk.CTkFrame):
         self.disk_slider_label.grid(
             row=2,
             column=0,
+            columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std
         )

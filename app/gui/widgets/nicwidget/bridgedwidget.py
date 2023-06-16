@@ -20,7 +20,7 @@ class BridgedWidget(ctk.CTkFrame):
     def __init__(self, master, provisions_configs, num_tab):
         self.provisions_configs = provisions_configs
         self.num_tab = num_tab
-        ctk.CTkFrame.__init__(self, master)
+        ctk.CTkFrame.__init__(self, master, fg_color=["gray81", "gray21"])
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_std_dimensions()
         self.columnconfigure(0, weight=1)

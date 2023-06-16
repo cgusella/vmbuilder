@@ -99,7 +99,6 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         self.additional_scripts_frame.grid(
             row=4,
             column=0,
-            rowspan=2,
             columnspan=2,
             padx=self.padx_std,
             pady=self.pady_std,

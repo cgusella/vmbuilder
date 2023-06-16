@@ -29,6 +29,8 @@ class PackageManagerWidget(ctk.CTkFrame):
         )
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
+        self.pady_up = (10, 0)
+        self.pady_down = (0, 10)
         self.pad_right = (5, 10)
         self.pad_equal = (5, 5)
         self.pady_entry = (2, 10)
@@ -43,7 +45,7 @@ class PackageManagerWidget(ctk.CTkFrame):
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
 
         # add frame title
@@ -72,6 +74,10 @@ class PackageManagerWidget(ctk.CTkFrame):
         self.package_manager_frame.columnconfigure(0, weight=1)
         self.package_manager_frame.columnconfigure(1, weight=1)
         self.package_manager_frame.columnconfigure(2, weight=1)
+        self.package_manager_frame.rowconfigure(0, weight=1)
+        self.package_manager_frame.rowconfigure(1, weight=5)
+        self.package_manager_frame.rowconfigure(2, weight=1)
+        self.package_manager_frame.rowconfigure(3, weight=1)
         self.package_manager_frame.grid(
             row=1,
             column=0,
@@ -90,10 +96,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             command=lambda: self._add_to_operation('install')
         )
         add_to_install_button.grid(
-            row=1,
+            row=0,
             column=0,
             padx=(10, 5),
-            pady=self.pady_std,
+            pady=self.pady_up,
             ipadx=self.ipadx_button,
             ipady=self.ipady_button
         )
@@ -106,10 +112,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             command=lambda: self._add_to_operation('uninstall')
         )
         add_to_uninstall_button.grid(
-            row=1,
+            row=0,
             column=1,
             padx=self.pad_equal,
-            pady=self.pady_std,
+            pady=self.pady_up,
             ipadx=self.ipadx_button,
             ipady=self.ipady_button
         )
@@ -122,10 +128,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             command=lambda: self._add_to_operation('config')
         )
         add_to_config_button.grid(
-            row=1,
+            row=0,
             column=2,
             padx=self.pad_right,
-            pady=self.pady_std,
+            pady=self.pady_up,
             ipadx=self.ipadx_button,
             ipady=self.ipady_button
         )
@@ -142,10 +148,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             command=lambda: self._select_all()
         )
         select_all_button.grid(
-            row=5,
+            row=3,
             column=0,
             padx=self.pad_equal,
-            pady=self.pady_std,
+            pady=self.pady_down,
             ipadx=self.ipadx_button,
             ipady=self.ipady_button
         )
@@ -157,10 +163,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             command=self._deselect_all
         )
         deselect_all_button.grid(
-            row=5,
+            row=3,
             column=1,
             padx=self.pad_equal,
-            pady=self.pady_std,
+            pady=self.pady_down,
             ipadx=self.ipadx_button,
             ipady=self.ipady_button
         )
@@ -174,10 +180,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             state='disabled'
         )
         self.delete_package_button.grid(
-            row=5,
+            row=3,
             column=2,
             padx=self.pad_right,
-            pady=self.pady_std,
+            pady=self.pady_down,
             ipadx=self.ipadx_button,
             ipady=self.ipady_button
         )
@@ -196,10 +202,10 @@ class PackageManagerWidget(ctk.CTkFrame):
             row=1,
             column=1,
             rowspan=2,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            ipadx=self.ipadx_std,
-            ipady=self.ipady_std,
+            # padx=self.padx_std,
+            # pady=self.pady_std,
+            # ipadx=self.ipadx_std,
+            # ipady=self.ipady_std,
             sticky=self.sticky_frame,
         )
         for operation in ('install', 'uninstall', 'config'):
@@ -222,7 +228,7 @@ class PackageManagerWidget(ctk.CTkFrame):
             row=0,
             column=column[operation],
             padx=(3, 3),
-            pady=self.pady_std,
+            pady=self.pady_up,
             sticky=self.sticky_frame
         )
         # add clean button
@@ -260,11 +266,11 @@ class PackageManagerWidget(ctk.CTkFrame):
             fg_color='transparent'
         )
         new_package_subframe.grid(
-            row=4,
+            row=2,
             column=0,
             columnspan=3,
             padx=self.padx_std,
-            pady=self.pady_entry,
+            pady=self.pady_up,
             sticky=self.sticky_horizontal,
         )
         new_package_subframe.columnconfigure(0, weight=10)
@@ -368,11 +374,11 @@ class PackageManagerWidget(ctk.CTkFrame):
             select_all=select_all
         )
         self.packages_scrollable.grid(
-            row=2,
+            row=1,
             column=0,
             columnspan=3,
             padx=self.padx_std,
-            pady=self.pady_std,
+            pady=self.pady_up,
             sticky='wens'
         )
         self.packages_scrollable.bind("<Motion>", self._check_package_selected)

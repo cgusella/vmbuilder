@@ -24,7 +24,7 @@ class AdditionalScriptWidget(ctk.CTkFrame):
         self.columnconfigure(2, weight=1)
         self.columnconfigure(3, weight=1)
         self.columnconfigure(4, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
 
