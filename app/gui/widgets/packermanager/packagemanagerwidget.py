@@ -33,7 +33,7 @@ class PackageManagerWidget(GuiStandard):
         )
 
     def set_std_dimensions(self):
-        self.padx_std = (20, 20)
+        self.padx_std = (5, 5)
         self.pady_std = (10, 10)
         self.pady_up = (10, 0)
         self.pady_down = (0, 10)

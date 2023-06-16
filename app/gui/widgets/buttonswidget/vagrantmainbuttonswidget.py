@@ -53,8 +53,8 @@ class VagrantMainButtons(MainButtonsWidget):
         vagrant_configs_view.grid(
             row=0,
             column=1,
-            columnspan=self.main.columns-1,
-            rowspan=self.main.rows,
+            columnspan=3,
+            rowspan=4,
             sticky=self.main.sticky_frame
         )
 
@@ -71,9 +71,9 @@ class VagrantMainButtons(MainButtonsWidget):
         new_vagrant_view.grid(
             row=0,
             column=1,
-            columnspan=self.main.columns-1,
-            rowspan=self.main.rows,
-            sticky=self.main.sticky_frame
+            columnspan=3,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def _save_configs_state(self):
