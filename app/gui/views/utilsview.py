@@ -62,7 +62,7 @@ class SetUpScriptEdit(ctk.CTkToplevel):
 
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values, select_all=False):
+    def __init__(self, master, title, values):
         super().__init__(
             master,
             label_text=title,
@@ -77,6 +77,7 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
                 self,
                 text=value,
                 font=master.master.master.font_std,
+                command=lambda: master._active_deactive_operation_buttons(self.get())
             )
             checkbox.grid(
                 row=count,
@@ -86,9 +87,14 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
                 sticky="wn"
             )
             self.checkboxes.append(checkbox)
-        if select_all:
-            for checkbox in self.checkboxes:
-                checkbox.select()
+
+    def select_all(self):
+        for checkbox in self.checkboxes:
+            checkbox.select()
+
+    def deselect_all(self):
+        for checkbox in self.checkboxes:
+            checkbox.deselect()
 
     def get(self):
         checked_checkboxes = []
@@ -99,20 +105,28 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
 
 
 class ScrollableButtonFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values):
+
+    def __init__(self, master, title, values, provisions_configs):
+        self.provisions_configs = provisions_configs
+        self.font = ctk.CTkFont(family='Sans', size=15, weight='bold')
+        self.label_font = ctk.CTkFont(family='Sans', size=15)
         super().__init__(
             master,
             label_text=title,
-            label_font=master.master.master.font_std,
+            label_font=self.label_font,
             border_width=2,
             border_color=['grey64', 'grey34']
         )
-        font = ctk.CTkFont(family='Sans', size=15, weight='bold')
         self.grid_columnconfigure(0, weight=1)
-        self.values = values
-        self.checkboxes = []
         self.operation = title.lower()
+        self.set_values(values)
+        self.add_button_values()
 
+    def set_values(self, values):
+        self.values = values
+
+    def add_button_values(self):
+        self.checkboxes = []
         for count, value in enumerate(self.values):
             # color = '#3996D5'
             # btn_color = ['#cfcfcf', '#333333']
@@ -125,8 +139,8 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 self,
                 height=20,
                 text=value,
-                font=font,
-                command=lambda args=(value, self.operation): master.master._open_text_window(*args),
+                font=self.font,
+                command=lambda args=(value,): self._open_text_window(*args),
                 fg_color=btn_color,
                 text_color=txt_color,
                 anchor='wn'
@@ -139,6 +153,14 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 sticky="wn",
             )
             self.checkboxes.append(checkbox)
+
+    def _open_text_window(self, package):
+        EditFileWindow(self, package=package, operation=self.operation,
+                       provisions_configs=self.provisions_configs)
+
+    def clean(self):
+        for checkbox in self.checkboxes:
+            checkbox.destroy()
 
 
 class EditFileWindow(ctk.CTkToplevel):

@@ -1,7 +1,7 @@
 import abc
 import customtkinter as ctk
 from gui.widgets.additionalscriptwidget import AdditionalScriptWidget
-from gui.widgets.packagemanagerwidget import PackageManagerWidget
+from gui.widgets.packermanager.mainpackagewidget import MainPackageWidget
 from gui.widgets.titlewidget import TitleWidget
 
 
@@ -29,7 +29,7 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
             title=title,
             subtitle='Provisions'
         )
-        self.package_manager_frame = PackageManagerWidget(
+        self.package_manager_frame = MainPackageWidget(
             self,
             self.provisions_configs
         )

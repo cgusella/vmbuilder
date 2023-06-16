@@ -1,41 +1,29 @@
 import abc
 import constants
-import customtkinter as ctk
 import os
+import customtkinter as ctk
+from gui.guistandard import GuiStandard
 
 
-class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
+class ProjectNameWidget(GuiStandard):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
+        self.set_std_dimensions()
+        self.set_fonts()
+        self.initialize_elements()
+        self.render_elements()
+
+    def set_fonts(self):
         self.warning_font = ctk.CTkFont(family='Sans', size=11)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
 
-        self.padx_std = (20, 20)
-        self.pady_std = (10, 10)
-        self.pady_title = (10, 2)
-        self.pady_entry = (2, 10)
-        self.entry_height_std = 40
-        self.sticky_label = 'w'
-        self.sticky_horizontal = 'we'
-
-        project_name_label = ctk.CTkLabel(
+    def initialize_elements(self):
+        self.project_name_label = ctk.CTkLabel(
             master=self,
             text="New Project Name:",
             font=self.font_std
-        )
-        project_name_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_title,
-            sticky=self.sticky_label
         )
 
         self.project_name_entry = ctk.CTkEntry(
@@ -43,6 +31,28 @@ class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
             height=self.entry_height_std,
             font=self.font_std,
             placeholder_text='Project name to be created'
+        )
+        self.project_name_entry.bind("<Configure>", self._project_name_check)
+        self.project_name_entry.bind("<KeyRelease>", self._project_name_check)
+
+        self.warning_label_project = ctk.CTkLabel(
+            master=self,
+            font=self.warning_font
+        )
+        self._set_project_name()
+
+    def render_elements(self):
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.project_name_label.grid(
+            row=0,
+            column=0,
+            columnspan=2,
+            padx=self.padx_std,
+            pady=self.pady_title,
+            sticky=self.sticky_label
         )
         self.project_name_entry.grid(
             row=1,
@@ -52,13 +62,6 @@ class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
             pady=self.pady_entry,
             sticky=self.sticky_horizontal
         )
-        self.project_name_entry.bind("<Configure>", self._project_name_check)
-        self.project_name_entry.bind("<KeyRelease>", self._project_name_check)
-
-        self.warning_label_project = ctk.CTkLabel(
-            master=self,
-            font=self.warning_font
-        )
         self.warning_label_project.grid(
             row=2,
             column=0,
@@ -67,7 +70,15 @@ class ProjectNameWidget(abc.ABC, ctk.CTkFrame):
             pady=0,
             sticky=self.sticky_label
         )
-        self._set_project_name()
+
+    def set_std_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
+        self.pady_title = (10, 2)
+        self.pady_entry = (2, 10)
+        self.entry_height_std = 40
+        self.sticky_label = 'w'
+        self.sticky_horizontal = 'we'
 
     @abc.abstractmethod
     def _set_project_name(self):
