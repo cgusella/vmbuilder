@@ -360,18 +360,7 @@ class MenuWidget(GuiStandard):
             if yes:
                 for project in projects:
                     shutil.rmtree(f'{constants.VAGRANT_MACHINES_PATH}/{project}')
-                self.vagrant_projects.clean()
-                self.vagrant_projects.set_values(
-                    sorted(
-                        [
-                            folder for folder in os.listdir(
-                                f'{constants.VAGRANT_MACHINES_PATH}'
-                            )
-                            if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
-                        ]
-                    )
-                )
-                self.vagrant_projects.add_checkboxes()
+                self.reload_vagrant_packages()
 
     def _delete_packer_projects(self):
         project_folder = constants.PACKER_MACHINES_PATH
@@ -391,18 +380,6 @@ class MenuWidget(GuiStandard):
             if yes:
                 for project in projects:
                     shutil.rmtree(f'{project_folder}/{project}')
-                self.packer_projects.clean()
-                self.packer_projects.set_values(
-                    sorted(
-                        [
-                            folder for folder in os.listdir(
-                                f'{constants.PACKER_MACHINES_PATH}'
-                            )
-                            if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
-                        ]
-                    )
-                )
-                self.packer_projects.add_checkboxes()
 
     def _load_vagrant(self):
         file_to_load = filedialog.askopenfile(
@@ -418,6 +395,34 @@ class MenuWidget(GuiStandard):
         )
         self.master.set_provisions_configs(json.loads(file_to_load.read()))
         self.master.add_packer_configs(load=True)
+
+    def reload_vagrant_packages(self):
+        self.vagrant_projects.clean()
+        self.vagrant_projects.set_values(
+            sorted(
+                [
+                    folder for folder in os.listdir(
+                        f'{constants.VAGRANT_MACHINES_PATH}'
+                    )
+                    if os.path.isdir(f'{constants.VAGRANT_MACHINES_PATH}/{folder}')
+                ]
+            )
+        )
+        self.vagrant_projects.add_checkboxes()
+
+    def reload_packer_packages(self):
+        self.packer_projects.clean()
+        self.packer_projects.set_values(
+            sorted(
+                [
+                    folder for folder in os.listdir(
+                        f'{constants.PACKER_MACHINES_PATH}'
+                    )
+                    if os.path.isdir(f'{constants.PACKER_MACHINES_PATH}/{folder}')
+                ]
+            )
+        )
+        self.packer_projects.add_checkboxes()
 
     def _build(self):
         pass

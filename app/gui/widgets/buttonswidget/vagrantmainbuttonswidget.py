@@ -170,7 +170,7 @@ class VagrantMainButtons(MainButtonsWidget):
                         'was succesfully created'
                     )
                 )
-                self.main.add_lateral_menu()
+                self.main.menu_frame.reload_vagrant_packages()
         except (
             NoFileToUploadError,
             PackageNotFoundError,
