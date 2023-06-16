@@ -322,6 +322,13 @@ class PackageManagerWidget(GuiStandard):
                                         'as package?')
             if confirm:
                 make_package_folder(package_name)
-                self.master.__init__(self, self.master, self.provisions_configs)
+                self.packages_scrollable.clean()
+                self.packages_scrollable.set_values(
+                    sorted([
+                        package for package in os.listdir(f'{constants.PACKAGES_PATH}')
+                        if package not in ('program-example', 'setup_scripts')
+                    ])
+                )
+                self.packages_scrollable.add_checkboxes()
         else:
             mb.showerror('Error', 'Package already exists')
