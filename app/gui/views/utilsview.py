@@ -62,7 +62,7 @@ class SetUpScriptEdit(ctk.CTkToplevel):
 
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values):
+    def __init__(self, master, title, values, command = None):
         self.font_std = ctk.CTkFont(family='Sans', size=16)
         super().__init__(
             master,
@@ -80,6 +80,10 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
                 font=self.font_std,
                 # command=lambda: master._active_deactive_operation_buttons(self.get())
             )
+            if command:
+                checkbox.configure(
+                    command=command
+                )
             checkbox.grid(
                 row=count,
                 column=0,

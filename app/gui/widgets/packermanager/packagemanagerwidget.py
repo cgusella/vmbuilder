@@ -78,6 +78,7 @@ class PackageManagerWidget(GuiStandard):
                 package for package in os.listdir(f'{constants.PACKAGES_PATH}')
                 if package not in ('program-example', 'setup_scripts')
             ]),
+            command=self._active_deactive_operation_buttons
         )
         self.new_package_subframe = ctk.CTkFrame(
             master=self,
@@ -108,7 +109,7 @@ class PackageManagerWidget(GuiStandard):
             command=self._delete_packages,
             state='disabled'
         )
-        self._active_deactive_operation_buttons(self.packages_scrollable.get())
+        self._active_deactive_operation_buttons()
 
     def _initialize_new_package_subframe_elements(self):
         self.new_package_entry = ctk.CTkEntry(
@@ -236,8 +237,8 @@ class PackageManagerWidget(GuiStandard):
             ipady=self.ipady_button
         )
 
-    def _active_deactive_operation_buttons(self, event):
-        if event:
+    def _active_deactive_operation_buttons(self):
+        if self.packages_scrollable.get():
             self.delete_package_button.configure(state='normal')
             self.install_button.configure(state='normal')
             self.uninstall_button.configure(state='normal')
@@ -250,11 +251,11 @@ class PackageManagerWidget(GuiStandard):
 
     def _select_all(self):
         self.packages_scrollable.select_all()
-        self._active_deactive_operation_buttons(self.packages_scrollable.get())
+        self._active_deactive_operation_buttons()
 
     def _deselect_all(self):
         self.packages_scrollable.deselect_all()
-        self._active_deactive_operation_buttons(self.packages_scrollable.get())
+        self._active_deactive_operation_buttons()
 
     def _add_selected_packages_to_install(self):
         for package in self.packages_scrollable.get():

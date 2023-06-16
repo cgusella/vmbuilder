@@ -77,7 +77,7 @@ class SelectedPackagesWidget(GuiStandard):
             values=sorted(
                 self.provisions_configs["provisions"]["packages_to_config"]
             ),
-            provisions_configs=self.provisions_configs
+            provisions_configs=self.provisions_configs,
         )
         self.clean_config_button = ctk.CTkButton(
             master=self,
