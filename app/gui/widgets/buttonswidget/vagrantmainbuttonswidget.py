@@ -35,9 +35,9 @@ class VagrantMainButtons(MainButtonsWidget):
         new_vagrant_view.grid(
             row=0,
             column=1,
-            columnspan=self.master.master.columns-1,
-            rowspan=self.master.master.rows,
-            sticky=self.master.master.sticky_frame
+            columnspan=3,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def _save_state_and_go_to_provisions(self):
