@@ -282,7 +282,7 @@ class PackageManagerWidget(GuiStandard):
             self.provisions_configs["provisions"]["packages_to_config"].add(package)
         self.selected_package_frame.config_scrollable.set_values(
             sorted(
-                self.provisions_configs["provisions"]["packages_to_uninstall"]
+                self.provisions_configs["provisions"]["packages_to_config"]
             )
         )
         self.selected_package_frame.config_scrollable.add_button_values()
