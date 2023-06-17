@@ -1,40 +1,40 @@
 import customtkinter as ctk
 from gui.views.utilsview import SetUpScriptEdit
+from gui.guistandard import GuiStandard
 
 
-class AdditionalScriptWidget(ctk.CTkFrame):
+class AdditionalScriptWidget(GuiStandard):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
+        self.set_fonts()
+        self.set_std_dimensions()
+        self.initialize_elements()
+        self.render_elements()
+
+    def set_fonts(self):
         family_font = 'Sans'
-        title_widget_font = ctk.CTkFont(
+        self.title_widget_font = ctk.CTkFont(
             family=family_font,
             size=20,
             weight='bold'
         )
         self.label_font = ctk.CTkFont(family=family_font, size=18)
-        self.additional_scripts_label = ctk.CTkLabel(
-            master=self,
-            text='Additional Scripts',
-            font=title_widget_font
-        )
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
-        self.columnconfigure(3, weight=1)
-        self.columnconfigure(4, weight=1)
-        self.rowconfigure(0, weight=0)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
 
+    def set_std_dimensions(self):
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
         self.pady_title = (10, 2)
         self.width_button_std = 100
         self.sticky_title = 'wn'
 
-        # add radiobuttons
+    def initialize_elements(self):
+        self.additional_scripts_label = ctk.CTkLabel(
+            master=self,
+            text='Additional Scripts',
+            font=self.title_widget_font
+        )
         self.radio_var = ctk.StringVar(self, value=None)
         self.update_upgrade = ctk.CTkRadioButton(
             master=self,
@@ -131,7 +131,6 @@ class AdditionalScriptWidget(ctk.CTkFrame):
             self.radio_var.set('update_upgrade_full')
         self._check_checkbox_clean_status()
         self._check_checkbox_reboot_status()
-        self.render()
 
     def _active_update_upgrade_edit_button(self):
         self.provisions_configs["provisions"]['update_upgrade_full'] = False
@@ -192,7 +191,15 @@ class AdditionalScriptWidget(ctk.CTkFrame):
                 state='disabled'
             )
 
-    def render(self):
+    def render_elements(self):
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+        self.columnconfigure(4, weight=1)
+        self.rowconfigure(0, weight=0)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
         self.additional_scripts_label.grid(
             row=0,
             column=0,
