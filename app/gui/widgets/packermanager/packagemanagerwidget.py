@@ -297,9 +297,31 @@ class PackageManagerWidget(GuiStandard):
             if yes:
                 for package in self.packages_scrollable.get():
                     shutil.rmtree(f'{constants.PACKAGES_PATH}/{package}')
-                self.master.__init__(self, self.master, self.provisions_configs)
+                self._reload_packages_scrollable()
         else:
             mb.showerror('Error', 'You have selected no packages')
+
+    def _add_package(self):
+        package_name = self.new_package_entry.get()
+        if package_name not in os.listdir(constants.PACKAGES_PATH):
+            confirm = mb.askyesnocancel("Add package",
+                                        f'You want to add "{package_name}" '
+                                        'as package?')
+            if confirm:
+                make_package_folder(package_name)
+                self._reload_packages_scrollable()
+        else:
+            mb.showerror('Error', 'Package already exists')
+
+    def _reload_packages_scrollable(self):
+        self.packages_scrollable.clean()
+        self.packages_scrollable.set_values(
+            sorted([
+                package for package in os.listdir(f'{constants.PACKAGES_PATH}')
+                if package not in ('program-example', 'setup_scripts')
+            ])
+        )
+        self.packages_scrollable.add_checkboxes()
 
     def _active_add_package(self, event):
         new_package_typed = self.new_package_entry.get()
@@ -313,22 +335,3 @@ class PackageManagerWidget(GuiStandard):
                 state="disabled",
                 image=self.plus_disabled
             )
-
-    def _add_package(self):
-        package_name = self.new_package_entry.get()
-        if package_name not in os.listdir(constants.PACKAGES_PATH):
-            confirm = mb.askyesnocancel("Add package",
-                                        f'You want to add "{package_name}" '
-                                        'as package?')
-            if confirm:
-                make_package_folder(package_name)
-                self.packages_scrollable.clean()
-                self.packages_scrollable.set_values(
-                    sorted([
-                        package for package in os.listdir(f'{constants.PACKAGES_PATH}')
-                        if package not in ('program-example', 'setup_scripts')
-                    ])
-                )
-                self.packages_scrollable.add_checkboxes()
-        else:
-            mb.showerror('Error', 'Package already exists')
