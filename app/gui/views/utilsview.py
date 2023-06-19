@@ -140,7 +140,7 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
         self.values = values
 
     def add_button_values(self):
-        self.checkboxes = []
+        self.checkboxes = set()
         for count, value in enumerate(self.values):
             # color = '#3996D5'
             # btn_color = ['#cfcfcf', '#333333']
@@ -166,15 +166,16 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 pady=(0, 0),
                 sticky="wn",
             )
-            self.checkboxes.append(self.checkbox)
+            self.checkboxes.add(self.checkbox)
 
     def _open_text_window(self, package):
         EditFileWindow(self, package=package, operation=self.operation,
                        provisions_configs=self.provisions_configs)
 
     def clean(self):
-        for checkbox in self.checkboxes:
-            checkbox.destroy()
+        if self.checkboxes:
+            for checkbox in self.checkboxes:
+                checkbox.destroy()
 
 
 class EditFileWindow(ctk.CTkToplevel):
