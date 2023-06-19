@@ -68,7 +68,6 @@ class NicWidget(GuiStandard):
         self.nic_type.set('Select one')
         if self.network_info["enable"] or self.network_info["settings"]:
             self._show_nic_info_if_in_provisions_configs()
-        # self._check_nic_type_optionmenu()
 
     def _initialize_config_adapter_subframe_elements(self):
         selected_nic_type = self.nic_type.get()
@@ -169,7 +168,6 @@ class NicWidget(GuiStandard):
             pady=self.pady_std,
             sticky=self.sticky_frame
         )
-        # self._check_nic_type_optionmenu()
 
     def _render_config_adapter_subframe_elements(self):
         self.config_adapter_frame.columnconfigure(0, weight=1)
