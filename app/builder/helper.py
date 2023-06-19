@@ -21,7 +21,7 @@ def is_empty_script(script: str):
 
     list_to_evaluate = list()
     for line in lines:
-        if line.startswith('#') or line == '':
+        if line.startswith('#') or line == '' or line == '\n':
             pass
         else:
             list_to_evaluate.append(line)
