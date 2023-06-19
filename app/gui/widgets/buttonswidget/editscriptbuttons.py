@@ -73,16 +73,13 @@ class EditScriptButtonsWidget(ctk.CTkFrame):
         """Save scripted file"""
         with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
             file.write(self.master.open_text_box.get("1.0", "end"))
+        self._reload_packages_scrollable()
         self.master.destroy()
 
     def _remove(self):
         """Remove package from operation"""
         self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        self.master.master.set_values(
-            self.provisions_configs["provisions"][f'packages_to_{self.operation}']
-        )
-        self.master.master.clean()
-        self.master.master.add_button_values()
+        self._reload_packages_scrollable()
         self.master.destroy()
 
     def _upload(self):
@@ -101,3 +98,12 @@ class EditScriptButtonsWidget(ctk.CTkFrame):
             dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
         )
         self.master.destroy()
+
+    def _reload_packages_scrollable(self):
+        self.master.master.clean()
+        self.master.master.set_values(
+            sorted(
+                self.provisions_configs["provisions"][f'packages_to_{self.operation}']
+            )
+        )
+        self.master.master.add_button_values()
