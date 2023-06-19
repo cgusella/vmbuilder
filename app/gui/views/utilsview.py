@@ -149,7 +149,7 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
             package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{value}/{self.operation}.sh')
             if package_is_empty:
                 txt_color = 'red'
-            checkbox = ctk.CTkButton(
+            self.checkbox = ctk.CTkButton(
                 self,
                 height=20,
                 text=value,
@@ -159,14 +159,14 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
                 text_color=txt_color,
                 anchor='wn'
             )
-            checkbox.grid(
+            self.checkbox.grid(
                 row=count,
                 column=0,
                 padx=10,
                 pady=(0, 0),
                 sticky="wn",
             )
-            self.checkboxes.append(checkbox)
+            self.checkboxes.append(self.checkbox)
 
     def _open_text_window(self, package):
         EditFileWindow(self, package=package, operation=self.operation,
