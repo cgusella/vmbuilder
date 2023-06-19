@@ -118,7 +118,7 @@ class IsoWidget(GuiStandard):
         self.iso_checksum_algorithm = ctk.CTkOptionMenu(
             master=self.iso_checksum_subframe,
             font=self.font_std,
-            values=['SHA-1', 'SHA-224', 'SHA-256', 'SHA-384', 'SHA-512', 'MD5']
+            values=['SHA1', 'SHA224', 'SHA256', 'SHA384', 'SHA512', 'MD5']
         )
         self.iso_checksum_label = ctk.CTkLabel(
             master=self.iso_checksum_subframe,
