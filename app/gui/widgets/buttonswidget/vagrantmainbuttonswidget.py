@@ -15,11 +15,15 @@ from tkinter import messagebox as mb
 
 
 class VagrantMainButtons(MainButtonsWidget):
+    """You have to choose between
+        * configs
+        * provisions
+        * networks
+    """
 
     def __init__(self, master, provisions_configs, wanted_buttons: list):
         self.main = master.master
-        self.main_buttons = super()
-        self.main_buttons.__init__(master, provisions_configs, wanted_buttons)
+        super().__init__(master, provisions_configs, wanted_buttons)
 
     def _save_state_and_go_to_configs(self):
         if self.master.frame_name == 'networks':
@@ -45,7 +49,7 @@ class VagrantMainButtons(MainButtonsWidget):
             self._save_configs_state()
         elif self.master.frame_name == 'networks':
             pass
-        from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsView
+        from gui.views.vagrantview.vagrantprovisionsview import VagrantProvisionsView
         vagrant_configs_view = VagrantProvisionsView(
             master=self.main,
             provisions_configs=self.provisions_configs

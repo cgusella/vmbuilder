@@ -15,25 +15,28 @@ from tkinter import messagebox as mb
 
 
 class PackerMainButtons(MainButtonsWidget):
+    """You have to choose between
+        * configs
+        * provisions
+    """
 
     def __init__(self, master, provisions_configs, wanted_buttons: list):
         self.main = master.master
-        self.main_buttons = super()
-        self.main_buttons.__init__(master, provisions_configs, wanted_buttons)
+        super().__init__(master, provisions_configs, wanted_buttons)
 
     def _save_state_and_go_to_configs(self):
         from gui.views.packerview.packerconfigsview import PackerConfigsFrame
+        # self.main is the mainview
         new_packer_view = PackerConfigsFrame(
             master=self.main,
             provisions_configs=self.provisions_configs
         )
-        # self.master.master is the mainview
         new_packer_view.grid(
             row=0,
             column=1,
-            columnspan=self.master.master.columns-1,
-            rowspan=self.master.master.rows,
-            sticky=self.master.master.sticky_frame
+            columnspan=3,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def _save_state_and_go_to_provisions(self):
@@ -46,9 +49,9 @@ class PackerMainButtons(MainButtonsWidget):
         packer_configs_view.grid(
             row=0,
             column=1,
-            columnspan=self.main.columns-1,
-            rowspan=self.main.rows,
-            sticky=self.main.sticky_frame
+            columnspan=3,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def _save_configs_state(self):
@@ -130,7 +133,7 @@ class PackerMainButtons(MainButtonsWidget):
                         'was succesfully created'
                     )
                 )
-                self.main.add_lateral_menu()
+                self.main.menu_frame.reload_packer_packages()
         except (
             NoFileToUploadError,
             PackageNotFoundError,

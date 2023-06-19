@@ -1,7 +1,4 @@
 import customtkinter as ctk
-from gui.views.utilsview import (
-    EditFileWindow,
-)
 from gui.guistandard import GuiStandard
 from gui.widgets.packermanager.packagemanagerwidget import PackageManagerWidget
 from gui.widgets.packermanager.selectedpackageswidget import SelectedPackagesWidget

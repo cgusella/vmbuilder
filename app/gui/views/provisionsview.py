@@ -1,44 +1,35 @@
 import abc
 import customtkinter as ctk
+from gui.guistandard import GuiStandard
 from gui.widgets.additionalscriptwidget import AdditionalScriptWidget
 from gui.widgets.packermanager.mainpackagewidget import MainPackageWidget
 from gui.widgets.titlewidget import TitleWidget
 
 
-class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
+class ProvisionsFrame(GuiStandard):
 
     def __init__(self, master, provisions_configs, title):
         self.provisions_configs = provisions_configs
+        self.title = title
         ctk.CTkFrame.__init__(self, master)
-        self.family = 'Sans'
+        self.set_fonts()
+        self.set_std_dimensions()
+        self.initialize_elements()
+        self.render_elements()
+
+    def set_fonts(self):
+        family = 'Sans'
         self.title_std = ctk.CTkFont(
-            family=self.master.family,
+            family=family,
             size=30,
             weight='bold'
         )
         self.little_title = ctk.CTkFont(
-            family=self.master.family,
+            family=family,
             size=20,
             weight='bold'
         )
-        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
-        self.set_std_dimensions()
-        self.set_grid()
-        self.title_frame = TitleWidget(
-            self,
-            title=title,
-            subtitle='Provisions'
-        )
-        self.package_manager_frame = MainPackageWidget(
-            self,
-            self.provisions_configs
-        )
-        self.additional_scripts_frame = AdditionalScriptWidget(
-            self,
-            self.provisions_configs
-        )
-        self.add_main_button_frame()
-        self.render()
+        self.font_std = ctk.CTkFont(family=family, size=18)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
@@ -64,19 +55,31 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         self.sticky_warningmsg = 'e'
         self.sticky_horizontal = 'ew'
 
-    def set_grid(self):
-        # self.grid()
+    def initialize_elements(self):
+        self.title_frame = TitleWidget(
+            self,
+            title=self.title,
+            subtitle='Provisions'
+        )
+        self.package_manager_frame = MainPackageWidget(
+            self,
+            self.provisions_configs
+        )
+        self.additional_scripts_frame = AdditionalScriptWidget(
+            self,
+            self.provisions_configs
+        )
+        self._initialize_main_buttons_frame()
+
+    def render_elements(self):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
-
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
         self.rowconfigure(4, weight=1)
         self.rowconfigure(5, weight=1)
-
-    def render(self):
         self.title_frame.grid(
             row=0,
             column=0,
@@ -117,5 +120,5 @@ class ProvisionsFrame(abc.ABC, ctk.CTkFrame):
         )
 
     @abc.abstractmethod
-    def add_main_button_frame(self):
-        pass
+    def _initialize_main_buttons_frame(self):
+        self.main_buttons_frame = ctk.CTkFrame()
