@@ -380,6 +380,7 @@ class MenuWidget(GuiStandard):
             if yes:
                 for project in projects:
                     shutil.rmtree(f'{project_folder}/{project}')
+        self.reload_packer_packages()
 
     def _load_vagrant(self):
         file_to_load = filedialog.askopenfile(
