@@ -128,9 +128,10 @@ class VagrantConfigsView(ctk.CTkFrame):
         ssh_key = ctk.CTkRadioButton(
             master=self.connection_mode_frame,
             text="ssh_key",
-            variable=self.connection_mode_var,
+            font=self.font_std,
             value='key',
-            font=self.font_std
+            variable=self.connection_mode_var,
+            command=self.set_connection_mode
         )
         ssh_key.grid(
             row=0,
@@ -143,10 +144,10 @@ class VagrantConfigsView(ctk.CTkFrame):
         password = ctk.CTkRadioButton(
             master=self.connection_mode_frame,
             text="password",
-            variable=self.connection_mode_var,
             value='password',
-            command=self.set_connection_mode,
-            font=self.font_std
+            font=self.font_std,
+            variable=self.connection_mode_var,
+            command=self.set_connection_mode
         )
         password.grid(
             row=0,
