@@ -29,10 +29,10 @@ class MainFrame(GuiStandard):
         self.provisions_configs = provisions_configs
 
     def set_fonts(self):
-        self.family = 'Sans'
-        self.title_std = ctk.CTkFont(family=self.family, size=24)
-        self.font_std = ctk.CTkFont(family=self.family, size=16)
-        self.font_packages = ctk.CTkFont(family=self.family, size=14)
+        family = 'Sans'
+        self.title_std = ctk.CTkFont(family=family, size=24)
+        self.font_std = ctk.CTkFont(family=family, size=16)
+        self.font_packages = ctk.CTkFont(family=family, size=14)
 
     def set_std_dimensions(self):
         self.padx_std = (10, 10)

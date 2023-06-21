@@ -16,13 +16,14 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.local_vagrant_boxes = get_local_vagrant_boxes()
 
         ctk.CTkFrame.__init__(self, master)
+        family = 'Sans'
         self.title_std = ctk.CTkFont(
-            family=self.master.family,
+            family=family,
             size=30,
             weight='bold'
         )
-        self.warning_font = ctk.CTkFont(family=self.master.family, size=11)
-        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
+        self.warning_font = ctk.CTkFont(family=family, size=11)
+        self.font_std = ctk.CTkFont(family=family, size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_titles()
