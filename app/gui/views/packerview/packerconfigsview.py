@@ -16,9 +16,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.master = master
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
-        self.title_std = ctk.CTkFont(family=self.master.family, size=30,
+        self.title_std = ctk.CTkFont(family='Sans', size=30,
                                      weight='bold')
-        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
+        self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_title()
