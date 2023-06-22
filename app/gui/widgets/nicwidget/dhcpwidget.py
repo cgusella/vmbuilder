@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import subprocess
+from gui.guistandard import GuiStandard
 from tkinter import messagebox as mb
 
 
@@ -31,35 +32,28 @@ def get_dhcp_infos() -> dict:
     return dhcp_configs_dict
 
 
-class DHCPWidget(ctk.CTkFrame):
+class DHCPWidget(GuiStandard):
 
     def __init__(self, master, provisions_cofigs, num_tab, nic_type):
         self.provisions_configs = provisions_cofigs
         self.num_tab = num_tab
         self.nic_type = nic_type
         ctk.CTkFrame.__init__(self, master)
-        self.font_std = ctk.CTkFont(family='Sans', size=18)
-        self.title_font_std = ctk.CTkFont(family='Sans', size=18, weight='bold')
+        self.set_fonts()
         self.set_std_dimensions()
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
-        self.rowconfigure(5, weight=1)
-        self.rowconfigure(6, weight=1)
-        self.rowconfigure(7, weight=1)
-        self.grid_propagate(False)
-        self.initialize_dhcp_info_labels()
-        self.render_dhcp_info_labels()
+        self.initialize_elements()
+        self.render_elements()
+
+    def set_fonts(self):
+        family = 'Sans'
+        self.font_std = ctk.CTkFont(family=family, size=18)
+        self.title_font_std = ctk.CTkFont(family=family, size=18, weight='bold')
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
 
-    def initialize_dhcp_info_labels(self):
+    def initialize_elements(self):
         self.dhcp_configs_title_label = ctk.CTkLabel(
             master=self,
             text='DHCP configs',
@@ -119,10 +113,99 @@ class DHCPWidget(ctk.CTkFrame):
             placeholder_text='Insert Server Netmask'
         )
 
+    def render_elements(self):
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
+        self.rowconfigure(5, weight=1)
+        self.rowconfigure(6, weight=1)
+        self.rowconfigure(7, weight=1)
+        self.grid_propagate(False)
+        self.enable_update_dhcp_button.grid(
+            row=1,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='w'
+        )
+        self.delete_dhcp_button.grid(
+            row=1,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='w'
+        )
+        self.dhcp_configs_title_label.grid(
+            row=0,
+            column=0,
+            columnspan=2,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wens'
+        )
+        self.lower_ip_label.grid(
+            row=2,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wens'
+        )
+        self.upper_ip_label.grid(
+            row=2,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wens'
+        )
+        self.lower_ip_entry.grid(
+            row=3,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='we'
+        )
+        self.upper_ip_entry.grid(
+            row=3,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='we'
+        )
+        self.server_ip_label.grid(
+            row=4,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wens'
+        )
+        self.server_netmask_label.grid(
+            row=4,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='wens'
+        )
+        self.server_ip_entry.grid(
+            row=5,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='we'
+        )
+        self.server_netmask_entry.grid(
+            row=5,
+            column=1,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky='we'
+        )
+
     def _show_dhcp_values(self, selected_dhcp: str):
         self.selected_dhcp = selected_dhcp
-        self.initialize_dhcp_info_labels()
-        self.render_dhcp_info_labels()
         self.set_enable_or_update_button()
         # fill the entries with the information from dhcp server
         try:
@@ -304,85 +387,4 @@ class DHCPWidget(ctk.CTkFrame):
         mb.showinfo(
             title='Update DHCP',
             message=f'The DHCP configs has been updated for the {self.selected_dhcp} network.'
-        )
-
-    def render_dhcp_info_labels(self):
-        self.enable_update_dhcp_button.grid(
-            row=1,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='w'
-        )
-        self.delete_dhcp_button.grid(
-            row=1,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='w'
-        )
-
-        self.dhcp_configs_title_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.lower_ip_label.grid(
-            row=2,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.upper_ip_label.grid(
-            row=2,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.lower_ip_entry.grid(
-            row=3,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
-        )
-        self.upper_ip_entry.grid(
-            row=3,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
-        )
-        self.server_ip_label.grid(
-            row=4,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.server_netmask_label.grid(
-            row=4,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='wens'
-        )
-        self.server_ip_entry.grid(
-            row=5,
-            column=0,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
-        )
-        self.server_netmask_entry.grid(
-            row=5,
-            column=1,
-            padx=self.padx_std,
-            pady=self.pady_std,
-            sticky='we'
         )
