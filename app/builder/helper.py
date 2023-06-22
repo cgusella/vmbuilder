@@ -47,4 +47,8 @@ def get_packages_upload_files(packages: list) -> dict:
                 package_upload_files[package].append(
                     upload_file_name
                 )
+            #TODO: here should be present a message which says the upload of the configuration 
+            #program is not set
+            # else:
+            #     print('error message')
     return package_upload_files
