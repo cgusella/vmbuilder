@@ -92,6 +92,10 @@ class PackerMainButtons(MainButtonsWidget):
         if dst:
             dst.write(json.dumps(self.provisions_configs, indent=2))
             dst.close()
+        for operation in ('install', 'uninstall', 'config'):
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            )
 
     def _build(self):
         try:
