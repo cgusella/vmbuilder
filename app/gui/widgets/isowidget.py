@@ -9,7 +9,7 @@ class IsoWidget(GuiStandard):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
-        self.iso_folder_path = constants.ISO_PATH
+        self.set_iso_folder_path_from_json()
         ctk.CTkFrame.__init__(self, master)
         self.set_fonts()
         self.set_std_dimensions()
@@ -221,6 +221,12 @@ class IsoWidget(GuiStandard):
         iso_file_paths.append(self.provisions_configs["configurations"]["iso_link"]["default"])
         return iso_file_paths
 
+    def set_iso_folder_path_from_json(self):
+        if self.provisions_configs["configurations"]["iso_directory"]["default"]:
+            self.iso_folder_path = self.provisions_configs["configurations"]["iso_directory"]["default"]
+        else:
+            self.iso_folder_path = constants.ISO_PATH
+
     def _set_iso_folder_path(self):
         iso_folder_path = filedialog.askdirectory()
         if iso_folder_path:
@@ -231,6 +237,7 @@ class IsoWidget(GuiStandard):
             self.iso_link_drop.configure(
                 values=self._get_local_isofiles()
             )
+            self.provisions_configs["configurations"]["iso_directory"]["default"] = iso_folder_path
 
     def _check_if_disable_iso_file(self, iso_link: str):
         if iso_link.startswith('http'):
