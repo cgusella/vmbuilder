@@ -37,7 +37,7 @@
     },
     "connection": {
       "description":"Connection mode",
-      "default":""
+      "default":"key"
     },
     "cpus":{
       "description":"Number of CPU cores for the machine",

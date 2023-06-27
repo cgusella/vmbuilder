@@ -15,11 +15,15 @@ from tkinter import messagebox as mb
 
 
 class VagrantMainButtons(MainButtonsWidget):
+    """You have to choose between
+        * configs
+        * provisions
+        * networks
+    """
 
     def __init__(self, master, provisions_configs, wanted_buttons: list):
         self.main = master.master
-        self.main_buttons = super()
-        self.main_buttons.__init__(master, provisions_configs, wanted_buttons)
+        super().__init__(master, provisions_configs, wanted_buttons)
 
     def _save_state_and_go_to_configs(self):
         if self.master.frame_name == 'networks':
@@ -35,9 +39,9 @@ class VagrantMainButtons(MainButtonsWidget):
         new_vagrant_view.grid(
             row=0,
             column=1,
-            columnspan=self.master.master.columns-1,
-            rowspan=self.master.master.rows,
-            sticky=self.master.master.sticky_frame
+            columnspan=3,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def _save_state_and_go_to_provisions(self):
@@ -45,7 +49,7 @@ class VagrantMainButtons(MainButtonsWidget):
             self._save_configs_state()
         elif self.master.frame_name == 'networks':
             pass
-        from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsView
+        from gui.views.vagrantview.vagrantprovisionsview import VagrantProvisionsView
         vagrant_configs_view = VagrantProvisionsView(
             master=self.main,
             provisions_configs=self.provisions_configs
@@ -53,8 +57,8 @@ class VagrantMainButtons(MainButtonsWidget):
         vagrant_configs_view.grid(
             row=0,
             column=1,
-            columnspan=self.main.columns-1,
-            rowspan=self.main.rows,
+            columnspan=3,
+            rowspan=4,
             sticky=self.main.sticky_frame
         )
 
@@ -71,9 +75,9 @@ class VagrantMainButtons(MainButtonsWidget):
         new_vagrant_view.grid(
             row=0,
             column=1,
-            columnspan=self.main.columns-1,
-            rowspan=self.main.rows,
-            sticky=self.main.sticky_frame
+            columnspan=3,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def _save_configs_state(self):
@@ -170,7 +174,7 @@ class VagrantMainButtons(MainButtonsWidget):
                         'was succesfully created'
                     )
                 )
-                self.main.add_lateral_menu()
+                self.main.menu_frame.reload_vagrant_packages()
         except (
             NoFileToUploadError,
             PackageNotFoundError,

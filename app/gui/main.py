@@ -3,38 +3,38 @@ import constants
 import customtkinter as ctk
 import json
 import os
+from gui.guistandard import GuiStandard
 from gui.views.packerview.packerconfigsview import PackerConfigsFrame
 from gui.views.vagrantview.vagrantconfigsview import VagrantConfigsView
-from gui.views.vagrantview.vagrantprovisionspackagesview import VagrantProvisionsView
 from gui.widgets.menuwidget import MenuWidget
-from tkinter import filedialog
-from tkinter import messagebox as mb
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 ctk.set_appearance_mode('system')
 
 
-class MainFrame(ctk.CTkFrame):
+class MainFrame(GuiStandard):
 
     def __init__(self, master):
         self.frame_name = 'main'
         ctk.CTkFrame.__init__(self, master)
         self.master = master
-        self.rows = 4
-        self.columns = 3
-        self.family = 'Sans'
-        self.title_std = ctk.CTkFont(family=self.family, size=24)
-        self.font_std = ctk.CTkFont(family=self.family, size=16)
-        self.font_packages = ctk.CTkFont(family=self.family, size=14)
-        self.set_dimensions()
-        self.set_menu_row_col_conf(rows=self.rows, columns=self.columns)
-
-        self.add_lateral_menu()
-        self.add_initial_message()
+        self.set_fonts()
+        self.set_std_dimensions()
+        self.initialize_elements()
+        self.render_elements()
         self.pack(side="top", fill="both", expand=True)
 
-    def set_dimensions(self):
+    def set_provisions_configs(self, provisions_configs: dict):
+        self.provisions_configs = provisions_configs
+
+    def set_fonts(self):
+        family = 'Sans'
+        self.title_std = ctk.CTkFont(family=family, size=24)
+        self.font_std = ctk.CTkFont(family=family, size=16)
+        self.font_packages = ctk.CTkFont(family=family, size=14)
+
+    def set_std_dimensions(self):
         self.padx_std = (10, 10)
         self.pady_std = (10, 10)
         self.ipadx = 10
@@ -52,80 +52,45 @@ class MainFrame(ctk.CTkFrame):
         self.sticky_frame = 'wens'
         self.sticky_optionmenu = 'w'
 
-    def set_menu_row_col_conf(self, rows: int, columns: int):
-        # self.grid()
-        for i in range(columns):
-            weight = 1
-            if i > 1:
-                # this weight set the menu width respect to the
-                # view frame. Larger the weight, smaller the menu
-                weight = 20
-            self.columnconfigure(i, weight=weight)
+    def initialize_elements(self):
+        self._initialize_subframes()
+        self._initialize_first_page()
 
-        for i in range(rows):
-            self.rowconfigure(i, weight=1)
+    def _initialize_subframes(self):
+        self.menu_frame = MenuWidget(self)
+        self.operative_frame = ctk.CTkScrollableFrame(self)
 
-    def add_lateral_menu(self):
-        self.menu_frame = MenuWidget(master=self)
-        self.menu_frame.grid(row=0, column=0, rowspan=self.rows, sticky='wens')
-
-    def set_general_row_col_conf(self, frame: ctk.CTkFrame, rows: int, columns: int):
-        for i in range(columns):
-            frame.columnconfigure(i, weight=1)
-
-        for i in range(rows):
-            frame.rowconfigure(i, weight=1)
-
-    def add_initial_message(self):
-        self.initial_message_frame = ctk.CTkScrollableFrame(self)
-        self.initial_message_frame.__init__(self)
-
-        self.set_general_row_col_conf(
-            frame=self.initial_message_frame,
-            rows=2,
-            columns=1
+    def _initialize_first_page(self):
+        self.message_label = ctk.CTkLabel(
+            master=self.operative_frame,
+            font=self.font_std,
+            text='welcome!'
         )
 
-        self.initial_message_frame.grid(
+    def render_elements(self):
+        self.columnconfigure(0, weight=0)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.menu_frame.grid(
             row=0,
-            column=1,
-            rowspan=2,
-            columnspan=self.columns-1,
+            column=0,
+            rowspan=4,
             sticky=self.sticky_frame
         )
+        self._render_operative_frame()
 
-        title_label = ctk.CTkLabel(
-            master=self.initial_message_frame,
-            font=self.font_std,
-            text='Welcome!'
-        )
-        title_label.grid(
+    def _render_operative_frame(self):
+        self.operative_frame.grid(
             row=0,
-            column=0,
-            sticky=self.sticky_title
-        )
-        message_label = ctk.CTkLabel(
-            master=self.initial_message_frame,
-            font=self.font_std,
-            text="""
-Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
-laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi
-architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas
-sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione
-voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet,
-consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et
-dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum
-exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?
-Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae
-consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? [33] At vero eos
-et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti
-atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate
-"""
-        )
-        message_label.grid(
-            row=1,
-            column=0,
-            sticky='wens'
+            column=1,
+            columnspan=4,
+            rowspan=4,
+            sticky=self.sticky_frame
         )
 
     def add_vagrant_configs(self, load=False):
@@ -136,73 +101,11 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
-
-        self.vagrant_configs_frame = VagrantConfigsView(
+        self.operative_frame = VagrantConfigsView(
             self,
             self.provisions_configs
         )
-        self.vagrant_configs_frame.grid(
-            row=0,
-            column=1,
-            columnspan=self.columns-1,
-            rowspan=self.rows,
-            sticky=self.sticky_frame
-        )
-
-    def add_vagrant_provisions_frame(self):
-        self.vagrant_configs_frame.destroy()
-        vagrant_configs_view = VagrantProvisionsView(
-            master=self,
-            provisions_configs=self.provisions_configs
-        )
-        vagrant_configs_view.grid(
-            row=0,
-            column=1,
-            columnspan=self.columns-1,
-            rowspan=self.rows,
-            sticky=self.sticky_frame
-        )
-
-    def _load_vagrant(self):
-        file_to_load = filedialog.askopenfile(
-            initialdir=constants.VAGRANT_PROVS_CONFS_PATH
-        )
-        if file_to_load:
-            self.provisions_configs = json.loads(file_to_load.read())
-            self.add_vagrant_configs(load=True)
-
-    def _up(self):
-        project_name = self.vagrant_projects.get()
-        if project_name:
-            if len(project_name) > 1:
-                mb.showerror('Up Error', 'You must select just one project to up')
-            else:
-                self.destroy()
-                self.__init__(self.master)
-
-                terminal_frame = ctk.CTkFrame(self)
-                terminal_frame.grid(
-                    row=2,
-                    column=1,
-                    columnspan=self.columns-1,
-                    rowspan=2,
-                    sticky=self.sticky_frame
-                )
-                wid = terminal_frame.winfo_id()
-                os.chdir(f'{constants.VAGRANT_MACHINES_PATH}/{project_name[0]}')
-                # os.system(f'xterm -into {wid} -geometry 218x38 -sb -e "vagrant up ; while true ; do sleep 100 ; done" &')
-                os.system(f'xterm -into {wid} -geometry 218x38 -sb -e vagrant up &')
-                os.chdir(f'{constants.VMBUILDER_PATH}')
-
-    def _load_packer(self):
-        file_to_load = filedialog.askopenfile(
-            initialdir=constants.PACKER_PROVS_CONFS_PATH
-        )
-        self.provisions_configs = json.loads(file_to_load.read())
-        self.add_packer_configs(load=True)
-
-    def _build(self):
-        pass
+        self._render_operative_frame()
 
     def add_packer_configs(self, load=False):
         if not load:
@@ -212,21 +115,11 @@ atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupidit
             self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
                 self.provisions_configs["provisions"][f"packages_to_{operation}"]
             )
-        self.initial_message_frame.destroy()
-        self.vagrant_configs_frame = PackerConfigsFrame(
+        self.operative_frame = PackerConfigsFrame(
             self,
             self.provisions_configs
         )
-        self.vagrant_configs_frame.grid(
-            row=0,
-            column=1,
-            columnspan=self.columns-1,
-            rowspan=self.rows,
-            sticky=self.sticky_frame
-        )
-
-    def close_window(self):
-        self.master.destroy()
+        self._render_operative_frame()
 
 
 if __name__ == "__main__":

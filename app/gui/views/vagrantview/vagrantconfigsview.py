@@ -16,13 +16,14 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.local_vagrant_boxes = get_local_vagrant_boxes()
 
         ctk.CTkFrame.__init__(self, master)
+        family = 'Sans'
         self.title_std = ctk.CTkFont(
-            family=self.master.family,
+            family=family,
             size=30,
             weight='bold'
         )
-        self.warning_font = ctk.CTkFont(family=self.master.family, size=11)
-        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
+        self.warning_font = ctk.CTkFont(family=family, size=11)
+        self.font_std = ctk.CTkFont(family=family, size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_titles()
@@ -55,13 +56,13 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.columnconfigure(0, weight=2)
         self.columnconfigure(1, weight=1)
 
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
+        self.rowconfigure(4, weight=0)
 
-    def set_general_row_col_conf(self, frame:ctk.CTkFrame, rows: int, columns: int):
+    def set_general_row_col_conf(self, frame: ctk.CTkFrame, rows: int, columns: int):
         # self.grid()
         for i in range(columns):
             frame.columnconfigure(i, weight=1)
@@ -128,32 +129,33 @@ class VagrantConfigsView(ctk.CTkFrame):
         ssh_key = ctk.CTkRadioButton(
             master=self.connection_mode_frame,
             text="ssh_key",
-            variable=self.connection_mode_var,
+            font=self.font_std,
             value='key',
-            font=self.font_std
+            variable=self.connection_mode_var,
+            command=self.set_connection_mode
         )
         ssh_key.grid(
             row=0,
             column=1,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_frame
+            sticky=self.sticky_label
         )
 
         password = ctk.CTkRadioButton(
             master=self.connection_mode_frame,
             text="password",
-            variable=self.connection_mode_var,
             value='password',
-            command=self.set_connection_mode,
-            font=self.font_std
+            font=self.font_std,
+            variable=self.connection_mode_var,
+            command=self.set_connection_mode
         )
         password.grid(
             row=0,
             column=2,
             padx=self.padx_std,
             pady=self.pady_std,
-            sticky=self.sticky_frame
+            sticky=self.sticky_label
         )
 
     def add_main_buttons(self):
@@ -168,13 +170,12 @@ class VagrantConfigsView(ctk.CTkFrame):
             row=0,
             column=0,
             columnspan=2,
-            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             sticky=self.sticky_frame
         )
         self.project_name_frame.grid(
-            row=2,
+            row=1,
             column=0,
             padx=self.padx_std,
             pady=self.pady_std,
@@ -183,7 +184,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.vagrant_box_setup_frame.grid(
-            row=3,
+            row=2,
             column=0,
             rowspan=2,
             padx=self.padx_std,
@@ -193,7 +194,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame,
         )
         self.vbox_configs_frame.grid(
-            row=2,
+            row=1,
             column=1,
             rowspan=3,
             padx=self.padx_std,
@@ -203,7 +204,7 @@ class VagrantConfigsView(ctk.CTkFrame):
             sticky=self.sticky_frame
         )
         self.connection_mode_frame.grid(
-            row=7,
+            row=4,
             column=0,
             columnspan=2,
             padx=self.padx_std,
@@ -215,7 +216,6 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.main_button_frame.grid(
             row=0,
             column=1,
-            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,

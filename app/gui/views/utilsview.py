@@ -1,8 +1,7 @@
 import constants
 import customtkinter as ctk
-import shutil
 from builder.helper import is_empty_script
-from tkinter import filedialog
+from gui.widgets.buttonswidget.editscriptbuttons import EditScriptButtonsWidget
 
 
 class SetUpScriptEdit(ctk.CTkToplevel):
@@ -63,22 +62,33 @@ class SetUpScriptEdit(ctk.CTkToplevel):
 
 
 class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values, select_all=False):
+    def __init__(self, master, title, values, command=None):
+        self.font_std = ctk.CTkFont(family='Sans', size=16)
+        self.command = command
         super().__init__(
             master,
             label_text=title,
-            label_font=master.master.master.font_std,
+            label_font=self.font_std,
         )
         self.grid_columnconfigure(0, weight=1)
-        self.values = values
-        self.checkboxes = []
+        self.set_values(values)
+        self.add_checkboxes()
 
+    def set_values(self, values):
+        self.values = values
+
+    def add_checkboxes(self):
+        self.checkboxes = []
         for count, value in enumerate(self.values):
             checkbox = ctk.CTkCheckBox(
                 self,
                 text=value,
-                font=master.master.master.font_std,
+                font=self.font_std,
             )
+            if self.command:
+                checkbox.configure(
+                    command=self.command
+                )
             checkbox.grid(
                 row=count,
                 column=0,
@@ -87,9 +97,14 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
                 sticky="wn"
             )
             self.checkboxes.append(checkbox)
-        if select_all:
-            for checkbox in self.checkboxes:
-                checkbox.select()
+
+    def select_all(self):
+        for checkbox in self.checkboxes:
+            checkbox.select()
+
+    def deselect_all(self):
+        for checkbox in self.checkboxes:
+            checkbox.deselect()
 
     def get(self):
         checked_checkboxes = []
@@ -98,22 +113,34 @@ class ScrollableCheckboxFrame(ctk.CTkScrollableFrame):
                 checked_checkboxes.append(checkbox.cget("text"))
         return checked_checkboxes
 
+    def clean(self):
+        for checkbox in self.checkboxes:
+            checkbox.destroy()
+
 
 class ScrollableButtonFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, title, values):
+
+    def __init__(self, master, title, values, provisions_configs):
+        self.provisions_configs = provisions_configs
+        self.font = ctk.CTkFont(family='Sans', size=15, weight='bold')
+        self.label_font = ctk.CTkFont(family='Sans', size=15)
         super().__init__(
             master,
             label_text=title,
-            label_font=master.master.master.font_std,
+            label_font=self.label_font,
             border_width=2,
             border_color=['grey64', 'grey34']
         )
-        font = ctk.CTkFont(family='Sans', size=15, weight='bold')
         self.grid_columnconfigure(0, weight=1)
-        self.values = values
-        self.checkboxes = []
         self.operation = title.lower()
+        self.set_values(values)
+        self.add_button_values()
 
+    def set_values(self, values):
+        self.values = values
+
+    def add_button_values(self):
+        self.checkboxes = set()
         for count, value in enumerate(self.values):
             # color = '#3996D5'
             # btn_color = ['#cfcfcf', '#333333']
@@ -122,24 +149,33 @@ class ScrollableButtonFrame(ctk.CTkScrollableFrame):
             package_is_empty = is_empty_script(f'{constants.PACKAGES_PATH}/{value}/{self.operation}.sh')
             if package_is_empty:
                 txt_color = 'red'
-            checkbox = ctk.CTkButton(
+            self.checkbox = ctk.CTkButton(
                 self,
                 height=20,
                 text=value,
-                font=font,
-                command=lambda args=(value, self.operation): master.master._open_text_window(*args),
+                font=self.font,
+                command=lambda args=(value,): self._open_text_window(*args),
                 fg_color=btn_color,
                 text_color=txt_color,
                 anchor='wn'
             )
-            checkbox.grid(
+            self.checkbox.grid(
                 row=count,
                 column=0,
                 padx=10,
                 pady=(0, 0),
                 sticky="wn",
             )
-            self.checkboxes.append(checkbox)
+            self.checkboxes.add(self.checkbox)
+
+    def _open_text_window(self, package):
+        EditFileWindow(self, package=package, operation=self.operation,
+                       provisions_configs=self.provisions_configs)
+
+    def clean(self):
+        if self.checkboxes:
+            for checkbox in self.checkboxes:
+                checkbox.destroy()
 
 
 class EditFileWindow(ctk.CTkToplevel):
@@ -152,6 +188,11 @@ class EditFileWindow(ctk.CTkToplevel):
         self.geometry(
             '1200x600'
         )
+        self.set_std_dimensions()
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
         self.title('Edit File')
         self.font_std = ctk.CTkFont(family='Sans', size=18)
         file_label = ctk.CTkLabel(
@@ -159,7 +200,7 @@ class EditFileWindow(ctk.CTkToplevel):
             text=f'You are modifying "{operation}.sh"\nfrom package "{package}"',
             font=self.font_std
         )
-        file_label.grid(row=1, column=0, columnspan=3)
+        file_label.grid(row=0, column=0, columnspan=3)
         self.open_text_box = ctk.CTkTextbox(
             self,
             width=1100,
@@ -169,63 +210,25 @@ class EditFileWindow(ctk.CTkToplevel):
         with open(f'{constants.PACKAGES_PATH}/{package}/{operation}.sh') as file:
             text = file.read()
         self.open_text_box.insert('end', text)
-        self.open_text_box.grid(row=2, column=0, columnspan=3)
-
-        if self.operation == 'config':
-            upload_button = ctk.CTkButton(
-                self,
-                text='Upload',
-                font=self.font_std,
-                command=self.upload_file
-            )
-            upload_button.grid(row=3, column=0)
-            save_button = ctk.CTkButton(
-                self,
-                text='Save',
-                font=self.font_std,
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=2)
-        else:
-            save_button = ctk.CTkButton(
-                self,
-                text='Save',
-                font=self.font_std,
-                command=self.save_file
-            )
-            save_button.grid(row=3, column=1)
-        remove_button = ctk.CTkButton(
+        self.open_text_box.grid(
+            row=1,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+        )
+        self.bottom_buttons = EditScriptButtonsWidget(
             self,
-            text=f'Remove from {operation}',
-            font=self.font_std,
-            command=self.remove_from_operation
+            package=self.package,
+            operation=self.operation,
+            provisions_configs=self.provisions_configs
         )
-        remove_button.grid(row=4, column=1)
-
-    def save_file(self):
-        with open(f'{constants.PACKAGES_PATH}/{self.package}/{self.operation}.sh', 'w') as file:
-            file.write(self.open_text_box.get("1.0", "end"))
-        self.master._add_selected_packages_to(self.operation)
-        self.destroy()
-
-    def remove_from_operation(self):
-        self.provisions_configs["provisions"][f'packages_to_{self.operation}'].remove(self.package)
-        self.master.fill_selected_packages_frame()
-        self.destroy()
-
-    def upload_file(self):
-        filename = filedialog.askopenfilename(
-            initialdir=f"{constants.VMBUILDER_PATH}",
-            title="Select a File",
-            filetypes=(
-                ("Text files",
-                 "*.txt*"),
-                ("all files",
-                 "*.*")
-            )
+        self.bottom_buttons.grid(
+            row=2,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
         )
-        shutil.copy(
-            src=filename,
-            dst=f'{constants.PACKAGES_PATH}/{self.package}/upload/'
-        )
-        self.destroy()
+
+    def set_std_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)

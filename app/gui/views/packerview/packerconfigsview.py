@@ -16,9 +16,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.master = master
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
-        self.title_std = ctk.CTkFont(family=self.master.family, size=30,
+        self.title_std = ctk.CTkFont(family='Sans', size=30,
                                      weight='bold')
-        self.font_std = ctk.CTkFont(family=self.master.family, size=18)
+        self.font_std = ctk.CTkFont(family='Sans', size=18)
         self.set_grid()
         self.set_std_dimensions()
         self.add_title()
@@ -49,11 +49,12 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.ipadx_std = 10
         self.ipady_std = 10
         self.width_button_std = 100
-        self.entry_height_std = 50
+        self.entry_height_std = 40
         self.entry_width_std = 280
         self.sticky_label = 'w'
         self.sticky_entry = 'w'
         self.sticky_frame = 'wens'
+        self.sticky_horizontal = 'we'
 
     def add_title(self):
         self.title_widget = TitleWidget(
@@ -70,7 +71,9 @@ class PackerConfigsFrame(ctk.CTkFrame):
 
     def add_disk_name(self):
         self.disk_name_frame = ctk.CTkFrame(self)
-
+        self.disk_name_frame.columnconfigure(0, weight=1)
+        self.disk_name_frame.rowconfigure(0, weight=1)
+        self.disk_name_frame.rowconfigure(1, weight=1)
         disk_name_label = ctk.CTkLabel(
             self.disk_name_frame,
             text='Insert Disk Name',
@@ -87,9 +90,8 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.disk_name_entry = ctk.CTkEntry(
             self.disk_name_frame,
             font=self.font_std,
-            width=self.entry_width_std,
-            height=self.entry_height_std,
-            placeholder_text='Disk Name'
+            placeholder_text='Disk Name',
+            height=self.entry_height_std
         )
         if self.provisions_configs["configurations"]["disk_name"]["default"]:
             self.disk_name_entry.insert(
@@ -100,8 +102,8 @@ class PackerConfigsFrame(ctk.CTkFrame):
             row=1,
             column=0,
             padx=self.padx_std,
-            pady=self.pady_std,
-            sticky=self.sticky_entry
+            pady=self.pady_entry,
+            sticky=self.sticky_horizontal
         )
 
     def add_preseed_frame(self):

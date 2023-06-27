@@ -165,7 +165,7 @@ class Vagrant(Builder):
                     if self.configs["networks"][nic]["nic_type"] == 'natnetwork':
                         vagrantfile.write(
                             f'\t\tvb.customize ["modifyvm", :id, "--{nic}", "{self.configs["networks"][nic]["nic_type"]}"]\n'
-                            f'\t\tvb.customize ["modifyvm", :id, "--intnet{nic[-1]}", "{self.configs["networks"][nic]["settings"]["natnetwork"]}"]\n'
+                            f'\t\tvb.customize ["modifyvm", :id, "--natnetwork{nic[-1]}", "{self.configs["networks"][nic]["settings"]["natnetwork"]}"]\n'
                             f'\t\tvb.customize ["modifyvm", :id, "--cableconnected{nic[-1]}", "on"]\n'
                         )
             vagrantfile.write(
