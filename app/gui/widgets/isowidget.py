@@ -1,11 +1,15 @@
+import constants
 import customtkinter as ctk
+import os
 from gui.guistandard import GuiStandard
+from tkinter import filedialog
 
 
 class IsoWidget(GuiStandard):
 
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
+        self.iso_folder_path = constants.ISO_PATH
         ctk.CTkFrame.__init__(self, master)
         self.set_fonts()
         self.set_std_dimensions()
@@ -34,16 +38,26 @@ class IsoWidget(GuiStandard):
             text='Insert Iso Link',
             font=self.font_std
         )
-        self.iso_link_entry = ctk.CTkEntry(
+        self.iso_path_button = ctk.CTkButton(
+            master=self,
+            text='Set Iso Path',
+            command=self._set_iso_folder_path
+        )
+        self.iso_folder_label = ctk.CTkLabel(
             master=self,
             font=self.font_std,
-            placeholder_text='Iso link'
+            text=f'Actual iso path: {self.iso_folder_path}'
         )
-        if self.provisions_configs["configurations"]["iso_link"]["default"]:
-            self.iso_link_entry.insert(
-                0,
-                self.provisions_configs["configurations"]["iso_link"]["default"]
-            )
+        self.iso_link_var = ctk.StringVar(self)
+        self.iso_link_var.set(self.provisions_configs["configurations"]["iso_link"]["default"])
+        self.iso_link_drop = ctk.CTkComboBox(
+            master=self,
+            variable=self.iso_link_var,
+            values=self._get_local_isofiles(),
+            font=self.font_std,
+            dropdown_font=self.font_std,
+            command=self._check_if_disable_iso_file
+        )
         self.iso_file_label = ctk.CTkLabel(
             master=self,
             font=self.font_std,
@@ -64,50 +78,6 @@ class IsoWidget(GuiStandard):
             fg_color='transparent'
         )
         self._initialize_iso_checksum_elements()
-
-    def render_elements(self):
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.iso_link_label.grid(
-            row=0,
-            column=0,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self.iso_link_entry.grid(
-            row=1,
-            column=0,
-            columnspan=2,
-            padx=self.padx_std,
-            pady=self.pady_entry,
-            sticky=self.sticky_frame
-        )
-        self.iso_file_label.grid(
-            row=0,
-            column=2,
-            sticky=self.sticky_label,
-            padx=self.padx_std,
-            pady=self.pady_title
-        )
-        self.iso_file_entry.grid(
-            row=1,
-            column=2,
-            sticky=self.sticky_frame,
-            padx=self.padx_std,
-            pady=self.pady_entry
-        )
-        self.iso_checksum_subframe.grid(
-            row=2,
-            column=0,
-            columnspan=2,
-            sticky=self.sticky_frame
-        )
-        self._render_iso_checksum_elements()
 
     def _initialize_iso_checksum_elements(self):
         self.algorithm_label = ctk.CTkLabel(
@@ -138,6 +108,68 @@ class IsoWidget(GuiStandard):
                 0,
                 self.provisions_configs["configurations"]["iso_checksum"]["default"].split(':')[1]
             )
+
+    def render_elements(self):
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=3)
+        self.iso_path_button.grid(
+            row=0,
+            column=0,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.iso_folder_label.grid(
+            row=0,
+            column=1,
+            columnspan=3,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.iso_link_label.grid(
+            row=1,
+            column=0,
+            columnspan=2,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.iso_link_drop.grid(
+            row=2,
+            column=0,
+            columnspan=2,
+            padx=self.padx_std,
+            pady=self.pady_entry,
+            sticky=self.sticky_frame
+        )
+        self.iso_file_label.grid(
+            row=3,
+            column=0,
+            columnspan=2,
+            sticky=self.sticky_label,
+            padx=self.padx_std,
+            pady=self.pady_title
+        )
+        self.iso_file_entry.grid(
+            row=4,
+            column=0,
+            sticky=self.sticky_frame,
+            padx=self.padx_std,
+            pady=self.pady_entry
+        )
+        self._render_iso_checksum_elements()
+        self.iso_checksum_subframe.grid(
+            row=5,
+            column=0,
+            columnspan=2,
+            sticky=self.sticky_frame
+        )
 
     def _render_iso_checksum_elements(self):
         self.iso_checksum_subframe.columnconfigure(0, weight=0)
@@ -172,3 +204,42 @@ class IsoWidget(GuiStandard):
             pady=self.pady_entry,
             sticky=self.sticky_frame
         )
+
+    def get_iso_link(self):
+        if self.iso_link_drop.get().startswith('http'):
+            iso_link = self.iso_link_drop.get()
+        else:
+            iso_link = f'{self.iso_folder_path}/{self.iso_link_drop.get()}'
+        return iso_link
+
+    def _get_local_isofiles(self):
+        folder_elements = os.listdir(self.iso_folder_path)
+        iso_file_paths = [
+            element for element in folder_elements
+            if os.path.isfile(f'{self.iso_folder_path}/{element}') and not element.startswith('.')
+        ]
+        iso_file_paths.append(self.provisions_configs["configurations"]["iso_link"]["default"])
+        return iso_file_paths
+
+    def _set_iso_folder_path(self):
+        iso_folder_path = filedialog.askdirectory()
+        if iso_folder_path:
+            self.iso_folder_path = iso_folder_path
+            self.iso_folder_label.configure(
+                text=f'Actual iso path: {iso_folder_path}'
+            )
+            self.iso_link_drop.configure(
+                values=self._get_local_isofiles()
+            )
+
+    def _check_if_disable_iso_file(self, iso_link: str):
+        if iso_link.startswith('http'):
+            self.iso_file_entry.configure(
+                state='normal',
+                text_color='black'
+            )
+        else:
+            self.iso_file_entry.configure(
+                state='disable',
+                text_color='grey85'
+            )

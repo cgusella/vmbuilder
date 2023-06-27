@@ -285,6 +285,7 @@ class PackerConfigsFrame(GuiStandard):
             row=5,
             column=0,
             columnspan=2,
+            rowspan=2,
             padx=self.padx_std,
             pady=self.pady_std,
             ipadx=self.ipadx_std,
@@ -324,7 +325,7 @@ class PackerConfigsFrame(GuiStandard):
         configs["disk_size"]["default"] = self.vbox_configs_frame.disk_slider.get()
         configs["disk_name"]["default"] = self.disk_name_entry.get()
         configs["iso_file"]["default"] = self.iso_frame.iso_file_entry.get()
-        configs["iso_link"]["default"] = self.iso_frame.iso_link_entry.get()
+        configs["iso_link"]["default"] = self.iso_frame.iso_link_var.get()
         configs["checksum"]["default"] = (
             f'{self.iso_frame.checksum_algorithm.get()}:{self.iso_frame.checksum_entry.get()}'
         )
