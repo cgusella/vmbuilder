@@ -25,6 +25,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
         self.add_project_name()
         self.add_disk_name()
         self.add_preseed_frame()
+        self.add_username_password()
         self.add_iso_frame()
         self.add_vbox_configs()
         self.add_main_buttons()
@@ -142,6 +143,77 @@ class PackerConfigsFrame(ctk.CTkFrame):
             pady=self.pady_entry
         )
 
+    def add_username_password(self):
+        self.username_password_frame = ctk.CTkFrame(self)
+        self.username_password_frame.columnconfigure(0, weight=1)
+        self.username_password_frame.rowconfigure(0, weight=1)
+        self.username_password_frame.rowconfigure(1, weight=1)
+        self.username_password_frame.rowconfigure(2, weight=1)
+        self.username_password_frame.rowconfigure(3, weight=1)
+
+        self.username_label = ctk.CTkLabel(
+            master=self.username_password_frame,
+            text="Username:",
+            font=self.font_std
+        )
+
+        self.username_entry = ctk.CTkEntry(
+            master=self.username_password_frame,
+            font=self.font_std,
+            height=self.entry_height_std,
+            placeholder_text="Username to be created"
+        )
+        if self.provisions_configs["credentials"]['username']:
+            self.username_entry.insert(
+                0,
+                self.provisions_configs["credentials"]['username']
+            )
+
+        self.password_label = ctk.CTkLabel(
+            master=self.username_password_frame,
+            text="Password:",
+            font=self.font_std
+        )
+        self.password_entry = ctk.CTkEntry(
+            master=self.username_password_frame,
+            font=self.font_std,
+            height=self.entry_height_std,
+            placeholder_text="Password of the previous user"
+        )
+        if self.provisions_configs["credentials"]['password']:
+            self.password_entry.insert(
+                0,
+                self.provisions_configs["credentials"]['password']
+            )
+        self.username_label.grid(
+            row=0,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_label
+        )
+        self.username_entry.grid(
+            row=1,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+        self.password_label.grid(
+            row=2,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_label
+        )
+        self.password_entry.grid(
+            row=3,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            sticky=self.sticky_frame
+        )
+
     def add_iso_frame(self):
         self.iso_frame = IsoWidget(
             self,
@@ -163,6 +235,10 @@ class PackerConfigsFrame(ctk.CTkFrame):
         )
 
     def _save_and_pass_to_provisions(self):
+        credentials = self.provisions_configs["credentials"]
+        credentials["username"] = self.username_entry.get()
+        credentials["password"] = self.password_entry.get()
+
         configs = self.provisions_configs["configurations"]
         configs["project_name"]["default"] = self.project_name_frame.project_name_entry.get()
         configs["vbox_name"]["default"] = self.vbox_configs_frame.vbox_name_entry.get()
@@ -176,6 +252,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
             f'{self.iso_frame.checksum_algorithm.get()}:{self.iso_frame.checksum_entry.get()}'
         )
         configs["preseed_file"]["default"] = self.preseed_files_option.get()
+
         packer_provisions_view = PackerProvisionsView(
             self.master,
             self.provisions_configs
@@ -216,7 +293,7 @@ class PackerConfigsFrame(ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky=self.sticky_frame
         )
-        self.preseed_frame.grid(
+        self.username_password_frame.grid(
             row=3,
             column=0,
             padx=self.padx_std,
@@ -225,8 +302,17 @@ class PackerConfigsFrame(ctk.CTkFrame):
             ipady=self.ipady_std,
             sticky=self.sticky_frame
         )
-        self.iso_frame.grid(
+        self.preseed_frame.grid(
             row=4,
+            column=0,
+            padx=self.padx_std,
+            pady=self.pady_std,
+            ipadx=self.ipadx_std,
+            ipady=self.ipady_std,
+            sticky=self.sticky_frame
+        )
+        self.iso_frame.grid(
+            row=5,
             column=0,
             columnspan=2,
             padx=self.padx_std,

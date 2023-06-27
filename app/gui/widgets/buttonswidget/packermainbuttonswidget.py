@@ -63,6 +63,9 @@ class PackerMainButtons(MainButtonsWidget):
             mb.showerror(
                 'Error',
                 'You must choose a name for the virtual box machine!')
+        self.provisions_configs["credentials"]["username"] = self.master.username_entry.get()
+        self.provisions_configs["credentials"]["password"] = self.master.password_entry.get()
+
         self.provisions_configs["configurations"]["project_name"]["default"] = project_name
         self.provisions_configs["configurations"]["vbox_name"]["default"] = vbox_name
         self.provisions_configs["configurations"]["cpus"]["default"] = self.master.vbox_configs_frame.cpus_value.get()
