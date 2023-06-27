@@ -10,14 +10,23 @@ class ProjectNameWidget(GuiStandard):
     def __init__(self, master, provisions_configs):
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
-        self.set_std_dimensions()
         self.set_fonts()
+        self.set_std_dimensions()
         self.initialize_elements()
         self.render_elements()
 
     def set_fonts(self):
         self.warning_font = ctk.CTkFont(family='Sans', size=11)
         self.font_std = ctk.CTkFont(family='Sans', size=18)
+
+    def set_std_dimensions(self):
+        self.padx_std = (20, 20)
+        self.pady_std = (10, 10)
+        self.pady_title = (10, 2)
+        self.pady_entry = (2, 10)
+        self.entry_height_std = 40
+        self.sticky_label = 'w'
+        self.sticky_horizontal = 'we'
 
     def initialize_elements(self):
         self.project_name_label = ctk.CTkLabel(
@@ -70,15 +79,6 @@ class ProjectNameWidget(GuiStandard):
             pady=0,
             sticky=self.sticky_label
         )
-
-    def set_std_dimensions(self):
-        self.padx_std = (20, 20)
-        self.pady_std = (10, 10)
-        self.pady_title = (10, 2)
-        self.pady_entry = (2, 10)
-        self.entry_height_std = 40
-        self.sticky_label = 'w'
-        self.sticky_horizontal = 'we'
 
     @abc.abstractmethod
     def _set_project_name(self):

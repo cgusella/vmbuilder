@@ -63,6 +63,9 @@ class PackerMainButtons(MainButtonsWidget):
             mb.showerror(
                 'Error',
                 'You must choose a name for the virtual box machine!')
+        self.provisions_configs["credentials"]["username"] = self.master.username_entry.get()
+        self.provisions_configs["credentials"]["password"] = self.master.password_entry.get()
+
         self.provisions_configs["configurations"]["project_name"]["default"] = project_name
         self.provisions_configs["configurations"]["vbox_name"]["default"] = vbox_name
         self.provisions_configs["configurations"]["cpus"]["default"] = self.master.vbox_configs_frame.cpus_value.get()
@@ -70,7 +73,7 @@ class PackerMainButtons(MainButtonsWidget):
         self.provisions_configs["configurations"]["disk_size"]["default"] = self.master.vbox_configs_frame.disk_slider_value.get()
         self.provisions_configs["configurations"]["disk_name"]["default"] = self.master.disk_name_entry.get()
         self.provisions_configs["configurations"]["iso_file"]["default"] = self.master.iso_frame.iso_file_entry.get()
-        self.provisions_configs["configurations"]["iso_link"]["default"] = self.master.iso_frame.iso_link_entry.get()
+        self.provisions_configs["configurations"]["iso_link"]["default"] = self.master.iso_frame.get_iso_link()
         self.provisions_configs["configurations"]["iso_checksum"]["default"] = (
             f'{self.master.iso_frame.iso_checksum_algorithm.get()}:{self.master.iso_frame.iso_checksum_entry.get()}'
         )
@@ -92,6 +95,10 @@ class PackerMainButtons(MainButtonsWidget):
         if dst:
             dst.write(json.dumps(self.provisions_configs, indent=2))
             dst.close()
+        for operation in ('install', 'uninstall', 'config'):
+            self.provisions_configs["provisions"][f"packages_to_{operation}"] = set(
+                self.provisions_configs["provisions"][f"packages_to_{operation}"]
+            )
 
     def _build(self):
         try:
