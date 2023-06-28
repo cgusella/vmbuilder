@@ -3,6 +3,7 @@ import customtkinter as ctk
 import os
 from gui.guistandard import GuiStandard
 from tkinter import filedialog
+from tkinter import ttk
 
 
 class IsoWidget(GuiStandard):
@@ -50,14 +51,13 @@ class IsoWidget(GuiStandard):
         )
         self.iso_link_var = ctk.StringVar(self)
         self.iso_link_var.set(self.provisions_configs["configurations"]["iso_link"]["default"])
-        self.iso_link_drop = ctk.CTkComboBox(
+        self.iso_link_drop = ttk.Combobox(
             master=self,
-            variable=self.iso_link_var,
+            textvariable=self.iso_link_var,
             values=self._get_local_isofiles(),
             font=self.font_std,
-            dropdown_font=self.font_std,
-            command=self._check_if_disable_iso_file
         )
+        self.iso_link_drop.bind("<<ComboboxSelected>>", self._check_if_disable_iso_file)
         self.iso_file_label = ctk.CTkLabel(
             master=self,
             font=self.font_std,
@@ -239,7 +239,8 @@ class IsoWidget(GuiStandard):
             )
             self.provisions_configs["configurations"]["iso_directory"]["default"] = iso_folder_path
 
-    def _check_if_disable_iso_file(self, iso_link: str):
+    def _check_if_disable_iso_file(self, event):
+        iso_link = self.iso_link_drop.get()
         if iso_link.startswith('http'):
             self.iso_file_entry.configure(
                 state='normal',
