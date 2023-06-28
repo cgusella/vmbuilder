@@ -213,11 +213,19 @@ class IsoWidget(GuiStandard):
         return iso_link
 
     def _get_local_isofiles(self):
-        folder_elements = os.listdir(self.iso_folder_path)
-        iso_file_paths = [
-            element for element in folder_elements
-            if os.path.isfile(f'{self.iso_folder_path}/{element}') and not element.startswith('.')
-        ]
+        iso_file_paths = list()
+        try:
+            folder_elements = os.listdir(self.iso_folder_path)
+            iso_file_paths = [
+                element for element in folder_elements
+                if os.path.isfile(f'{self.iso_folder_path}/{element}') and not element.startswith('.')
+            ]
+        except FileNotFoundError:
+            self.iso_folder_label.configure(
+                text_color = 'red',
+                text=f'Folder not found: {self.iso_folder_path}'
+            )
+        
         iso_file_paths.append(self.provisions_configs["configurations"]["iso_link"]["default"])
         return iso_file_paths
 
@@ -232,7 +240,8 @@ class IsoWidget(GuiStandard):
         if iso_folder_path:
             self.iso_folder_path = iso_folder_path
             self.iso_folder_label.configure(
-                text=f'Actual iso path: {iso_folder_path}'
+                text=f'Actual iso path: {iso_folder_path}',
+                text_color = ['black', 'white']
             )
             self.iso_link_drop.configure(
                 values=self._get_local_isofiles()
