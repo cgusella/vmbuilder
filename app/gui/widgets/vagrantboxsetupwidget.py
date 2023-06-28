@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from gui.guistandard import GuiStandard
+from tkinter import ttk
 
 
 class VagrantBoxSetUpWidget(GuiStandard):
@@ -51,13 +52,12 @@ class VagrantBoxSetUpWidget(GuiStandard):
 
         self.vagrant_box = ctk.StringVar(self)
         self.vagrant_box.set(self.provisions_configs["configurations"]["image"]["default"])
-        self.vagrant_drop = ctk.CTkComboBox(
+        self.vagrant_drop = ttk.Combobox(
             master=self,
-            variable=self.vagrant_box,
+            textvariable=self.vagrant_box,
             height=self.height,
             values=self.master.local_vagrant_boxes.split("\n"),
             font=self.font_std,
-            dropdown_font=self.font_std,
         )
 
         self.username_label = ctk.CTkLabel(
