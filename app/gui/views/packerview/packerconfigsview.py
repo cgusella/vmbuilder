@@ -1,5 +1,6 @@
 import constants
 import customtkinter as ctk
+import gui.settings as settings
 import os
 from gui.guistandard import GuiStandard
 from gui.widgets.vboxconfigswidget import VboxConfigsWidget
@@ -23,9 +24,7 @@ class PackerConfigsFrame(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        family = 'Sans'
-        self.title_std = ctk.CTkFont(family=family, size=30, weight='bold')
-        self.font_std = ctk.CTkFont(family=family, size=18)
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)

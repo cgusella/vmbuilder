@@ -1,10 +1,12 @@
 import constants
 import customtkinter as ctk
+import gui.settings as settings
 import shutil
+from gui.guistandard import GuiStandard
 from tkinter import filedialog
 
 
-class EditScriptButtonsWidget(ctk.CTkFrame):
+class EditScriptButtonsWidget(GuiStandard):
 
     def __init__(self, master, package: str, operation: str, provisions_configs):
         self.master = master
@@ -12,16 +14,19 @@ class EditScriptButtonsWidget(ctk.CTkFrame):
         self.operation = operation
         self.provisions_configs = provisions_configs
         ctk.CTkFrame.__init__(self, master)
-        self.font_std = ctk.CTkFont(family='Sans', size=18)
+        self.set_fonts()
         self.set_std_dimensions()
-        self.initialize_buttons()
-        self.render()
+        self.initialize_elements()
+        self.render_elements()
+
+    def set_fonts(self):
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
         self.pady_std = (10, 10)
 
-    def initialize_buttons(self):
+    def initialize_elements(self):
         """Initilized wanted buttons"""
         self.save_button = ctk.CTkButton(
             self,
@@ -43,7 +48,7 @@ class EditScriptButtonsWidget(ctk.CTkFrame):
                 command=self._upload
             )
 
-    def render(self):
+    def render_elements(self):
         """Render buttons on grid"""
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)

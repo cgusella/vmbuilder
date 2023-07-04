@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import gui.settings as settings
 import subprocess
 from gui.guistandard import GuiStandardValues
 from tkinter import messagebox as mb
@@ -42,9 +43,8 @@ class HostOnlyWidget(GuiStandardValues):
         self.render_elements()
 
     def set_fonts(self):
-        family = 'Sans'
-        self.font_std = ctk.CTkFont(family=family, size=18)
-        self.title_font_std = ctk.CTkFont(family=family, size=18, weight='bold')
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
+        self.title_font_std = ctk.CTkFont(**settings.TITLE_WIDGET_FONT_BOLD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)

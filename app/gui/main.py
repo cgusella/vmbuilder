@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import constants
 import customtkinter as ctk
+import gui.settings as settings
 import json
 import os
 from gui.guistandard import GuiStandard
@@ -29,10 +30,8 @@ class MainFrame(GuiStandard):
         self.provisions_configs = provisions_configs
 
     def set_fonts(self):
-        family = 'Sans'
-        self.title_std = ctk.CTkFont(family=family, size=24)
-        self.font_std = ctk.CTkFont(family=family, size=16)
-        self.font_packages = ctk.CTkFont(family=family, size=14)
+        self.title_std = ctk.CTkFont(**settings.TITLE_WIDGET_FONT)
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (10, 10)

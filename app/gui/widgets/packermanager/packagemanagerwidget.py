@@ -1,5 +1,6 @@
 import constants
 import customtkinter as ctk
+import gui.settings as settings
 import os
 import shutil
 from cli.newpackage import make_package_folder
@@ -21,16 +22,8 @@ class PackageManagerWidget(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        family = 'Sans'
-        self.little_title = ctk.CTkFont(
-            family=family,
-            size=20,
-            weight='bold'
-        )
-        self.label_font = ctk.CTkFont(
-            family=family,
-            size=16,
-        )
+        self.little_title = ctk.CTkFont(**settings.TITLE_WIDGET_FONT_BOLD)
+        self.label_font = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (5, 5)

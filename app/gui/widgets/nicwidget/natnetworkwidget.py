@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import subprocess
+import gui.settings as settings
 from gui.guistandard import GuiStandardValues
 from tkinter import messagebox as mb
 
@@ -39,9 +40,8 @@ class NatNetworkWidget(GuiStandardValues):
         self.render_elements()
 
     def set_fonts(self):
-        family = 'Sand'
-        self.font_std = ctk.CTkFont(family=family, size=18)
-        self.title_font_std = ctk.CTkFont(family=family, size=18, weight='bold')
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
+        self.title_font_std = ctk.CTkFont(**settings.SUBTITLE_VIEW_FONT_BOLD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)

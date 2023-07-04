@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import gui.settings as settings
 from existencecontroller.controller import launch_vboxmanage_lst_command
 from gui.guistandard import GuiStandard
 
@@ -31,9 +32,8 @@ class VboxConfigsWidget(GuiStandard):
         self.sticky_horizontal = 'we'
 
     def set_fonts(self):
-        family = 'Sans'
-        self.font_std = ctk.CTkFont(family=family, size=18)
-        self.warning_font = ctk.CTkFont(family=family, size=11)
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
+        self.warning_font = ctk.CTkFont(**settings.WARNING_FONT)
 
     def initialize_elements(self):
         self._intialize_subframes()

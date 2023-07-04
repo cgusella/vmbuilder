@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import gui.settings as settings
 from gui.guistandard import GuiStandard
 
 
@@ -21,16 +22,8 @@ class TitleWidget(GuiStandard):
         pass
 
     def set_fonts(self):
-        family_font = 'Sans'
-        self.title_font = ctk.CTkFont(
-            family=family_font,
-            size=30,
-            weight='bold'
-        )
-        self.subtitle_font = ctk.CTkFont(
-            family=family_font,
-            size=18
-        )
+        self.title_font = ctk.CTkFont(**settings.TITLE_VIEW_FONT)
+        self.subtitle_font = ctk.CTkFont(**settings.SUBTITLE_VIEW_FONT)
 
     def initialize_elements(self):
         self.title_label = ctk.CTkLabel(

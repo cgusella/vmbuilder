@@ -1,5 +1,6 @@
 import abc
 import constants
+import gui.settings as settings
 import os
 import customtkinter as ctk
 from gui.guistandard import GuiStandard
@@ -16,8 +17,8 @@ class ProjectNameWidget(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        self.warning_font = ctk.CTkFont(family='Sans', size=11)
-        self.font_std = ctk.CTkFont(family='Sans', size=18)
+        self.warning_font = ctk.CTkFont(**settings.WARNING_FONT)
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)

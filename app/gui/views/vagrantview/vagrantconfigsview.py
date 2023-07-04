@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import gui.settings as settings
 from argumentparser.helper import get_local_vagrant_boxes
 from gui.widgets.projectnamewidget import VagrantProjectNameWidget
 from gui.widgets.titlewidget import TitleWidget
@@ -16,14 +17,7 @@ class VagrantConfigsView(ctk.CTkFrame):
         self.local_vagrant_boxes = get_local_vagrant_boxes()
 
         ctk.CTkFrame.__init__(self, master)
-        family = 'Sans'
-        self.title_std = ctk.CTkFont(
-            family=family,
-            size=30,
-            weight='bold'
-        )
-        self.warning_font = ctk.CTkFont(family=family, size=11)
-        self.font_std = ctk.CTkFont(family=family, size=18)
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
         self.set_grid()
         self.set_std_dimensions()
         self.add_titles()

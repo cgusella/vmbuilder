@@ -18,18 +18,7 @@ class ProvisionsFrame(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        family = 'Sans'
-        self.title_std = ctk.CTkFont(
-            family=family,
-            size=30,
-            weight='bold'
-        )
-        self.little_title = ctk.CTkFont(
-            family=family,
-            size=20,
-            weight='bold'
-        )
-        self.font_std = ctk.CTkFont(family=family, size=18)
+        pass
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import gui.settings as settings
 from gui.guistandard import GuiStandard
 from gui.widgets.nicwidget.bridgedwidget import BridgedWidget
 from gui.widgets.nicwidget.hostonlywidget import HostOnlyWidget
@@ -19,7 +20,7 @@ class NicWidget(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        self.font_std = ctk.CTkFont(family='Sans', size=18)
+        self.font_std = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)

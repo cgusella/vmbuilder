@@ -2,6 +2,7 @@ import constants
 import customtkinter as ctk
 import os
 import json
+import gui.settings as settings
 import shutil
 from gui.guistandard import GuiStandard
 from gui.views.utilsview import ScrollableCheckboxFrame
@@ -21,10 +22,9 @@ class MenuWidget(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        family_font = 'Sans'
-        self.title_font = ctk.CTkFont(family=family_font, size=20)
-        self.label_font = ctk.CTkFont(family=family_font, size=16)
-        self.switch_font = ctk.CTkFont(family=family_font, size=14)
+        self.title_font = ctk.CTkFont(**settings.TITLE_WIDGET_FONT)
+        self.label_font = ctk.CTkFont(**settings.FONT_STD)
+        self.switch_font = ctk.CTkFont(**settings.SWITCH_FONT)
 
     def set_std_dimensions(self):
         self.padx_std = (5, 5)

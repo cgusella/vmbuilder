@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import gui.settings as settings
 from gui.views.utilsview import SetUpScriptEdit
 from gui.guistandard import GuiStandard
 
@@ -14,13 +15,8 @@ class AdditionalScriptWidget(GuiStandard):
         self.render_elements()
 
     def set_fonts(self):
-        family_font = 'Sans'
-        self.title_widget_font = ctk.CTkFont(
-            family=family_font,
-            size=20,
-            weight='bold'
-        )
-        self.label_font = ctk.CTkFont(family=family_font, size=18)
+        self.title_widget_font = ctk.CTkFont(**settings.TITLE_WIDGET_FONT_BOLD)
+        self.label_font = ctk.CTkFont(**settings.FONT_STD)
 
     def set_std_dimensions(self):
         self.padx_std = (20, 20)
